@@ -39,5 +39,5 @@ if __name__ == '__main__':
     form = bioImageApp()
     form.get_widget().show()
     # Run the main Qt loop
-    app.setStyleSheet("file:///" + "bioimageapp/theme/stylesheet.css")
+    app.setStyleSheet("file:///" + "bioimageapp/theme/default/stylesheet.css")
     sys.exit(app.exec_())

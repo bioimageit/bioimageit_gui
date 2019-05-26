@@ -10,7 +10,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton,
 from framework import BiObject, BiContainer, BiModel, BiComponent
 from widgets import BiButton
 from bioimagepy.metadata import BiData, BiRawDataSet, BiProcessedDataSet, BiRun
-from bioimageapp.experiment import BiExperiment
+from bioimagepy.experiment import BiExperiment
 
 class BiBrowserBookmarks(BiObject):
     def __init__(self, filename = ''):
@@ -62,7 +62,7 @@ class BiBrowserContainer(BiContainer):
         self.clickedRow = -1
         self.historyPaths = list()
         self.posHistory = 0
-        self.bookmarks
+        self.bookmarks = BiBrowserBookmarks()
 
 class BiBrowserFileInfo(BiObject):     
     def __init__(self, fileName: str = '', path: str = '', name: str = '', dtype: str = '', date: str = ''):
@@ -137,9 +137,9 @@ class BiBrowserModel(BiModel):
     def loadFiles(self):
         dir = QDir(self.container.currentPath)
         files = dir.entryInfoList()
-        self.files = list
+        self.files = []
 
-        for i in range(files.count()):
+        for i in range(len(files)):
             if files[i].fileName() != "." and files[i].fileName() != "..":
                 if files[i].isDir():
                     fileInfo = BiBrowserFileInfo(files[i].fileName(),
@@ -147,61 +147,61 @@ class BiBrowserModel(BiModel):
                                            files[i].fileName(),
                                            "dir",
                                            files[i].lastModified().toString("yyyy-MM-dd"))
-                self.files.append(fileInfo)
+                    self.files.append(fileInfo)
 
-            elif files[i].fileName().endsWith("experiment.md.json"):
-                experiment = BiExperiment(files[i].absoluteFilePath())
+                elif files[i].fileName().endswith("experiment.md.json"):
+                    experiment = BiExperiment(files[i].absoluteFilePath())
 
-                fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           experiment.name(),
-                                           "experiment",
-                                           experiment.createddate())
-                self.files.append(fileInfo)
-                del experiment
+                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            experiment.name(),
+                                            "experiment",
+                                            experiment.createddate())
+                    self.files.append(fileInfo)
+                    del experiment
         
-            elif files[i].fileName().endsWith("run.md.json"):
-                run = BiRun(files[i].absoluteFilePath())
- 
-                fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           run.process_name(),
-                                           "run",
-                                           files[i].lastModified().toString("yyyy-MM-dd"))
-                self.files.append(fileInfo)
-                del run
-            
-            elif files[i].fileName().endsWith("rawdataset.md.json"):
-                rawDataSet = BiRawDataSet(files[i].absoluteFilePath())
-
-                fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           rawDataSet.name(),
-                                           "rawdataset",
-                                           files[i].lastModified().toString("yyyy-MM-dd"))
-                self.files.append(fileInfo)
-                del rawDataSet
+                elif files[i].fileName().endswith("run.md.json"):
+                    run = BiRun(files[i].absoluteFilePath())
     
-            elif files[i].fileName().endsWith("processeddataset.md.json"):
-                processedDataSet = BiProcessedDataSet(files[i].absoluteFilePath())
+                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            run.process_name(),
+                                            "run",
+                                            files[i].lastModified().toString("yyyy-MM-dd"))
+                    self.files.append(fileInfo)
+                    del run
+                
+                elif files[i].fileName().endswith("rawdataset.md.json"):
+                    rawDataSet = BiRawDataSet(files[i].absoluteFilePath())
 
-                fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           processedDataSet.name(),
-                                           "processeddataset",
-                                           files[i].lastModified().toString("yyyy-MM-dd"))
-                self.files.append(fileInfo)
-                del processedDataSet
-    
-            elif files[i].fileName().endsWith(".md.json"):
-                data = BiData(files[i].absoluteFilePath())
-                fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           data.name(),
-                                           data.origin_type() + "data",
-                                           files[i].lastModified().toString("yyyy-MM-dd"))
-                self.files.append(fileInfo)
-                del data
+                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            rawDataSet.name(),
+                                            "rawdataset",
+                                            files[i].lastModified().toString("yyyy-MM-dd"))
+                    self.files.append(fileInfo)
+                    del rawDataSet
+        
+                elif files[i].fileName().endswith("processeddataset.md.json"):
+                    processedDataSet = BiProcessedDataSet(files[i].absoluteFilePath())
+
+                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            processedDataSet.name(),
+                                            "processeddataset",
+                                            files[i].lastModified().toString("yyyy-MM-dd"))
+                    self.files.append(fileInfo)
+                    del processedDataSet
+        
+                elif files[i].fileName().endswith(".md.json"):
+                    data = BiData(files[i].absoluteFilePath())
+                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            data.name(),
+                                            data.origin_type() + "data",
+                                            files[i].lastModified().toString("yyyy-MM-dd"))
+                    self.files.append(fileInfo)
+                    del data
 
         self.container.files = self.files
         self.container.notify(BiBrowserContainer.FilesInfoLoaded)
@@ -233,18 +233,18 @@ class BiBrowserPreviewComponent(BiComponent):
         layout.addWidget(self.textEdit, 0, 0, 1, 2)
 
         self.name = QLabel(self.widget)
-        layout.addWidget(QLabel(QObject.tr("Name:")), 1, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QLabel(self.widget.tr("Name:")), 1, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(self.name, 1, 1, PySide2.QtCore.Qt.AlignTop)
 
         self.type = QLabel(self.widget)
-        layout.addWidget(QLabel(QObject.tr("Type:")), 2, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QLabel(self.widget.tr("Type:")), 2, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(self.type, 2, 1, PySide2.QtCore.Qt.AlignTop)
 
         self.date = QLabel(self.widget)
-        layout.addWidget(QLabel(QObject.tr("Date:")), 3, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QLabel(self.widget.tr("Date:")), 3, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(self.date, 3, 1, PySide2.QtCore.Qt.AlignTop)
 
-        openButton = QPushButton(QObject.tr("Open"), self.widget)
+        openButton = QPushButton(self.widget.tr("Open"), self.widget)
         openButton.setObjectName("btnDefault")
         layout.addWidget(openButton, 4, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
         openButton.released.connect(self.openButtonClicked)
@@ -276,6 +276,9 @@ class BiBrowserPreviewComponent(BiComponent):
         self.container.doubleClickedRow = self.container.clickedRow
         self.container.notify(BiBrowserContainer.ItemDoubleClicked)
 
+    def get_widget(self): 
+        return self.widget     
+
 
 class BiBrowserShortCutsComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
@@ -294,12 +297,12 @@ class BiBrowserShortCutsComponent(BiComponent):
         layout = QVBoxLayout()
         self.widget.setLayout(layout)
 
-        addExpermentbutton = QPushButton(QObject.tr("New Experiment"))
-        addExpermentbutton.setObjectName("biBrowserShortCutsNewButton")
+        addExpermentbutton = QPushButton(self.widget.tr("New Experiment"))
+        addExpermentbutton.setObjectName("BiBrowserShortCutsNewButton")
         addExpermentbutton.released.connect(self.newExperimentClicked)
         layout.addWidget(addExpermentbutton, 0, PySide2.QtCore.Qt.AlignTop)
 
-        separatorLabel = QLabel(QObject.tr("Bookmarks"), self.widget)
+        separatorLabel = QLabel(self.widget.tr("Bookmarks"), self.widget)
         layout.addWidget(separatorLabel, 0, PySide2.QtCore.Qt.AlignTop)
         separatorLabel.setObjectName("BiBrowserShortCutsTitle")
 
@@ -339,6 +342,9 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.container.currentPath = path
         self.container.notify(BiBrowserContainer.DirectoryModified)
 
+    def get_widget(self): 
+        return self.widget     
+
 class BiBrowserTableComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
         super(BiBrowserTableComponent, self).__init__()
@@ -364,7 +370,7 @@ class BiBrowserTableComponent(BiComponent):
         self.tableWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
         self.tableWidget.cellClicked.connect(self.cellClicked)
 
-        labels = list('', 'Name', 'Date', 'Type')
+        labels = ['', 'Name', 'Date', 'Type']
         self.tableWidget.setHorizontalHeaderLabels(labels)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.verticalHeader().setVisible(False)
@@ -383,7 +389,7 @@ class BiBrowserTableComponent(BiComponent):
                 elif fileInfo.type == "experiment":
                     iconLabel.setObjectName("BiBrowserExperimentIcon")
                 elif fileInfo.type == "rawdataset":
-                    iconLabel.setObjectName("biBrowserRawDatSetIcon")
+                    iconLabel.setObjectName("BiBrowserRawDatSetIcon")
                 elif fileInfo.type == "processeddataset":
                     iconLabel.setObjectName("BiBrowserProcessedDataSetIcon")
                 elif fileInfo.type == "rawdata":
@@ -408,15 +414,17 @@ class BiBrowserTableComponent(BiComponent):
         self.container.setClickedRow(row)
         self.container.notify(BiBrowserContainer.ItemClicked)
 
+    def get_widget(self): 
+        return self.widget     
+
 class BiBrowserToolBarComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
         super(BiBrowserToolBarComponent, self).__init__()
         self._object_name = 'BiBrowserToolBarComponent'
         self.container = container
         self.container.addObserver(self)
-        self.buildWidget()
 
-    def buildWidget(self):
+        # build widget
         self.widget = QWidget()
         self.widget.setObjectName("BiToolBar")
         layout = QHBoxLayout()
@@ -427,28 +435,28 @@ class BiBrowserToolBarComponent(BiComponent):
         # previous
         previousButton = QToolButton()
         previousButton.setObjectName("BiBrowserToolBarPreviousButton")
-        previousButton.setToolTip(QObject.tr("Previous"))
+        previousButton.setToolTip(self.widget.tr("Previous"))
         previousButton.released.connect(self.previousButtonClicked)
         layout.addWidget(previousButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # next
         nextButton = QToolButton()
         nextButton.setObjectName("BiBrowserToolBarNextButton")
-        nextButton.setToolTip(QObject.tr("Next"))
+        nextButton.setToolTip(self.widget.tr("Next"))
         nextButton.released.connect(self.nextButtonClicked)
         layout.addWidget(nextButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # up
         upButton = QToolButton()
         upButton.setObjectName("BiExperimentToolBarUpButton")
-        upButton.setToolTip(QObject.tr("Tags"))
+        upButton.setToolTip(self.widget.tr("Tags"))
         upButton.released.connect(self.upButtonClicked)
         layout.addWidget(upButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # up
         refreshButton = QToolButton()
         refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
-        refreshButton.setToolTip(QObject.tr("Tags"))
+        refreshButton.setToolTip(self.widget.tr("Tags"))
         refreshButton.released.connect(self.refreshButtonClicked)
         layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
@@ -460,7 +468,7 @@ class BiBrowserToolBarComponent(BiComponent):
         # bookmark
         bookmarkButton = QToolButton()
         bookmarkButton.setObjectName("BiExperimentToolBarBookmarkButton")
-        bookmarkButton.setToolTip(QObject.tr("Bookmark"))
+        bookmarkButton.setToolTip(self.widget.tr("Bookmark"))
         bookmarkButton.released.connect(self.bookmarkButtonClicked)
         layout.addWidget(bookmarkButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
@@ -478,7 +486,7 @@ class BiBrowserToolBarComponent(BiComponent):
         self.container.notify(BiBrowserContainer.UpClicked)
 
     def pathEditReturnPressed(self):
-        self.container.setCurrentPath(self.pathLineEdit.text())
+        self.container.currentPath = self.pathLineEdit.text()
         self.container.notify(BiBrowserContainer.DirectoryModified)
 
     def refreshButtonClicked(self):
@@ -494,3 +502,6 @@ class BiBrowserToolBarComponent(BiComponent):
         ret = msgBox.exec_()
         if ret:
             self.container.notify(BiBrowserContainer.BookmarkClicked)
+
+    def get_widget(self): 
+        return self.widget        
