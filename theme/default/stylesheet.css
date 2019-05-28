@@ -691,6 +691,10 @@ QHeaderView {
 /*////////////////////////////////////////////////////////////////////////////
 // QSplitter
 ////////////////////////////////////////////////////////////////////////////*/
+QSplitter{
+  background-color: #7f7f7f;
+}
+
 QSplitter::handle {
     background-color:#d1d1d1;
 }
@@ -1125,9 +1129,18 @@ background-color: #e1e1e1;
 border: 1px solid #e1e1e1;
 }
 
-QWidget#BiBrowserShortCutsBar{
+.QWidget#BiBrowserShortCutsBar{
   background-color: #7f7f7f;
 }
+
+QSplitter#BiBrowserAppSplitterRight{
+  background-color: #ffffff;
+}
+
+QSplitter#BiBrowserAppSplitterLeft{
+  background-color: #7f7f7f;
+}
+
 
 QPushButton#BiBrowserShortCutsButton {
   text-align: left;

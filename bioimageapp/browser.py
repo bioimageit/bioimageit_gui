@@ -19,7 +19,7 @@ class BiBrowserBookmarks(BiObject):
         self.filename = filename
         self.bookmarks = dict()
         if filename != '':
-            self.read()
+            self.read() 
 
     def read(self):
         """Read the bookmarks to the file in json format"""
@@ -36,7 +36,10 @@ class BiBrowserBookmarks(BiObject):
         self.bookmarks = dict()
 
     def set(self, name: str, url: str):
-        self.bookmarks[name] = url
+        data = dict()
+        data['name'] = name
+        data['url'] = url
+        self.bookmarks['bookmarks'].append(data)
 
 class BiBrowserContainer(BiContainer):
     DirectoryModified = "BiBrowserContainer::DirectoryModified"
@@ -64,6 +67,36 @@ class BiBrowserContainer(BiContainer):
         self.posHistory = 0
         self.bookmarks = BiBrowserBookmarks()
 
+    def clickedFileInfo(self):
+        return self.files[self.clickedRow]  
+
+    def doubleClickedFile(self):
+        return self.files[self.doubleClickedRow].filePath()
+
+    def addHistory(self, path: str):
+        self.historyPaths.append(path)
+
+    def moveToPrevious(self):
+        self.posHistory -= 1
+        if self.posHistory < 0 :
+            self.posHistory = 0
+        self.currentPath = self.historyPaths[self.posHistory]
+
+    def moveToNext(self):
+        self.posHistory += 1
+        if self.posHistory >= len(self.historyPaths):
+            self.posHistory = len(self.historyPaths) - 1
+        self.currentPath = self.historyPaths[self.posHistory]
+
+    def setCurrentPath(self, path: str):
+        self.currentPath = path
+        if self.posHistory <= len(self.historyPaths):
+            for i in range(len(self.historyPaths), self.posHistory):
+                self.historyPaths.pop(i)
+        self.addHistory(path)
+        self.posHistory = len(self.historyPaths) - 1 
+
+
 class BiBrowserFileInfo(BiObject):     
     def __init__(self, fileName: str = '', path: str = '', name: str = '', dtype: str = '', date: str = ''):
         super(BiBrowserFileInfo, self).__init__()
@@ -73,7 +106,7 @@ class BiBrowserFileInfo(BiObject):
         self.type = dtype
         self.date = date
 
-    def filePath(self):
+    def filePath(self) -> str:
         return os.path.join(self.path, self.fileName)    
 
 
@@ -93,9 +126,9 @@ class BiBrowserModel(BiModel):
     
         if container.action == BiBrowserContainer.ItemDoubleClicked:
             row = self.container.doubleClickedRow
-            dcFile = self.container.file(row)
+            dcFile = self.container.files[row]
             if dcFile.type == "dir":
-                self.container.currentPath = os.path.join(dcFile.path,dcFile.fileName)
+                self.container.setCurrentPath(os.path.join(dcFile.path,dcFile.fileName))
                 self.container.notify(BiBrowserContainer.DirectoryModified)
             elif dcFile.type == "experiment":
                 if self._useExperimentProcess:
@@ -123,13 +156,14 @@ class BiBrowserModel(BiModel):
             dir = QDir(self.container.currentPath)
             dir.cdUp()
             upPath = dir.absolutePath()
-            self.container.currentPath = upPath
+            self.container.setCurrentPath(upPath)
             self.container.notify(BiBrowserContainer.DirectoryModified)
             return
 
         if container.action == BiBrowserContainer.BookmarkClicked:
             dir = QDir(self.container.currentPath)
             self.container.bookmarks.set(dir.dirName(), self.container.currentPath)
+            print('bookmarks:', self.container.bookmarks.bookmarks)
             self.container.bookmarks.write()
             self.container.notify(BiBrowserContainer.BookmarksModified)
             return
@@ -260,7 +294,7 @@ class BiBrowserPreviewComponent(BiComponent):
             if fileInfo.type == "dir":
                 self.widget.setVisible(False)
             else:
-                self.textEdit.setText(self.fileContentPreview(fileInfo.filePath))
+                self.textEdit.setText(self.fileContentPreview(fileInfo.filePath()))
                 self.widget.setVisible(True)
 
             self.name.setText(fileInfo.name)
@@ -287,26 +321,29 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.container = container
         self.container.addObserver(self)
 
-        self.buildWidget()
-
-    def buildWidget(self):
-
         self.widget = QWidget()
-        self.widget.setObjectName("BiBrowserShortCutsBar")
+        
+        mainLayout = QVBoxLayout()
+        mainLayout.setContentsMargins(0,0,0,0)
+        self.widget.setLayout(mainLayout)
+
+        self.wwidget = QWidget()
+        mainLayout.addWidget(self.wwidget)
+        self.wwidget.setObjectName("BiBrowserShortCutsBar")
 
         layout = QVBoxLayout()
-        self.widget.setLayout(layout)
+        self.wwidget.setLayout(layout)
 
-        addExpermentbutton = QPushButton(self.widget.tr("New Experiment"))
+        addExpermentbutton = QPushButton(self.wwidget.tr("New Experiment"))
         addExpermentbutton.setObjectName("BiBrowserShortCutsNewButton")
         addExpermentbutton.released.connect(self.newExperimentClicked)
         layout.addWidget(addExpermentbutton, 0, PySide2.QtCore.Qt.AlignTop)
 
-        separatorLabel = QLabel(self.widget.tr("Bookmarks"), self.widget)
+        separatorLabel = QLabel(self.wwidget.tr("Bookmarks"), self.wwidget)
         layout.addWidget(separatorLabel, 0, PySide2.QtCore.Qt.AlignTop)
         separatorLabel.setObjectName("BiBrowserShortCutsTitle")
 
-        bookmarkWidget = QWidget(self.widget)
+        bookmarkWidget = QWidget(self.wwidget)
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setSpacing(0)
@@ -322,12 +359,12 @@ class BiBrowserShortCutsComponent(BiComponent):
             self.layout.itemAt(i).widget().deleteLater()
 
         # load
-        for key, value in self.container.bookmarks.items():
-            button = BiButton(key, self.widget)
+        for entry in self.container.bookmarks.bookmarks["bookmarks"]:
+            button = BiButton(entry['name'], self.widget)
             button.setObjectName("BiBrowserShortCutsButton")
-            button.setContent(value)
+            button.content = entry['url']
             button.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
-            button.clicked.connect(self.buttonClicked)
+            button.clickedContent.connect(self.buttonClicked)
             self.layout.insertWidget(self.layout.count()-1, button, 0, PySide2.QtCore.Qt.AlignTop)
 
     def update(self, container: BiContainer):
@@ -339,7 +376,7 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.container.notify(BiBrowserContainer.NewExperimentClicked)
 
     def buttonClicked(self, path: str):
-        self.container.currentPath = path
+        self.container.setCurrentPath(path)
         self.container.notify(BiBrowserContainer.DirectoryModified)
 
     def get_widget(self): 
@@ -378,6 +415,7 @@ class BiBrowserTableComponent(BiComponent):
     def update(self, container : BiContainer):
         if container.action == BiBrowserContainer.FilesInfoLoaded:
             i = -1
+            self.tableWidget.setRowCount(len(self.container.files))
             for fileInfo in self.container.files:
                 i += 1
                 # icon depends on type
@@ -411,7 +449,7 @@ class BiBrowserTableComponent(BiComponent):
         self.container.notify(BiBrowserContainer.ItemDoubleClicked)
 
     def cellClicked(self, row : int, col : int):
-        self.container.setClickedRow(row)
+        self.container.clickedRow = row
         self.container.notify(BiBrowserContainer.ItemClicked)
 
     def get_widget(self): 
@@ -486,7 +524,7 @@ class BiBrowserToolBarComponent(BiComponent):
         self.container.notify(BiBrowserContainer.UpClicked)
 
     def pathEditReturnPressed(self):
-        self.container.currentPath = self.pathLineEdit.text()
+        self.container.setCurrentPath(self.pathLineEdit.text())
         self.container.notify(BiBrowserContainer.DirectoryModified)
 
     def refreshButtonClicked(self):
@@ -495,8 +533,7 @@ class BiBrowserToolBarComponent(BiComponent):
 
     def bookmarkButtonClicked(self):
         msgBox = QMessageBox()
-        msgBox.setText("The document has been modified.")
-        msgBox.setInformativeText("Do you want to save your changes?")
+        msgBox.setText("Want to bookmark this directory ?")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.Yes)
         ret = msgBox.exec_()
