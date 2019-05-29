@@ -8,7 +8,7 @@ from settings import BiSettingsAccess
 class BiBrowserApp(BiComponent):
     def __init__(self):
         super(BiBrowserApp, self).__init__()
-        self._object_name = 'bioImageApp'
+        self._object_name = 'BiBrowserApp'
 
         # container
         self.browserContainer = BiBrowserContainer()

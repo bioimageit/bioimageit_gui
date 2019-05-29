@@ -1,6 +1,6 @@
 import PySide2.QtCore
-from PySide2.QtWidgets import QWidget, QPushButton, QFileDialog, QHBoxLayout, QLineEdit
-from PySide2.QtCore import QObject, Signal, Slot 
+from PySide2.QtWidgets import QWidget, QPushButton, QFileDialog, QHBoxLayout, QLineEdit, QMouseEvent, QDrag, QMimeData
+from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
 class BiButton(QPushButton):
     clickedId = Signal(int)
@@ -52,3 +52,25 @@ class BiFileSelectWidget(QWidget):
             file = QFileDialog.getOpenFileName(self, "Open a file", '', "*.*")
             if file != "":
                 self.lineEdit.setText(file)
+
+class BiDragLabel(QWidget):
+    def __init__(self, parent: QWidget):
+        super(BiDragLabel, self).__init__(parent)
+
+    def setMimeData(self, data: str):
+        self.mimeData = data
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == PySide2.QtCore.Qt.LeftButton:
+            drag = QDrag(self)
+            mimeData = QMimeData()
+            urlList = [QUrl(self.mimeData)]
+
+            mimeData.setUrls(urlList)
+            drag.setMimeData(mimeData)
+
+            if self.pixmap():
+                drag.setPixmap(self.pixmap())
+            
+            drag.exec()
+        
