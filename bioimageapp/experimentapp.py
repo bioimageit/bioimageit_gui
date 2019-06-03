@@ -2,10 +2,17 @@ import sys
 import os
 
 import PySide2.QtCore
-from PySide2.QtWidget import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide2.QtGui import QIcon
 
 from framework import BiComponent, BiContainer, BiModel
-from experiment import BiExperimentContainer, BiExperimentModel, BiExperimentComponent, BiExperimentImportDataContainer, BiExperimentImportDataModel
+from experiment import (BiExperimentContainer, BiExperimentModel, BiExperimentComponent, 
+                    BiExperimentImportDataContainer, BiExperimentImportDataModel,
+                    BiExperimentInfoEditorComponent, BiExperimentTagsComponent,
+                    BiExperimentImportDataComponent, BiExperimentTitleToolBarComponent,
+                    BiExperimentToolBarComponent)
+from processbrowser import BiProcessesContainer, BiProcessesModel, BiProcessesComponent, BiProcessesToolBarComponent
+from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent
 from settings import BiSettingsAccess
 
 class BiExperimentAppContainer(BiContainer):
@@ -92,12 +99,12 @@ class BiExperimentApp(BiComponent):
         self.processesContainer = BiProcessesContainer()
         self.processMultiEditorContainer = BiProcessMultiEditorContainer()
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
-
+ 
         # Models
         self.experimentModel = BiExperimentModel(self.experimentAppContainer)
         self.processesModel = BiProcessesModel(self.experimentContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
-        self.experimentImportDataModel = BiExperimentImportDataModel(self.explerimentImportDataContainer)
+        self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentImportDataContainer)
 
         # Components
         # main components
@@ -217,3 +224,31 @@ class BiExperimentApp(BiComponent):
             self.processMultiEditorContainer.processAdd(self.processesContainer.clickedProcess())
             self.processMultiEditorContainer.notify(BiProcessMultiEditorContainer.ProcessAdded)
             self.experimentAppContainer.notify(BiExperimentAppContainer.ExecButtonClicked)
+
+if __name__ == '__main__':
+    # Create the Qt Application
+    app = QApplication(sys.argv)
+    
+    projectFileUrl = '/Users/sprigent/Documents/code/bioimageit/data/explorer/project1/experiment.md.json'
+    settingsFileUrl = ''
+    processesDir = ''
+    if len(sys.argv) > 1 :
+        projectFileUrl = sys.argv[1]
+
+    if len(sys.argv) > 2 :
+        settingsFileUrl = sys.argv[2]
+    else:
+        settingsFileUrl = "../bioimageit/data/explorer/config.json"    
+
+    access = BiSettingsAccess()
+    settings = access.instance
+    settings.file = settingsFileUrl
+    settings.read()
+    
+    # Create and show the component
+    component = BiExperimentApp(projectFileUrl)
+    component.get_widget().show()
+    # Run the main Qt loop
+    app.setStyleSheet("file:///" + "../bioimageapp/theme/default/stylesheet.css")
+    app.setWindowIcon(QIcon("../bioimageapp/theme/default/icon.png"))
+    sys.exit(app.exec_())
