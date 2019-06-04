@@ -75,6 +75,17 @@ class BiProcessEditorModel(BiModel):
         self.processExecContainer.notify(BiProcessEditorContainer.ProgressChanged)
 
 
+class BiProcessMultiEditorToolBarComponent(BiComponent):
+    def __init__(self, container: BiProcessMultiEditorContainer):
+        super(BiProcessMultiEditorToolBarComponent, self).__init__()
+        self.container = container
+        self.container.addObserver(self)
+        self.widget = QWidget()
+
+    def get_widget(self):
+        return self.widget    
+
+
 class BiProcessEditorComponent(BiComponent):
     def __init__(self, container: BiProcessEditorContainer, experimentContainer: BiExperimentContainer):
         super(BiProcessEditorComponent, self).__init__()
@@ -173,6 +184,9 @@ class BiProcessEditorComponent(BiComponent):
         self.editContainer.setSelectedData(selectedDataList)
         self.editContainer.notify(BiProcessEditorContainer.RunProcess)
 
+    def get_widget(self):
+        return self.widget      
+
 class BiProcessMultiEditorComponent(BiComponent):
     def __init__(self, container: BiProcessMultiEditorContainer, experimentContainer: BiExperimentContainer):
         super(BiProcessMultiEditorComponent, self).__init__()
@@ -209,3 +223,6 @@ class BiProcessMultiEditorComponent(BiComponent):
 
         processEditorContainer.notify(BiProcessEditorContainer.ProcessInfoLoaded)
         self.tabWidget.addTab(processExecComponent.widget(), processInfo.name())
+
+    def get_widget(self):
+        return self.widget      

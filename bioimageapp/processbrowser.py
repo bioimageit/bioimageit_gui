@@ -125,3 +125,6 @@ class BiProcessesComponent(BiComponent):
     def openClicked(self, id: int):
         self.container.setClickedProcess(id)
         self.container.notify(BiProcessesContainer.OpenProcess)
+
+    def get_widget(self):
+        return self.widget    

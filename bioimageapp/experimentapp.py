@@ -12,7 +12,7 @@ from experiment import (BiExperimentContainer, BiExperimentModel, BiExperimentCo
                     BiExperimentImportDataComponent, BiExperimentTitleToolBarComponent,
                     BiExperimentToolBarComponent)
 from processbrowser import BiProcessesContainer, BiProcessesModel, BiProcessesComponent, BiProcessesToolBarComponent
-from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent
+from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent, BiProcessMultiEditorToolBarComponent
 from settings import BiSettingsAccess
 
 class BiExperimentAppContainer(BiContainer):
@@ -87,6 +87,8 @@ class BiExperimentAppToolBarComponent(BiComponent):
     def execButtonClicked(self):
         self.container.notify(BiExperimentAppContainer.ExecButtonClicked)
 
+    def get_widget(self):
+        return self.widget
 
 class BiExperimentApp(BiComponent):
     def __init__(self, projectFile: str):
@@ -101,8 +103,8 @@ class BiExperimentApp(BiComponent):
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
  
         # Models
-        self.experimentModel = BiExperimentModel(self.experimentAppContainer)
-        self.processesModel = BiProcessesModel(self.experimentContainer)
+        self.experimentModel = BiExperimentModel(self.experimentContainer)
+        self.processesModel = BiProcessesModel(self.processesContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
         self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentImportDataContainer)
 
@@ -131,11 +133,11 @@ class BiExperimentApp(BiComponent):
         self.experimentImportDataContainer.addObserver(self)
 
         # initialization
-        self.experimentContainer.setProjectFile(projectFile)
+        self.experimentContainer.projectFile = projectFile
         self.experimentContainer.notify(BiExperimentContainer.OriginModified)
 
         processesDir = BiSettingsAccess().instance.value("Processes", "processesdir")
-        self.processesContainer.setProcessesDir(processesDir)
+        self.processesContainer.processesDir = processesDir
         self.processesContainer.notify(BiProcessesContainer.DirChanged)
 
         self.buildWidget()
@@ -224,6 +226,9 @@ class BiExperimentApp(BiComponent):
             self.processMultiEditorContainer.processAdd(self.processesContainer.clickedProcess())
             self.processMultiEditorContainer.notify(BiProcessMultiEditorContainer.ProcessAdded)
             self.experimentAppContainer.notify(BiExperimentAppContainer.ExecButtonClicked)
+
+    def get_widget(self):
+        return self.widget        
 
 if __name__ == '__main__':
     # Create the Qt Application
