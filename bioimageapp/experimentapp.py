@@ -37,6 +37,7 @@ class BiExperimentAppToolBarComponent(BiComponent):
         self.widget = QWidget()
         self.widget.setObjectName("BiToolBar")
         layout = QHBoxLayout()
+        layout.setSpacing(1)
         layout.setContentsMargins(0,0,0,0)
         self.widget.setLayout(layout)
 

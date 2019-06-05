@@ -44,14 +44,14 @@ class BiProcessesModel(BiModel):
                 self.container.notify(BiProcessesContainer.ProcessesLoaded)
     
     def load(self) -> bool:
-        processesDirInfo = QFileInfo(self.container.processesDir())
+        processesDirInfo = QFileInfo(self.container.processesDir)
 
         if processesDirInfo.exists() and processesDirInfo.isDir():
-            dir = QDir(self.container.processesDir())
+            dir = QDir(self.container.processesDir)
             files = dir.entryList()
             for file in files:
-                if file.endsWith(".xml"):
-                    self.loadFile(self.container.processesDir() + QDir.separator() + file)
+                if file.endswith(".xml"):
+                    self.loadFile(self.container.processesDir + QDir.separator() + file)
 
             return True
         else:
@@ -96,7 +96,7 @@ class BiProcessesComponent(BiComponent):
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(4)
 
-        labels = ["Open", "Name", "Author", "Description"]
+        labels = ["Open", "Name", "Version", "Description"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
@@ -111,16 +111,15 @@ class BiProcessesComponent(BiComponent):
             i= -1    
             for info in self.container.processes:
                 i += 1
-                open = BiButton()
-                open.setText(self.widget.tr("Open"))
+                open = BiButton(self.widget.tr("Open"))
                 open.id = i
                 open.setObjectName("btnPrimary")
                 open.clicked.connect(self.openClicked)
-                open.tableWidget.setCellWidget(i, 0, open)
+                self.tableWidget.setCellWidget(i, 0, open)
 
-                self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
-                self.tableWidget.setItem(i, 2, QTableWidgetItem(info.author()))
-                self.tableWidget.setItem(i, 3, QTableWidgetItem(info.description()))
+                self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
+                self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))
+                self.tableWidget.setItem(i, 3, QTableWidgetItem(info.description))
         
     def openClicked(self, id: int):
         self.container.setClickedProcess(id)

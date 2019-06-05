@@ -1,11 +1,13 @@
 import sys
 import os
+import ntpath
 import PySide2.QtCore
 from PySide2.QtCore import QFileInfo, QDir
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QPushButton, 
                                QTableWidget, QTableWidgetItem, QLineEdit, QLabel, 
-                               QGridLayout, QScrollArea, QToolButton, QComboBox)
+                               QGridLayout, QScrollArea, QToolButton, QComboBox,
+                               QFileDialog)
 from shutil import copyfile
 import subprocess
 
@@ -15,6 +17,7 @@ from settings import BiSettingsAccess
 
 from bioimagepy.experiment import BiExperiment 
 from bioimagepy.metadata import BiRawData
+from  bioimagepy.metadata import create_rawdata
 
 
 class BiExperimentContainer(BiContainer):
@@ -40,10 +43,13 @@ class BiExperimentContainer(BiContainer):
         return os.path.dirname(self.projectFile)
 
     def setTagValue(self, dataIdx: int, tag: str, value: str):
-        self.dataProject.rawDataSet().dataAt(dataIdx).setTag(tag, value)
+        self.experiment.rawdataset().data(dataIdx).set_tag(tag, value)
 
     def setDataName(self, dataIdx: int, name: str):
-        self.dataProject.rawDataSet().dataAt(dataIdx).setName(name)
+        self.experiment.rawdataset().data(dataIdx).set_name(name)
+
+    def setLastEditedDataIdx(self, idx):
+        self.lastEditedDataIdx = idx    
    
 class BiExperimentImportDataContainer(BiContainer):
     NewImport = "BiExperimentImportDataContainer::NewImport"
@@ -76,14 +82,14 @@ class BiExperimentModel(BiModel):
             return
         
         if container.action == BiExperimentContainer.RawDataImported:
-            self.container.experiment.rawDataSet().write()    
-            self.containerexperiment.rawDataSet().lastData().write()
+            self.container.experiment.rawdataset().write()    
+            self.container.experiment.rawdataset().last_data().write()
             self.container.notify(BiExperimentContainer.RawDataLoaded)
             return
 
         if container.action == BiExperimentContainer.DataAttributEdited:
-            lastEditedIndex = self.container.lastEditedIdx
-            rawData = self.containerexperiment.rawDataSet().dataAt(lastEditedIndex)
+            lastEditedIndex = self.container.lastEditedDataIdx
+            rawData = self.container.experiment.rawdataset().data(lastEditedIndex)
             rawData.write()
             return
 
@@ -115,8 +121,8 @@ class BiExperimentImportDataModel(BiModel):
         destinationPath = self.container.destinationFile
 
         settingsGroups = BiSettingsAccess().instance
-        program = settingsGroups.value("Project", "fiji") # "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx"
-        arguments = [program, "--headless", "--console", "-macro", settingsGroups.value("Project", "thumbnail macro"), destinationPath]
+        program = settingsGroups.value("Experiment", "fiji") # "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx"
+        arguments = [program, "--headless", "--console", "-macro", settingsGroups.value("Experiment", "thumbnail macro"), destinationPath]
 
         print("create thumb:")
         print("program: ", program)
@@ -191,12 +197,12 @@ class BiExperimentDataComponent(BiComponent):
             # data
             self.tableWidget.cellChanged.disconnect(self.cellChanged)
             self.tableWidget.setRowCount(0)
-            self.tableWidget.setRowCount(self.container.experiment.rawDataSet().count())
+            self.tableWidget.setRowCount(self.container.experiment.rawdataset().size())
 
             self.tableWidget.setColumnWidth(0, 64)
-            for i in range(self.container.experiment.rawDataSet().count()):
+            for i in range(self.container.experiment.rawdataset().size()):
                
-                info = self.container.experiment.rawDataSet().dataAt(i)
+                info = self.container.experiment.rawdataset().data(i)
 
                 # thumbnail
                 metaLabel = BiDragLabel(self.widget)
@@ -204,6 +210,7 @@ class BiExperimentDataComponent(BiComponent):
                 metaLabel.setMimeData(info.url())
                 thumbnail = info.thumbnail()
                 if thumbnail != "":
+                    print('set thumbnail: ', thumbnail)
                     image = QImage(thumbnail)
                     metaLabel.setPixmap(QPixmap.fromImage(image))
                     self.tableWidget.setRowHeight(i, 64)
@@ -217,21 +224,21 @@ class BiExperimentDataComponent(BiComponent):
                 self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
 
                 # tags
-                for t in range(self.container.info().tagsCount()):
-                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tagValue(self.containerexperiment.tagAt(t))))
+                for t in range(self.container.experiment.tags_size()):
+                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
 
-                for t in range(self.container.info().tagsCount()):
-                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tagValue(self.container.experiment.tagAt(t))))
+                for t in range(self.container.experiment.tags_size()):
+                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
 
                 # author
                 itemAuthor = QTableWidgetItem(info.author())
                 itemAuthor.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
-                self.tableWidget.setItem(i, 2 + self.container.experiment.tagsCount(), itemAuthor)
+                self.tableWidget.setItem(i, 2 + self.container.experiment.tags_size(), itemAuthor)
 
                 # created date
                 itemCreatedDate = QTableWidgetItem(info.createddate())
                 itemCreatedDate.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
-                self.tableWidget.setItem(i, 3 + self.container.experiment.tagsCount(), itemCreatedDate)
+                self.tableWidget.setItem(i, 3 + self.container.experiment.tags_size(), itemCreatedDate)
             
             self.tableWidget.cellChanged.connect(self.cellChanged)
         
@@ -240,9 +247,9 @@ class BiExperimentDataComponent(BiComponent):
             self.container.setLastEditedDataIdx(row)
             self.container.setDataName(row, self.tableWidget.item(row, col).text())
             self.container.notify(BiExperimentContainer.DataAttributEdited)
-        elif  col > 1 and col < 4 + self.container.experiment.tagsCount() :
+        elif  col > 1 and col < 4 + self.container.experiment.tags_size() :
             self.container.setLastEditedDataIdx(row)
-            self.container.setTagValue(row, self.container.experiment.tagAt(col-2), self.tableWidget.item(row, col).text())
+            self.container.setTagValue(row, self.container.experiment.tag(col-2), self.tableWidget.item(row, col).text())
             self.container.notify(BiExperimentContainer.DataAttributEdited)
 
     def get_widget(self):
@@ -288,14 +295,14 @@ class BiExperimentInfoEditorComponent(BiComponent):
 
     def update(self, container: BiContainer):
         if container.action == BiExperimentContainer.Loaded:
-            self.nameEdit.setText(self.container.info.name)
-            self.authorEdit.setText(self.container.info.author)
-            self.createdEdit.setText(self.container.info.createddate)
+            self.nameEdit.setText(self.container.experiment.name())
+            self.authorEdit.setText(self.container.experiment.author())
+            self.createdEdit.setText(self.container.experiment.createddate())
 
     def saveClicked(self):
-        self.container.info.name = self.nameEdit.text()
-        self.container.info.author = self.authorEdit.text()
-        self.container.info.createddate = self.createdEdit.text()
+        self.container.experiment.set_name(self.nameEdit.text())
+        self.container.experiment.set_author(self.authorEdit.text())
+        self.container.experiment.set_createddate(self.createdEdit.text())
 
         self.container.notify(BiExperimentContainer.InfoModified)
 
@@ -373,9 +380,9 @@ class BiExperimentTagsComponent(BiComponent):
             self.tagListLayout.itemAt(i).widget().deleteLater()
 
         # add tags
-        for t in range(self.container.info.tagsCount()):
-            tagWidget = BiTagWidget()
-            tagWidget.setContent(self.container.info.tagAt(t))
+        for t in range(self.container.experiment.tags_size()):
+            tagWidget = BiTagWidget() 
+            tagWidget.setContent(self.container.experiment.tag(t))
             tagWidget.remove.connect(self.removeClicked)
             self.tagListLayout.addWidget(tagWidget)
         self.tagListWidget.adjustSize()
@@ -393,12 +400,12 @@ class BiExperimentTagsComponent(BiComponent):
         self.reload()
 
     def saveButtonClicked(self):
-        self.container.info().clearTags()
+        self.container.experiment.clear_tags()
         for i in range(self.tagListLayout.count()):
             item = self.tagListLayout.itemAt(i)
             widget = item.widget()
             if widget:
-                self.container.info.addTag(widget.content())
+                self.container.experiment.add_tag(widget.content())
         self.container.notify(BiExperimentContainer.TagsModified)
 
     def removeClicked(self, tag: str):
@@ -474,31 +481,37 @@ class BiExperimentImportDataComponent(BiComponent):
         originfilename = originFileInfo.fileName()
         originBasename = originFileInfo.baseName()
 
-        rawDataSetmdFileInfo = self.container.experiment.rawDataSet.mdFileUrl()
-        destinationFile = rawDataSetmdFileInfo.path() + QDir.separator() + originfilename
+        rawDataSetmdFileInfo = self.container.experiment.rawdataset().md_file_path()
+        destinationFile = rawDataSetmdFileInfo + QDir.separator() + originfilename
 
         # meta data
-        data = BiRawData()
-        data.setUrl(destinationFile)
-        data.setName(self.nameEdit.text())
-        data.setAuthor(self.authorEdit.text())
-        data.setCreateddate(self.createddateEdit.text())
-        data.setDatatype("image")
-        data.setThumbnail(originBasename + "_thumb.jpg")
-        data.setmdFileUrl(rawDataSetmdFileInfo.path() + QDir.separator() + originBasename + ".md.json")
+        data_md_file = rawDataSetmdFileInfo + QDir.separator() + originBasename + ".md.json"
 
-        self.container.info().rawDataSet().addData(data)
-        self.container.info().rawDataSet().addDatamdFile(data.mdFileUrl())
+        print('import data to:', data_md_file)
+
+        data = create_rawdata(data_md_file) 
+        data.set_url(ntpath.basename(destinationFile))
+        data.set_name(self.nameEdit.text())
+        data.set_author(self.authorEdit.text())
+        data.set_createddate(self.createddateEdit.text())
+        data.set_datatype("image")
+        data.set_thumbnail(originBasename + "_thumb.jpg")
+        
+        self.container.experiment.rawdataset().add_data(data)
         self.container.notify(BiExperimentContainer.RawDataImported)
 
-        self.importContainer.setData(data)
-        self.importContainer.setOriginFile(originFile)
-        self.importContainer.setDestinationFile(destinationFile)
+        self.importContainer.data = data
+        self.importContainer.originFile = originFile
+        self.importContainer.destinationFile = destinationFile
         self.importContainer.notify(BiExperimentImportDataContainer.NewImport)
 
     def browseDataButtonClicked(self):
-        file = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), QString(), "Data (*.*)")
-        self.dataPath.setText(file)
+        fileName = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), 'Data (*.*)')
+        print('filename: ', fileName[0])
+        self.dataPath.setText(fileName[0])
+
+    def get_widget(self):
+        return self.widget   
 
 class BiExperimentTitleToolBarComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -522,7 +535,7 @@ class BiExperimentTitleToolBarComponent(BiComponent):
 
     def update(self, container: BiContainer):
         if container.action == BiExperimentContainer.Loaded or container.action == BiExperimentContainer.InfoModified:
-            self.titleLabel.setText(self.container.info().name)
+            self.titleLabel.setText(self.container.experiment.name())
 
     def get_widget(self):
         return self.widget          
@@ -538,7 +551,7 @@ class BiExperimentToolBarComponent(BiComponent):
         self.widget = QWidget()
         self.widget.setObjectName("BiToolBar")
         layout = QHBoxLayout()
-        layout.setSpacing(3)
+        layout.setSpacing(2)
         layout.setContentsMargins(7,0,7,0)
         self.widget.setLayout(layout)
 

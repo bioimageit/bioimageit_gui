@@ -2,14 +2,14 @@ import PySide2.QtCore
 from PySide2.QtCore import QMimeData
 from PySide2.QtGui import QMouseEvent, QDrag
 from PySide2.QtWebEngineWidgets import QWebEngineView
-from PySide2.QtWidgets import QWidget, QPushButton, QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout
+from PySide2.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
 class BiButton(QPushButton):
     clickedId = Signal(int)
     clickedContent = Signal(str)
 
-    def __init__(self, title: str, parent: QWidget):
+    def __init__(self, title: str, parent: QWidget = None):
         super(BiButton, self).__init__(title, parent)
         self.pressed.connect(self.emitClicked)
         self.id = 0
@@ -56,7 +56,7 @@ class BiFileSelectWidget(QWidget):
             if file != "":
                 self.lineEdit.setText(file)
 
-class BiDragLabel(QWidget):
+class BiDragLabel(QLabel):
     def __init__(self, parent: QWidget):
         super(BiDragLabel, self).__init__(parent)
 
@@ -75,11 +75,13 @@ class BiDragLabel(QWidget):
             if self.pixmap():
                 drag.setPixmap(self.pixmap())
             
-            drag.exec()
+            drag.exec_()
         
 
 class BiTagWidget(QWidget):
-    def __init__(self, parent: QWidget):
+    remove = Signal(str)
+
+    def __init__(self, parent: QWidget = None):
         super(BiTagWidget, self).__init__(parent)
 
         layout = QHBoxLayout()
@@ -92,7 +94,7 @@ class BiTagWidget(QWidget):
         removeButton = QPushButton(self.tr("Remove"))
         removeButton.setObjectName("btnDanger")
         layout.addWidget(removeButton, 0, PySide2.QtCore.Qt.AlignRight)
-        removeButton.released.connect(self.emitClicked)
+        removeButton.released.connect(self.emitRemove)
 
         self.setLayout(layout)
 
