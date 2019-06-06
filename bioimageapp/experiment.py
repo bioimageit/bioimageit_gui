@@ -7,7 +7,7 @@ from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QPushButton, 
                                QTableWidget, QTableWidgetItem, QLineEdit, QLabel, 
                                QGridLayout, QScrollArea, QToolButton, QComboBox,
-                               QFileDialog)
+                               QFileDialog, QTabWidget, QCheckBox)
 from shutil import copyfile
 import subprocess
 
@@ -18,6 +18,7 @@ from settings import BiSettingsAccess
 from bioimagepy.experiment import BiExperiment 
 from bioimagepy.metadata import BiRawData
 from  bioimagepy.metadata import create_rawdata
+import bioimagepy.experiment as experimentpy 
 
 
 class BiExperimentContainer(BiContainer):
@@ -54,13 +55,21 @@ class BiExperimentContainer(BiContainer):
 class BiExperimentImportDataContainer(BiContainer):
     NewImport = "BiExperimentImportDataContainer::NewImport"
     DataImported = "BiExperimentImportDataContainer::DataImported"
+    NewImportDir = "BiExperimentImportDataContainer::NewImportDir"
 
     def __init__(self):
         super(BiExperimentImportDataContainer, self).__init__()
         self._object_name = 'BiExperimentImportDataContainer'
         self.originFile = ''
         self.destinationFile = ''
+        self.author = ''
+        self.createddate = ''
         self.data = None
+        self.dir_data_path = ''
+        self.dir_recursive = False
+        self.dir_filter = -1
+        self.dir_filter_value = ''
+        self.dir_copy_data = False
 
 
 class BiExperimentModel(BiModel):
@@ -94,17 +103,42 @@ class BiExperimentModel(BiModel):
             return
 
 class BiExperimentImportDataModel(BiModel):
-    def __init__(self, container: BiExperimentImportDataContainer):
+    def __init__(self, experimentContainer: BiExperimentContainer, importContainer: BiExperimentImportDataContainer):
         super(BiExperimentImportDataModel, self).__init__()
         self._object_name = 'BiExperimentImportDataModel'
-        self.container = container
-        self.container.addObserver(self)  
+        self.experimentContainer = experimentContainer
+        self.importContainer = importContainer
+        self.importContainer.addObserver(self)  
 
     def update(self, container: BiContainer):
         if container.action == BiExperimentImportDataContainer.NewImport:
             self.importData()
-            self.container.notify(BiExperimentImportDataContainer.DataImported)
+            self.importContainer.notify(BiExperimentImportDataContainer.DataImported)
             return
+
+        if container.action == BiExperimentImportDataContainer.NewImportDir:
+            self.importDir()
+            self.importContainer.notify(BiExperimentImportDataContainer.DataImported)   
+            return 
+
+    def importDir(self):
+
+        filter_regexp = ''
+        if self.importContainer.dir_filter == 0:
+            filter_regexp = '\\' + self.importContainer.dir_filter_value + '$'
+        elif self.importContainer.dir_filter == 1:
+            filter_regexp = self.importContainer.dir_filter_value    
+        elif self.importContainer.dir_filter == 2:
+            filter_regexp = '^' + self.importContainer.dir_filter_value        
+
+
+        experimentpy.import_dir(experiment=self.experimentContainer.experiment, 
+                      dir_path=self.importContainer.dir_data_path, 
+                      filter=filter_regexp, 
+                      author=self.importContainer.author, 
+                      datatype='image', 
+                      createddate=self.importContainer.createddate, 
+                      copy_data=self.importContainer.dir_copy_data)
 
     def importData(self):
         self.createMetaDataFile()
@@ -112,13 +146,13 @@ class BiExperimentImportDataModel(BiModel):
         self.createThumb()
 
     def createMetaDataFile(self):
-        self.container.data.write()
+        self.importContainer.data.write()
 
     def copyInputFile(self):
-        copyfile(self.container.originFile, self.container.destinationFile)
+        copyfile(self.importContainer.originFile, self.importContainer.destinationFile)
 
     def createThumb(self):
-        destinationPath = self.container.destinationFile
+        destinationPath = self.importContainer.destinationFile
 
         settingsGroups = BiSettingsAccess().instance
         program = settingsGroups.value("Experiment", "fiji") # "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx"
@@ -421,10 +455,10 @@ class BiExperimentTagsComponent(BiComponent):
     def get_widget(self):
         return self.widget      
 
-class BiExperimentImportDataComponent(BiComponent):
+class BiExperimentImportSingleDataComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer, importContainer: BiExperimentImportDataContainer):
-        super(BiExperimentImportDataComponent, self).__init__()
-        self._object_name = 'BiExperimentImportDataComponent'
+        super(BiExperimentImportSingleDataComponent, self).__init__()
+        self._object_name = 'BiExperimentImportSingleDataComponent'
         self.container = container
         self.container.addObserver(self)  
         self.importContainer = importContainer
@@ -437,13 +471,13 @@ class BiExperimentImportDataComponent(BiComponent):
         self.widget.setLayout(layout)
 
         # title
-        title = QLabel(self.widget.tr("Import data"))
+        title = QLabel(self.widget.tr("Import single data"))
         title.setObjectName("BiLabelFormHeader1")
 
         dataLabel = QLabel(self.widget.tr("Data"))
         self.dataPath = QLineEdit()
         browseDataButton = QPushButton(self.widget.tr("..."))
-        browseDataButton.setObjectName("biBrowseButton")
+        browseDataButton.setObjectName("BiBrowseButton")
         browseDataButton.released.connect(self.browseDataButtonClicked)
 
         nameLabel = QLabel(self.widget.tr("Name"))
@@ -511,7 +545,132 @@ class BiExperimentImportDataComponent(BiComponent):
         self.dataPath.setText(fileName[0])
 
     def get_widget(self):
-        return self.widget   
+        return self.widget  
+
+
+class BiExperimentImportDirectoryDataComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer, importContainer: BiExperimentImportDataContainer):
+        super(BiExperimentImportDirectoryDataComponent, self).__init__()
+        self._object_name = 'BiExperimentImportDirectoryDataComponent'
+        self.container = container
+        self.container.addObserver(self)  
+        self.importContainer = importContainer
+        self.importContainer.addObserver(self) 
+
+        self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Import from folder"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        dataLabel = QLabel(self.widget.tr("Folder"))
+        self.dataPath = QLineEdit()
+        browseDataButton = QPushButton(self.widget.tr("..."))
+        browseDataButton.setObjectName("BiBrowseButton")
+        browseDataButton.released.connect(self.browseDataButtonClicked)
+
+        recursiveLabel = QLabel(self.widget.tr("Recursive"))
+        self.recursiveBox = QCheckBox()
+        self.recursiveBox.setChecked(True)
+
+        filterLabel = QLabel(self.widget.tr("Filter"))
+        self.filterComboBox = QComboBox()
+        self.filterComboBox.addItem(self.widget.tr('Ends With'))
+        self.filterComboBox.addItem(self.widget.tr('Start With'))
+        self.filterComboBox.addItem(self.widget.tr('Contains'))
+        self.filterEdit = QLineEdit()
+        self.filterEdit.setText('.tif')
+
+        copyDataLabel = QLabel(self.widget.tr("Copy data"))
+        self.copyDataBox = QCheckBox()
+        self.copyDataBox.setChecked(True)
+
+        authorLabel = QLabel(self.widget.tr("Author"))
+        self.authorEdit = QLineEdit()
+
+        createddateLabel = QLabel(self.widget.tr("Created date"))
+        self.createddateEdit = QLineEdit()
+
+        importButton = QPushButton(self.widget.tr("import"))
+        importButton.setObjectName("btnPrimary")
+        importButton.released.connect(self.importButtonClicked)
+
+        layout.addWidget(title, 0, 0, 1, 4)
+        layout.addWidget(dataLabel, 1, 0)
+        layout.addWidget(self.dataPath, 1, 1, 1, 2)
+        layout.addWidget(browseDataButton, 1, 3)
+        layout.addWidget(recursiveLabel, 2, 0)
+        layout.addWidget(self.recursiveBox, 2, 1, 1, 2)
+        layout.addWidget(filterLabel, 3, 0)
+        layout.addWidget(self.filterComboBox, 3, 1, 1, 1)
+        layout.addWidget(self.filterEdit, 3, 2, 1, 2)
+        layout.addWidget(copyDataLabel, 4, 0)
+        layout.addWidget(self.copyDataBox, 4, 1, 1, 2)
+        layout.addWidget(authorLabel, 5, 0)
+        layout.addWidget(self.authorEdit, 5, 1, 1, 2)
+        layout.addWidget(createddateLabel, 6, 0)
+        layout.addWidget(self.createddateEdit, 6, 1, 1, 2)
+        layout.addWidget(importButton, 7, 3, PySide2.QtCore.Qt.AlignRight)
+
+    def update(self, container: BiContainer):
+        pass
+
+    def importButtonClicked(self):
+
+        self.importContainer.dir_data_path = self.dataPath.text()
+        self.importContainer.dir_recursive = self.recursiveBox.isChecked()
+        self.importContainer.dir_filter = self.filterComboBox.currentIndex()
+        self.importContainer.dir_filter_value = self.filterEdit.text()
+        self.importContainer.dir_copy_data = self.copyDataBox.isChecked()
+        self.importContainer.author = self.authorEdit.text()
+        self.importContainer.createddate = self.createddateEdit.text()
+        self.importContainer.notify(BiExperimentImportDataContainer.NewImportDir)
+
+        #print("import from:", self.dataPath.text(), ", is recursive:", self.recursiveBox.isChecked())
+        #print("filter with condition:", self.filterComboBox.currentIndex(), " and value:", self.filterEdit.text())
+        #print("copy data:", self.copyDataBox.isChecked())
+        #print("import not yet implemented")
+
+    def browseDataButtonClicked(self):
+        directory = QFileDialog.getExistingDirectory(self.widget, self.widget.tr("Select Directory"),
+                                       "",
+                                       QFileDialog.ShowDirsOnly
+                                       | QFileDialog.DontResolveSymlinks)
+        self.dataPath.setText(directory)
+
+    def get_widget(self):
+        return self.widget  
+
+class BiExperimentImportDataComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer, importContainer: BiExperimentImportDataContainer):
+        super(BiExperimentImportDataComponent, self).__init__()
+        self._object_name = 'BiExperimentImportSingleDataComponent'
+        self.container = container
+        self.container.addObserver(self)  
+        self.importContainer = importContainer
+        self.importContainer.addObserver(self) 
+
+        self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+
+        layout = QVBoxLayout()
+        tabWidget = QTabWidget()
+        layout.addWidget(tabWidget)
+        self.widget.setLayout(layout)
+
+        importSingleComponent = BiExperimentImportSingleDataComponent(container, importContainer)
+        tabWidget.addTab(importSingleComponent.get_widget(), self.widget.tr("Single Data"))
+
+        importDirectoryComponent = BiExperimentImportDirectoryDataComponent(container, importContainer)
+        tabWidget.addTab(importDirectoryComponent.get_widget(), self.widget.tr("Multiple Data"))
+
+    def get_widget(self):
+        return self.widget
+
 
 class BiExperimentTitleToolBarComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):

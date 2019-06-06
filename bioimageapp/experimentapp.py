@@ -107,7 +107,7 @@ class BiExperimentApp(BiComponent):
         self.experimentModel = BiExperimentModel(self.experimentContainer)
         self.processesModel = BiProcessesModel(self.processesContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
-        self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentImportDataContainer)
+        self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentContainer, self.experimentImportDataContainer)
 
         # Components
         # main components
