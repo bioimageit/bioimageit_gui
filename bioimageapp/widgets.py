@@ -2,7 +2,7 @@ import PySide2.QtCore
 from PySide2.QtCore import QMimeData
 from PySide2.QtGui import QMouseEvent, QDrag
 from PySide2.QtWebEngineWidgets import QWebEngineView
-from PySide2.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout
+from PySide2.QtWidgets import QWidget, QLabel, QPushButton, QToolButton, QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
 class BiButton(QPushButton):
@@ -18,6 +18,20 @@ class BiButton(QPushButton):
     def emitClicked(self):
         self.clickedId.emit(self.id)
         self.clickedContent.emit(self.content)
+
+class BiToolButton(QToolButton):
+    clickedId = Signal(int)
+    clickedContent = Signal(str)
+
+    def __init__(self, parent: QWidget = None):
+        super(BiToolButton, self).__init__(parent)
+        self.pressed.connect(self.emitClicked)
+        self.id = 0
+        self.content = ''
+
+    def emitClicked(self):
+        self.clickedId.emit(self.id)
+        self.clickedContent.emit(self.content)        
 
 class BiFileSelectWidget(QWidget):
 

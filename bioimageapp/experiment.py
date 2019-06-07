@@ -131,7 +131,6 @@ class BiExperimentImportDataModel(BiModel):
         elif self.importContainer.dir_filter == 2:
             filter_regexp = '^' + self.importContainer.dir_filter_value        
 
-
         experimentpy.import_dir(experiment=self.experimentContainer.experiment, 
                       dir_path=self.importContainer.dir_data_path, 
                       filter=filter_regexp, 
@@ -189,16 +188,20 @@ class BiExperimentComponent(BiComponent):
     def get_widget(self):
         return self.widget      
 
+class BiExperimentHelpComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentHelpComponent, self).__init__()
+        self._object_name = 'BiExperimentDataComponent'
+        self.container = container
+        self.container.addObserver(self)
+
 class BiExperimentDataComponent(BiComponent):        
     def __init__(self, container: BiExperimentContainer):
         super(BiExperimentDataComponent, self).__init__()
         self._object_name = 'BiExperimentDataComponent'
         self.container = container
         self.container.addObserver(self)
-
-        self.buildWidget()
-
-    def buildWidget(self):   
+  
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
 
@@ -244,7 +247,6 @@ class BiExperimentDataComponent(BiComponent):
                 metaLabel.setMimeData(info.url())
                 thumbnail = info.thumbnail()
                 if thumbnail != "":
-                    print('set thumbnail: ', thumbnail)
                     image = QImage(thumbnail)
                     metaLabel.setPixmap(QPixmap.fromImage(image))
                     self.tableWidget.setRowHeight(i, 64)
@@ -343,12 +345,12 @@ class BiExperimentInfoEditorComponent(BiComponent):
     def get_widget(self):
         return self.widget  
 
-class BiExperimentTagsComponent(BiComponent):
+class BiExperimentTagsListComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
-        super(BiExperimentTagsComponent, self).__init__()
-        self._object_name = 'BiExperimentTagsComponent'
+        super(BiExperimentTagsListComponent, self).__init__()
+        self._object_name = 'BiExperimentTagsListComponent'
         self.container = container
-        self.container.addObserver(self)   
+        self.container.addObserver(self)  
 
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
@@ -450,7 +452,62 @@ class BiExperimentTagsComponent(BiComponent):
                 if widget.content() == tag:
                     itemd = self.tagListLayout.takeAt( i )
                     itemd.widget().deleteLater()
-        self.tagListWidget.adjustSize()
+        self.tagListWidget.adjustSize() 
+
+    def get_widget(self):
+        return self.widget   
+
+class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentTagsUsingSeparatorsComponent, self).__init__()
+        self._object_name = 'BiExperimentTagsUsingSeparatorsComponent'
+        self.container = container
+        self.container.addObserver(self)  
+
+        self.widget = QWidget()
+
+    def update(self, container: BiContainer):
+        pass    
+
+    def get_widget(self):
+        return self.widget  
+
+class BiExperimentTagsUsingNameComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentTagsUsingNameComponent, self).__init__()
+        self._object_name = 'BiExperimentTagsUsingNameComponent'
+        self.container = container
+        self.container.addObserver(self)  
+
+        self.widget = QWidget()
+
+    def update(self, container: BiContainer):
+        pass    
+
+    def get_widget(self):
+        return self.widget          
+
+class BiExperimentTagsComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentTagsComponent, self).__init__()
+        self._object_name = 'BiExperimentTagsComponent'
+        self.container = container
+        self.container.addObserver(self)   
+
+        self.widget = QWidget()
+        layout = QVBoxLayout()
+        self.widget.setLayout(layout)
+
+        tabWidget = QTabWidget()
+        layout.addWidget(tabWidget)
+
+        tagsListComponent = BiExperimentTagsListComponent(self.container)
+        tagUsingSeparatorComponent = BiExperimentTagsUsingSeparatorsComponent(self.container)
+        tagUsingNameComponent = BiExperimentTagsUsingNameComponent(self.container)
+
+        tabWidget.addTab(tagsListComponent.get_widget(), self.widget.tr("Tags"))
+        tabWidget.addTab(tagUsingSeparatorComponent.get_widget(), self.widget.tr("Tag using separator"))
+        tabWidget.addTab(tagUsingNameComponent.get_widget(), self.widget.tr("Tag using name"))
 
     def get_widget(self):
         return self.widget      
@@ -630,11 +687,6 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         self.importContainer.createddate = self.createddateEdit.text()
         self.importContainer.notify(BiExperimentImportDataContainer.NewImportDir)
 
-        #print("import from:", self.dataPath.text(), ", is recursive:", self.recursiveBox.isChecked())
-        #print("filter with condition:", self.filterComboBox.currentIndex(), " and value:", self.filterEdit.text())
-        #print("copy data:", self.copyDataBox.isChecked())
-        #print("import not yet implemented")
-
     def browseDataButtonClicked(self):
         directory = QFileDialog.getExistingDirectory(self.widget, self.widget.tr("Select Directory"),
                                        "",
@@ -648,7 +700,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
 class BiExperimentImportDataComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer, importContainer: BiExperimentImportDataContainer):
         super(BiExperimentImportDataComponent, self).__init__()
-        self._object_name = 'BiExperimentImportSingleDataComponent'
+        self._object_name = 'BiExperimentImportDataComponent'
         self.container = container
         self.container.addObserver(self)  
         self.importContainer = importContainer
@@ -667,6 +719,9 @@ class BiExperimentImportDataComponent(BiComponent):
 
         importDirectoryComponent = BiExperimentImportDirectoryDataComponent(container, importContainer)
         tabWidget.addTab(importDirectoryComponent.get_widget(), self.widget.tr("Multiple Data"))
+
+    def update(self, container: BiContainer):
+        pass
 
     def get_widget(self):
         return self.widget

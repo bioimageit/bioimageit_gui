@@ -1,5 +1,7 @@
 import os
 import json
+import shlex
+import subprocess
 import PySide2.QtCore
 from PySide2.QtCore import QObject, QDir
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, 
@@ -9,6 +11,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton,
                             QAbstractItemView)
 from framework import BiObject, BiContainer, BiModel, BiComponent
 from widgets import BiButton
+from settings import BiSettingsAccess
 from bioimagepy.metadata import BiData, BiRawDataSet, BiProcessedDataSet, BiRun
 from bioimagepy.experiment import BiExperiment
 
@@ -125,15 +128,25 @@ class BiBrowserModel(BiModel):
             return
     
         if container.action == BiBrowserContainer.ItemDoubleClicked:
+            
             row = self.container.doubleClickedRow
             dcFile = self.container.files[row]
+            
             if dcFile.type == "dir":
                 self.container.setCurrentPath(os.path.join(dcFile.path,dcFile.fileName))
                 self.container.notify(BiBrowserContainer.DirectoryModified)
             elif dcFile.type == "experiment":
+
                 if self._useExperimentProcess:
-                    pass
-                    ## TODO: Open the experiment as exernal process
+                    
+                    #Open the experiment as exernal process
+                    program = BiSettingsAccess().instance.value("Browser", "experiment editor")
+                    program += ' \'' + os.path.join(dcFile.path,dcFile.fileName) + '\''
+                    print('open experiment: ', program)
+
+                    args = shlex.split(program)
+                    subprocess.Popen(args)    
+
                     #QProcess *openProcess = new QProcess(this)
                     #connect(openProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(errorOccurred(QProcess::ProcessError)))
                     #QString program = biSettingsAccess::instance().settings().value("Browser", "experiment editor")

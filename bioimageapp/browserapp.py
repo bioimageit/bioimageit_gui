@@ -1,9 +1,11 @@
 import sys
+from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSplitter, QHBoxLayout
 from framework import (BiComponent, BiContainer)
 from browser import (BiBrowserContainer, BiBrowserModel, BiBrowserToolBarComponent, BiBrowserShortCutsComponent, BiBrowserTableComponent, BiBrowserPreviewComponent)
 from metadataeditor import BiMetadataEditorComponent, BiMetadataEditorContainer, BiMetadataEditorModel                   
 from settings import BiSettingsAccess
+from experimentcreate import BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
 
 class BiBrowserApp(BiComponent):
     def __init__(self):
@@ -13,10 +15,12 @@ class BiBrowserApp(BiComponent):
         # container
         self.browserContainer = BiBrowserContainer()
         self.metadataEditorContainer = BiMetadataEditorContainer()
+        self.experimentCreateContainer = BiExperimentCreateContainer()
         
         # model
-        self.browserModel = BiBrowserModel(self.browserContainer)
+        self.browserModel = BiBrowserModel(self.browserContainer, True)
         self.metadataEditorModel = BiMetadataEditorModel(self.metadataEditorContainer)
+        self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
 
         # components
         self.toolBarComponent = BiBrowserToolBarComponent(self.browserContainer)
@@ -25,10 +29,12 @@ class BiBrowserApp(BiComponent):
         self.previewComponent = BiBrowserPreviewComponent(self.browserContainer)
 
         self.metadataEditorComponent = BiMetadataEditorComponent(self.metadataEditorContainer)
+        self.experimentCreateComponent = BiExperimentCreateComponent(self.experimentCreateContainer)
         
         # connections
         self.browserContainer.addObserver(self)
         self.metadataEditorContainer.addObserver(self)
+        self.experimentCreateContainer.addObserver(self)
 
         # load settings
         settingsAccess = BiSettingsAccess().instance
@@ -80,14 +86,15 @@ class BiBrowserApp(BiComponent):
             return
 
         if container.action == BiBrowserContainer.NewExperimentClicked:
-            #self.experimentCreateComponent.reset()
-            #self.experimentCreateComponent.setDestination(self.browserContainer.currentPath)
-            #self.experimentCreateComponent.get_widget().setVisible(true)
+            self.experimentCreateComponent.reset()
+            self.experimentCreateComponent.setDestination(self.browserContainer.currentPath)
+            self.experimentCreateComponent.get_widget().setVisible(True)
             return
 
-        #if container.action == BiExperimentCreateContainer.ExperimentCreated):
-        #    self.experimentCreateComponent.get_widget().setVisible(false)
+        if container.action == BiExperimentCreateContainer.ExperimentCreated:
+            self.experimentCreateComponent.get_widget().setVisible(False)
 
+        
         #    QProcess *openProcess = new QProcess(this);
         #    connect(openProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(errorOccurred(QProcess::ProcessError)));
         #    QString program = biSettingsAccess::instance()->settings()->value("Browser", "experiment editor");
@@ -121,4 +128,5 @@ if __name__ == '__main__':
     component.get_widget().show()
     # Run the main Qt loop
     app.setStyleSheet("file:///" + "../bioimageapp/theme/default/stylesheet.css")
+    app.setWindowIcon(QIcon("../bioimageapp/theme/default/icon.png"))
     sys.exit(app.exec_())

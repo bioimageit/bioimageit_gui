@@ -14,11 +14,14 @@ from experiment import (BiExperimentContainer, BiExperimentModel, BiExperimentCo
 from processbrowser import BiProcessesContainer, BiProcessesModel, BiProcessesComponent, BiProcessesToolBarComponent
 from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent, BiProcessMultiEditorToolBarComponent
 from settings import BiSettingsAccess
+from docviewer import BiDocViewerContainer, BiDocViewerModel, BiDocViewerComponent
+
 
 class BiExperimentAppContainer(BiContainer):
     DataButtonClicked = "BiExperimentAppContainer::DataButtonClicked"
     ProcessButtonClicked = "BiExperimentAppContainer::ProcessButtonClicked"
     ExecButtonClicked = "BiExperimentAppContainer::ExecButtonClicked"
+    HelpButtonClicked = "BiExperimentAppContainer::HelpButtonClicked"
 
     def __init__(self):
         super(BiExperimentAppContainer, self).__init__()
@@ -41,18 +44,22 @@ class BiExperimentAppToolBarComponent(BiComponent):
         layout.setContentsMargins(0,0,0,0)
         self.widget.setLayout(layout)
 
+        self.helpButton = QPushButton(self.widget.tr("Help"), self.widget)
         self.dataButton = QPushButton(self.widget.tr("Data"), self.widget)
         self.processesButton = QPushButton(self.widget.tr("Processes"), self.widget)
         self.execButton = QPushButton(self.widget.tr("Exec"), self.widget)
 
+        self.helpButton.setCheckable(True)
         self.dataButton.setCheckable(True)
         self.processesButton.setCheckable(True)
         self.execButton.setCheckable(True)
 
-        self.dataButton.setObjectName("btnDefault")
-        self.processesButton.setObjectName("btnDefault")
-        self.execButton.setObjectName("btnDefault")
+        self.helpButton.setObjectName("btnDefaultLeft")
+        self.dataButton.setObjectName("btnDefaultCentral")
+        self.processesButton.setObjectName("btnDefaultCentral")
+        self.execButton.setObjectName("btnDefaultRight")
 
+        layout.addWidget(self.helpButton)
         layout.addWidget(self.dataButton)
         layout.addWidget(self.processesButton)
         layout.addWidget(self.execButton)
@@ -60,24 +67,37 @@ class BiExperimentAppToolBarComponent(BiComponent):
         self.dataButton.setChecked(True)
         self.execButton.setEnabled(False)
 
+        self.helpButton.released.connect(self.helpButtonClicked)
         self.dataButton.released.connect(self.dataButtonClicked)
         self.processesButton.released.connect(self.processesButtonClicked)
         self.execButton.released.connect(self.execButtonClicked)
 
     def update(self, container: BiContainer):
-        if container.action == BiExperimentAppContainer.DataButtonClicked:
+        if container.action == BiExperimentAppContainer.HelpButtonClicked:
+            self.helpButton.setChecked(True)
+            self.dataButton.setChecked(False)
+            self.processesButton.setChecked(False)
+            self.execButton.setChecked(False)
+        elif container.action == BiExperimentAppContainer.DataButtonClicked:
+            self.helpButton.setChecked(False)
             self.dataButton.setChecked(True)
             self.processesButton.setChecked(False)
             self.execButton.setChecked(False)
         elif container.action == BiExperimentAppContainer.ProcessButtonClicked:
+            self.helpButton.setChecked(False)
             self.dataButton.setChecked(False)
             self.processesButton.setChecked(True)
             self.execButton.setChecked(False)
         elif container.action == BiExperimentAppContainer.ExecButtonClicked:
+            self.helpButton.setChecked(False)
             self.execButton.setEnabled(True)
             self.dataButton.setChecked(False)
             self.processesButton.setChecked(False)
             self.execButton.setChecked(True)
+
+
+    def helpButtonClicked(self):
+        self.container.notify(BiExperimentAppContainer.HelpButtonClicked)
 
     def dataButtonClicked(self):
         self.container.notify(BiExperimentAppContainer.DataButtonClicked)
@@ -102,15 +122,18 @@ class BiExperimentApp(BiComponent):
         self.processesContainer = BiProcessesContainer()
         self.processMultiEditorContainer = BiProcessMultiEditorContainer()
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
+        self.docViewerContainer = BiDocViewerContainer()
  
         # Models
         self.experimentModel = BiExperimentModel(self.experimentContainer)
         self.processesModel = BiProcessesModel(self.processesContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
         self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentContainer, self.experimentImportDataContainer)
+        self.docViewerModel = BiDocViewerModel(self.docViewerContainer)
 
         # Components
         # main components
+        self.docViewerComponent = BiDocViewerComponent(self.docViewerContainer)
         self.experimentComponent = BiExperimentComponent(self.experimentContainer)
         self.processsesComponent = BiProcessesComponent(self.processesContainer)
         self.processMultiEditorComponent = BiProcessMultiEditorComponent(self.processMultiEditorContainer, self.experimentContainer)
@@ -133,15 +156,21 @@ class BiExperimentApp(BiComponent):
         self.experimentContainer.addObserver(self)
         self.experimentImportDataContainer.addObserver(self)
 
+        self.buildWidget()
+
         # initialization
         self.experimentContainer.projectFile = projectFile
         self.experimentContainer.notify(BiExperimentContainer.OriginModified)
+
+        self.docViewerContainer.content_path = "bioimageapp/experimentdoc.json"
+        self.docViewerContainer.notify(BiDocViewerContainer.PathChanged)
+        self.docViewerContainer.addObserver(self)
 
         processesDir = BiSettingsAccess().instance.value("Processes", "processesdir")
         self.processesContainer.processesDir = processesDir
         self.processesContainer.notify(BiProcessesContainer.DirChanged)
 
-        self.buildWidget()
+        
 
     def buildWidget(self):
         self.widget = QWidget()
@@ -170,9 +199,11 @@ class BiExperimentApp(BiComponent):
         centralLayout = QHBoxLayout()
         centralLayout.setContentsMargins(0,0,0,0)
         centralArea.setLayout(centralLayout)
+        centralLayout.addWidget(self.docViewerComponent.get_widget())
         centralLayout.addWidget(self.experimentComponent.get_widget())
         centralLayout.addWidget(self.processsesComponent.get_widget())
         centralLayout.addWidget(self.processMultiEditorComponent.get_widget())
+        self.docViewerComponent.get_widget().setVisible(False)
         self.experimentComponent.get_widget().setVisible(True)
         self.processsesComponent.get_widget().setVisible(False)
         self.processMultiEditorComponent.get_widget().setVisible(False)
@@ -183,8 +214,24 @@ class BiExperimentApp(BiComponent):
         self.widget.setObjectName("BiWidget")    
 
     def update(self, container: BiContainer):
+        if container.action == BiExperimentContainer.Loaded:
+            if self.experimentContainer.experiment.rawdataset().size() == 0:
+                self.experimentAppContainer.notify(BiExperimentAppContainer.HelpButtonClicked)
+                return
+
+        if container.action == BiExperimentAppContainer.HelpButtonClicked:
+            self.docViewerComponent.get_widget().setVisible(True)
+            self.experimentComponent.get_widget().setVisible(False)
+            self.processsesComponent.get_widget().setVisible(False)
+            self.processMultiEditorComponent.get_widget().setVisible(False)
+
+            self.experimentToolBarComponent.get_widget().setVisible(True)
+            self.processesToolBarComponent.get_widget().setVisible(False)
+            self.processMultiEditorToolBarComponent.get_widget().setVisible(False)  
+            return
 
         if container.action == BiExperimentAppContainer.DataButtonClicked:
+            self.docViewerComponent.get_widget().setVisible(False)
             self.experimentComponent.get_widget().setVisible(True)
             self.processsesComponent.get_widget().setVisible(False)
             self.processMultiEditorComponent.get_widget().setVisible(False)
@@ -193,7 +240,9 @@ class BiExperimentApp(BiComponent):
             self.processesToolBarComponent.get_widget().setVisible(False)
             self.processMultiEditorToolBarComponent.get_widget().setVisible(False)
             return
+
         if container.action == BiExperimentAppContainer.ProcessButtonClicked:
+            self.docViewerComponent.get_widget().setVisible(False)
             self.experimentComponent.get_widget().setVisible(False)
             self.processsesComponent.get_widget().setVisible(True)
             self.processMultiEditorComponent.get_widget().setVisible(False)
@@ -202,7 +251,9 @@ class BiExperimentApp(BiComponent):
             self.processesToolBarComponent.get_widget().setVisible(True)
             self.processMultiEditorToolBarComponent.get_widget().setVisible(False)
             return
+
         if container.action == BiExperimentAppContainer.ExecButtonClicked:
+            self.docViewerComponent.get_widget().setVisible(False)
             self.experimentComponent.get_widget().setVisible(False)
             self.processsesComponent.get_widget().setVisible(False)
             self.processMultiEditorComponent.get_widget().setVisible(True)
@@ -211,22 +262,36 @@ class BiExperimentApp(BiComponent):
             self.processesToolBarComponent.get_widget().setVisible(False)
             self.processMultiEditorToolBarComponent.get_widget().setVisible(True)
             return
+
         if container.action == BiExperimentContainer.InfoClicked:
             self.experimentInfoEditorComponent.get_widget().show()
             return
+
         if container.action == BiExperimentContainer.TagsClicked:
             self.experimentTagsComponent.get_widget().show()
             return
+
         if container.action == BiExperimentContainer.ImportClicked:
             self.experimentImportDataComponent.get_widget().show()
             return
+
         if container.action == BiExperimentContainer.RawDataLoaded:
             self.experimentImportDataComponent.get_widget().hide()
             return
+
         if container.action == BiProcessesContainer.OpenProcess:
             self.processMultiEditorContainer.processAdd(self.processesContainer.clickedProcess())
             self.processMultiEditorContainer.notify(BiProcessMultiEditorContainer.ProcessAdded)
             self.experimentAppContainer.notify(BiExperimentAppContainer.ExecButtonClicked)
+            return
+
+        if container.action == 'BiExperimentDoc::ImportButtonClicked': 
+            self.experimentImportDataComponent.get_widget().show()
+            return 
+          
+        if container.action == 'BiExperimentDoc::TagButtonClicked': 
+            self.experimentTagsComponent.get_widget().show()
+            return       
 
     def get_widget(self):
         return self.widget        
