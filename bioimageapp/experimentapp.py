@@ -10,7 +10,8 @@ from experiment import (BiExperimentContainer, BiExperimentModel, BiExperimentCo
                     BiExperimentImportDataContainer, BiExperimentImportDataModel,
                     BiExperimentInfoEditorComponent, BiExperimentTagsComponent,
                     BiExperimentImportDataComponent, BiExperimentTitleToolBarComponent,
-                    BiExperimentToolBarComponent)
+                    BiExperimentToolBarComponent, BiExperimentAddTagsContainer,
+                    BiExperimentAddTagsModel)
 from processbrowser import BiProcessesContainer, BiProcessesModel, BiProcessesComponent, BiProcessesToolBarComponent
 from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent, BiProcessMultiEditorToolBarComponent
 from settings import BiSettingsAccess
@@ -122,6 +123,7 @@ class BiExperimentApp(BiComponent):
         self.processesContainer = BiProcessesContainer()
         self.processMultiEditorContainer = BiProcessMultiEditorContainer()
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
+        self.experimentAddTagsContainer = BiExperimentAddTagsContainer()
         self.docViewerContainer = BiDocViewerContainer()
  
         # Models
@@ -129,6 +131,7 @@ class BiExperimentApp(BiComponent):
         self.processesModel = BiProcessesModel(self.processesContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
         self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentContainer, self.experimentImportDataContainer)
+        self.experimentAddTagsModel = BiExperimentAddTagsModel(self.experimentContainer, self.experimentAddTagsContainer)
         self.docViewerModel = BiDocViewerModel(self.docViewerContainer)
 
         # Components
@@ -140,7 +143,7 @@ class BiExperimentApp(BiComponent):
 
         # popup components
         self.experimentInfoEditorComponent = BiExperimentInfoEditorComponent(self.experimentContainer)
-        self.experimentTagsComponent = BiExperimentTagsComponent(self.experimentContainer)
+        self.experimentTagsComponent = BiExperimentTagsComponent(self.experimentContainer, self.experimentAddTagsContainer)
         self.experimentImportDataComponent = BiExperimentImportDataComponent(self.experimentContainer, self.experimentImportDataContainer)
 
         # toolbars
@@ -288,7 +291,7 @@ class BiExperimentApp(BiComponent):
         if container.action == 'BiExperimentDoc::ImportButtonClicked': 
             self.experimentImportDataComponent.get_widget().show()
             return 
-          
+
         if container.action == 'BiExperimentDoc::TagButtonClicked': 
             self.experimentTagsComponent.get_widget().show()
             return       
@@ -300,7 +303,7 @@ if __name__ == '__main__':
     # Create the Qt Application
     app = QApplication(sys.argv)
     
-    projectFileUrl = '/Users/sprigent/Documents/code/bioimageit/data/explorer/project1/experiment.md.json'
+    projectFileUrl = '/Users/sprigent/Documents/code/bioimageit/data/explorer/myexperiment/experiment.md.json'
     settingsFileUrl = ''
     processesDir = ''
     if len(sys.argv) > 1 :

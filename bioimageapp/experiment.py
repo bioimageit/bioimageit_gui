@@ -7,7 +7,7 @@ from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QPushButton, 
                                QTableWidget, QTableWidgetItem, QLineEdit, QLabel, 
                                QGridLayout, QScrollArea, QToolButton, QComboBox,
-                               QFileDialog, QTabWidget, QCheckBox)
+                               QFileDialog, QTabWidget, QCheckBox, QSpinBox)
 from shutil import copyfile
 import subprocess
 
@@ -71,6 +71,18 @@ class BiExperimentImportDataContainer(BiContainer):
         self.dir_filter_value = ''
         self.dir_copy_data = False
 
+class BiExperimentAddTagsContainer(BiContainer):
+    ValidatedUsingName = "BiExperimentAddTagsContainer::ValidatedUsingName"
+    ValidatedUsingSeparator = "BiExperimentAddTagsContainer::ValidatedUsingSeparator"
+
+    def __init__(self):
+        super(BiExperimentAddTagsContainer, self).__init__()
+        self._object_name = 'BiExperimentAddTagsContainer'
+        self.usingname_tag = ''
+        self.usingname_search = []
+        self.usingseparator_tags = []
+        self.usingseparator_separator = []
+        self.usingseparator_position = []
 
 class BiExperimentModel(BiModel):
     def __init__(self, container: BiExperimentContainer):
@@ -161,6 +173,30 @@ class BiExperimentImportDataModel(BiModel):
         print("program: ", program)
         print("arguments: ", arguments)
         subprocess.run(arguments)
+
+
+class BiExperimentAddTagsModel(BiModel):
+    def __init__(self, experimentContainer: BiExperimentContainer, addTagsContainer: BiExperimentAddTagsContainer):
+        super(BiExperimentAddTagsModel, self).__init__()
+        self._object_name = 'BiExperimentAddTagsModel'
+        self.experimentContainer = experimentContainer
+        self.addTagsContainer = addTagsContainer
+        self.addTagsContainer.addObserver(self)  
+
+    def update(self, container: BiContainer):
+        if container.action == BiExperimentAddTagsContainer.ValidatedUsingName:
+            experimentpy.tag_rawdata_from_name(self.experimentContainer.experiment, 
+                                                self.addTagsContainer.usingname_tag, 
+                                                self.addTagsContainer.usingname_search )  
+            return 
+
+        if container.action == BiExperimentAddTagsContainer.ValidatedUsingSeparator:
+            for i in range(len(self.addTagsContainer.usingseparator_tags)):
+                experimentpy.tag_rawdata_using_seperator(self.experimentContainer.experiment, 
+                                                         tag=self.addTagsContainer.usingseparator_tags[i], 
+                                                         separator=self.addTagsContainer.usingseparator_separator[i], 
+                                                         value_position=self.addTagsContainer.usingseparator_position[i]) 
+            return                                                                                
 
 
 class BiExperimentComponent(BiComponent):
@@ -458,13 +494,92 @@ class BiExperimentTagsListComponent(BiComponent):
         return self.widget   
 
 class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, experimentContainer: BiExperimentContainer, addTagsContainer: BiExperimentAddTagsContainer):
         super(BiExperimentTagsUsingSeparatorsComponent, self).__init__()
         self._object_name = 'BiExperimentTagsUsingSeparatorsComponent'
-        self.container = container
-        self.container.addObserver(self)  
+        self.experimentContainer = experimentContainer
+        self.experimentContainer.addObserver(self)  
+        self.addTagsContainer = addTagsContainer
+        self.addTagsContainer.addObserver(self)  
+        self._tagsEdit = []
+        self._separatorEdit = []
+        self._positionSpinBox = []
 
         self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Tag using separator"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        gridWidget = QWidget()
+        self.gridLayout = QGridLayout()
+        gridWidget.setLayout(self.gridLayout)
+
+        tagLabel = QLabel(self.widget.tr("Tag"))
+        separatorLabel = QLabel(self.widget.tr("Separator"))
+        positionLabel = QLabel(self.widget.tr("Position"))
+
+        tagsEdit = QLineEdit()
+        self._tagsEdit.append(tagsEdit)
+        separatorEdit = QLineEdit()
+        self._separatorEdit.append(separatorEdit)
+        positionSpinBox = QSpinBox()
+        self._positionSpinBox.append(positionSpinBox)
+
+        addLineButton = QPushButton(self.widget.tr("Add line"))
+        addLineButton.setObjectName('btnDefault')
+        addLineButton.released.connect(self.addLine)
+
+        validateButton = QPushButton(self.widget.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+        validateButton.released.connect(self.validated)
+
+        layout.addWidget(title, 0, 0, 1, 3)
+        
+        self.gridLayout.addWidget(tagLabel, 0, 0)
+        self.gridLayout.addWidget(separatorLabel, 0, 1)
+        self.gridLayout.addWidget(positionLabel, 0, 2)
+
+        self.gridLayout.addWidget(tagsEdit, 1, 0)
+        self.gridLayout.addWidget(separatorEdit, 1, 1)
+        self.gridLayout.addWidget(positionSpinBox, 1, 2)
+
+        layout.addWidget(gridWidget, 1, 0, 1, 3)
+        layout.addWidget(addLineButton, 2, 0)
+        layout.addWidget(validateButton, 3, 2)
+
+    def validated(self):
+        tags = []
+        separator = []
+        position = []
+        for tag in self._tagsEdit:
+            tags.append(tag)    
+        for sep in self._separatorEdit:
+            separator.append(sep)
+        for pos in self._positionSpinBox:
+            position.append(pos)    
+
+        self.addTagsContainer.usingseparator_tags = tags
+        self.addTagsContainer.usingseparator_separator = separator
+        self.addTagsContainer.usingseparator_position = position
+        self.addTagsContainer.notify(BiExperimentAddTagsContainer.ValidatedUsingSeparator)
+
+    def addLine(self):
+        tagsEdit = QLineEdit()
+        self._tagsEdit.append(tagsEdit)
+        separatorEdit = QLineEdit()
+        self._separatorEdit.append(separatorEdit)
+        positionSpinBox = QSpinBox()
+        self._positionSpinBox.append(positionSpinBox)
+
+        rowIdx = self.gridLayout.count()
+        self.gridLayout.addWidget(tagsEdit, rowIdx, 0)
+        self.gridLayout.addWidget(separatorEdit, rowIdx, 1)
+        self.gridLayout.addWidget(positionSpinBox, rowIdx, 2)
 
     def update(self, container: BiContainer):
         pass    
@@ -473,13 +588,66 @@ class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
         return self.widget  
 
 class BiExperimentTagsUsingNameComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, experimentContainer: BiExperimentContainer, addTagsContainer: BiExperimentAddTagsContainer):
         super(BiExperimentTagsUsingNameComponent, self).__init__()
         self._object_name = 'BiExperimentTagsUsingNameComponent'
-        self.container = container
-        self.container.addObserver(self)  
+        self.experimentContainer = experimentContainer
+        self.experimentContainer.addObserver(self)  
+        self.addTagsContainer = addTagsContainer
+        self.addTagsContainer.addObserver(self) 
+        self._namesEdit = []
 
         self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Tag using name"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        tagLabel = QLabel(self.widget.tr("Tag:"))
+        self.tagEdit = QLineEdit()
+
+        searchLabel = QLabel(self.widget.tr("Search names:"))
+        searchWidget = QWidget()
+        self.searchLayout = QVBoxLayout()
+        self.searchLayout.setContentsMargins(0,0,0,0)
+        searchWidget.setLayout(self.searchLayout)
+
+        nameEdit = QLineEdit()
+        self._namesEdit.append(nameEdit)
+        self.searchLayout.addWidget(nameEdit)
+
+        addLineButton = QPushButton(self.widget.tr("Add name"))
+        addLineButton.setObjectName('btnDefault')
+        addLineButton.released.connect(self.addLine)
+
+        validateButton = QPushButton(self.widget.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+        validateButton.released.connect(self.validated)
+
+        layout.addWidget(title, 0, 0)
+        layout.addWidget(tagLabel, 1, 0, 1, 1, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(self.tagEdit, 1, 1)
+        layout.addWidget(searchLabel, 2, 0, 1, 1, PySide2.QtCore.Qt.AlignTop )
+        layout.addWidget(searchWidget, 2, 1)
+        layout.addWidget(addLineButton, 3, 1)
+        layout.addWidget(validateButton, 4, 2)
+
+    def validated(self):
+        names = []
+        for name in self._namesEdit:
+            names.append(name)
+        self.addTagsContainer.usingname_tag = self.tagEdit.text()
+        self.addTagsContainer.usingname_search = names
+        self.addTagsContainer.notify(BiExperimentAddTagsContainer.ValidatedUsingName)
+
+    def addLine(self):
+        nameEdit = QLineEdit()
+        self._namesEdit.append(nameEdit)
+        self.searchLayout.addWidget(nameEdit)
 
     def update(self, container: BiContainer):
         pass    
@@ -488,11 +656,13 @@ class BiExperimentTagsUsingNameComponent(BiComponent):
         return self.widget          
 
 class BiExperimentTagsComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, container: BiExperimentContainer, addTagsContainer: BiExperimentAddTagsContainer):
         super(BiExperimentTagsComponent, self).__init__()
         self._object_name = 'BiExperimentTagsComponent'
         self.container = container
-        self.container.addObserver(self)   
+        self.container.addObserver(self) 
+        self.addTagsContainer = addTagsContainer
+        self.addTagsContainer.addObserver(self)    
 
         self.widget = QWidget()
         layout = QVBoxLayout()
@@ -502,8 +672,8 @@ class BiExperimentTagsComponent(BiComponent):
         layout.addWidget(tabWidget)
 
         tagsListComponent = BiExperimentTagsListComponent(self.container)
-        tagUsingSeparatorComponent = BiExperimentTagsUsingSeparatorsComponent(self.container)
-        tagUsingNameComponent = BiExperimentTagsUsingNameComponent(self.container)
+        tagUsingSeparatorComponent = BiExperimentTagsUsingSeparatorsComponent(self.container, self.addTagsContainer)
+        tagUsingNameComponent = BiExperimentTagsUsingNameComponent(self.container, self.addTagsContainer)
 
         tabWidget.addTab(tagsListComponent.get_widget(), self.widget.tr("Tags"))
         tabWidget.addTab(tagUsingSeparatorComponent.get_widget(), self.widget.tr("Tag using separator"))
