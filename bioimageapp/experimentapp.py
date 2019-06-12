@@ -1,6 +1,9 @@
 import sys
 import os
 
+# add bioimagepy to path for dev
+sys.path.append("/Users/sprigent/Documents/code/bioimagepy")
+
 import PySide2.QtCore
 from PySide2.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 from PySide2.QtGui import QIcon
@@ -278,6 +281,12 @@ class BiExperimentApp(BiComponent):
             self.experimentImportDataComponent.get_widget().show()
             return
 
+        if container.action == BiExperimentImportDataContainer.DataImported:
+            self.experimentImportDataComponent.get_widget().hide()
+            self.experimentContainer.notify(BiExperimentContainer.RawDataLoaded)
+            self.experimentAppContainer.notify(BiExperimentAppContainer.DataButtonClicked)
+            return    
+
         if container.action == BiExperimentContainer.RawDataLoaded:
             self.experimentImportDataComponent.get_widget().hide()
             return
@@ -300,6 +309,7 @@ class BiExperimentApp(BiComponent):
         return self.widget        
 
 if __name__ == '__main__':
+
     # Create the Qt Application
     app = QApplication(sys.argv)
     
