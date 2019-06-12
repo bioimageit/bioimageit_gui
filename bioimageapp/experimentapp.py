@@ -253,7 +253,7 @@ class BiExperimentApp(BiComponent):
             self.processsesComponent.get_widget().setVisible(True)
             self.processMultiEditorComponent.get_widget().setVisible(False)
 
-            self.experimentToolBarComponen.get_widget().setVisible(False)
+            self.experimentToolBarComponent.get_widget().setVisible(False)
             self.processesToolBarComponent.get_widget().setVisible(True)
             self.processMultiEditorToolBarComponent.get_widget().setVisible(False)
             return

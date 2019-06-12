@@ -28,6 +28,7 @@ class BiExperimentContainer(BiContainer):
     ImportClicked = "BiExperimentContainer::ImportClicked"
     TagsClicked = "BiExperimentContainer::TagsClicked"
     InfoModified = "BiExperimentContainer::InfoModified"
+    RefreshClicked = "BiExperimentContainer::RefreshClicked"
     RawDataImported = "BiExperimentContainer::RawDataImported"
     TagsModified = "BiExperimentContainer::TagsModified"
     RawDataLoaded = "BiExperimentContainer::RawDataLoaded"
@@ -306,7 +307,8 @@ class BiExperimentDataComponent(BiComponent):
     def update(self, container: BiContainer):
         if (container.action == BiExperimentContainer.Loaded or 
             container.action == BiExperimentContainer.TagsModified or 
-            container.action == BiExperimentContainer.RawDataLoaded):
+            container.action == BiExperimentContainer.RawDataLoaded or
+            container.action == BiExperimentContainer.RefreshClicked):
 
             # headers
             self.tableWidget.setColumnCount(4 + self.container.experiment.tags_size())
@@ -1046,6 +1048,13 @@ class BiExperimentToolBarComponent(BiComponent):
         dataCombo.currentTextChanged.connect(self.dataComboChanged)
         layout.addWidget(dataCombo, 0, PySide2.QtCore.Qt.AlignLeft)
 
+        # refresh
+        refreshButton = QToolButton()
+        refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
+        refreshButton.setToolTip(self.widget.tr("Refresh"))
+        refreshButton.released.connect(self.refreshButtonClicked)
+        layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
     def update(self, container: BiContainer):
         pass
 
@@ -1054,6 +1063,9 @@ class BiExperimentToolBarComponent(BiComponent):
 
     def dataComboChanged(self, text: str):
         pass
+
+    def refreshButtonClicked(self):
+        self.container.notify(BiExperimentContainer.RefreshClicked)
 
     def importButtonClicked(self):
         self.container.notify(BiExperimentContainer.ImportClicked)

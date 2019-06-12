@@ -1,8 +1,10 @@
 import sys
 import os
 import PySide2.QtCore
+from PySide2.QtGui import QPixmap
 from PySide2.QtCore import QFileInfo, QDir
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, 
+                               QTableWidget, QTableWidgetItem, QAbstractItemView)
 
 from framework import BiContainer, BiModel, BiComponent
 from widgets import BiButton
@@ -127,3 +129,46 @@ class BiProcessesComponent(BiComponent):
 
     def get_widget(self):
         return self.widget    
+
+class BiProcessesBrowserComponent(BiComponent):
+    def __init__(self, container: BiProcessesContainer):
+        super().__init__()
+        self._object_name = 'BiProcessesComponent'
+        self.container = container
+        self.container.addObserver(self)  
+
+        self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+
+        self.layout = QVBoxLayout()
+
+    def browse(self, categories: dict):
+        for category in categories:
+            widget = BiProcessCategoryTile(category, self.widget)
+            self.layout.addWidget(widget)
+
+
+    def update(self, container: BiComponent):
+        pass
+
+    def get_widget(self):
+        return self.widget        
+
+class BiProcessCategoryTile(QWidget):
+    def __init__(self, info: dict, parent: QWidget = None):
+        super().__init__(parent)
+        self.info = info
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        titleLabel = QLabel()
+        titleLabel.setObjectName("BiProcessCategoryTileTitle")
+        titleLabel.setText(info["name"])
+        layout.addWidget()
+
+        thumbnailLabel = QLabel()
+        thumbnailLabel.setPixmap(QPixmap.fromImage(info["thumbnail"]))
+
+    def mousePressEvent(self, event):
+        print("clicked", self.info["id"])
