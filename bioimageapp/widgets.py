@@ -197,7 +197,7 @@ class BiWebBrowser(QWidget):
 
 
 class BiFlowLayout(QLayout):
-    def __init__(self, parent: QWidget, margin: int, hSpacing: int, vSpacing: int):
+    def __init__(self, parent: QWidget = None, margin: int = -1, hSpacing: int = -1, vSpacing: int = -1):
         super().__init__(parent)
         self.hSpace = hSpacing
         self.vSpace = vSpacing
@@ -224,7 +224,9 @@ class BiFlowLayout(QLayout):
         return len(self.itemList)
 
     def itemAt(self, index: int) -> QLayoutItem:
-        return self.itemList[index]
+        if index < len(self.itemList):
+            return self.itemList[index]
+        return None   
 
     def takeAt(self, index: int) -> QLayoutItem:
         if index >= 0 and index < len(self.itemList):
@@ -245,7 +247,7 @@ class BiFlowLayout(QLayout):
         return height
 
     def setGeometry(self, rect: QRect):
-        QLayout.setGeometry(rect)
+        #QLayout.setGeometry(rect)
         self.doLayout(rect, False)
 
     def sizeHint(self) -> QSize:
@@ -264,7 +266,7 @@ class BiFlowLayout(QLayout):
         top = 0
         right = 0
         bottom = 0
-        self.getContentsMargins(left, top, right, bottom)
+        #self.getContentsMargins(left, top, right, bottom)
         effectiveRect = rect.adjusted(+left, +top, -right, -bottom)
         x = effectiveRect.x()
         y = effectiveRect.y()
@@ -295,12 +297,67 @@ class BiFlowLayout(QLayout):
         
         return y + lineHeight - rect.y() + bottom
 
-    def smartSpacing(self, pm: QStyle.PixelMetric) -> int:
+    def smartSpacing(self, pm: PySide2.QtWidgets.QStyle.PixelMetric) -> int:
         parent = self.parent()
         if not parent:
             return -1
         elif parent.isWidgetType():
-            return parent.style().pixelMetric(pm, 0, parent)
+            return parent.style().pixelMetric(pm, None, parent)
         else:
             return parent.spacing()
     
+
+class BiNavigationBar(QWidget):
+    previousSignal = Signal()
+    nextSignal = Signal()
+    homeSignal = Signal()
+    returnSignal = Signal()
+
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        layout = QHBoxLayout()
+        layout.setSpacing(2)
+        self.setLayout(layout)
+        self.setObjectName("BiToolBar")
+
+        # previous
+        previousButton = QToolButton()
+        previousButton.setObjectName("BiNavigationBarPreviousButton")
+        previousButton.setToolTip(self.tr("Previous"))
+        previousButton.released.connect(self.previousClicked)
+        layout.addWidget(previousButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
+        # next
+        nextButton = QToolButton()
+        nextButton.setObjectName("BiNavigationBarNextButton")
+        nextButton.setToolTip(self.tr("Next"))
+        nextButton.released.connect(self.nextClicked)
+        layout.addWidget(nextButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
+        # home
+        homeButton = QToolButton()
+        homeButton.setObjectName("BiNavigationBarHomeButton")
+        homeButton.setToolTip(self.tr("Home"))
+        homeButton.released.connect(self.homeClicked)
+        layout.addWidget(homeButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
+        # bar
+        self.lineEdit = QLineEdit()
+        self.lineEdit.returnPressed.connect(self.returnPressed)
+        layout.addWidget(self.lineEdit, 1)
+
+    def set_path(self, path: str):
+        self.lineEdit.setText(path)
+
+    def previousClicked(self):
+        self.previousSignal.emit()
+
+    def nextClicked(self):
+        self.nextSignal.emit()    
+
+    def homeClicked(self):
+        self.homeSignal.emit()  
+
+    def returnPressed(self):
+        self.returnSignal.emit()       

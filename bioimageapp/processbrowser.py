@@ -1,51 +1,86 @@
 import sys
 import os
+import json
 import PySide2.QtCore
-from PySide2.QtGui import QPixmap
-from PySide2.QtCore import QFileInfo, QDir
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, 
-                               QTableWidget, QTableWidgetItem, QAbstractItemView)
+from PySide2.QtGui import QPixmap, QImage
+from PySide2.QtCore import QFileInfo, QDir, Signal
+from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
+                               QTableWidget, QTableWidgetItem, QAbstractItemView,
+                               QHBoxLayout, QToolButton)
 
 from framework import BiContainer, BiModel, BiComponent
-from widgets import BiButton
+from widgets import BiButton, BiFlowLayout, BiNavigationBar
 from bioimagepy.process import BiProcessInfo, BiProcessParser
 
 
-class BiProcessesContainer(BiContainer):
-    DirChanged = "BiProcessesContainer::DirChanged"
+class BiProcessesBrowserContainer(BiContainer):
+    ProcessesDirChanged = "BiProcessesContainer::ProcessedDirChanged"
     ProcessesLoaded = "BiProcessesContainer::ProcessesLoaded"
-    OpenProcess = "BiProcessesContainer::OpenProcess"
+    PathChanged = "BiProcessesContainer::PathChanged"
 
     def __init__(self):
-        super(BiProcessesContainer, self).__init__()
+        super().__init__()
         self._object_name = 'BiExperimentContainer'
         self.processesDir = ''
         self.processes = []
-        self.clickedId = -1
+        self.categories = None
+        self.historyPaths = ["root"]
+        self.currentPath = "root"
+        self.posHistory = 0
 
-    def clickedProcess(self):
-        return self.processes[self.clickedId]
+    def set_path(self, path: str):
+        self.currentPath = path
+        if self.posHistory <= len(self.historyPaths):
+            for i in range(len(self.historyPaths), self.posHistory):
+                self.historyPaths.pop(i)
+        self.historyPaths.append(path)
+        self.posHistory = len(self.historyPaths) - 1 
 
-    def processAdd(self, info: BiProcessInfo):
-        self.processes.append(info)
+    def moveToPrevious(self):
+        self.posHistory -= 1
+        if self.posHistory < 0 :
+            self.posHistory = 0
+        self.currentPath = self.historyPaths[self.posHistory]
 
-    def processesCount(self):
-        return len(self.processes)
+    def moveToNext(self):
+        self.posHistory += 1
+        if self.posHistory >= len(self.historyPaths):
+            self.posHistory = len(self.historyPaths) - 1
+        self.currentPath = self.historyPaths[self.posHistory] 
+
+    def moveToHome(self):
+        self.set_path("root")  
 
 
-class BiProcessesModel(BiModel):
-    def __init__(self, container: BiProcessesContainer):
-        super(BiProcessesModel, self).__init__()
-        self._object_name = 'BiProcessesModel'
+class BiProcessesBrowserModel(BiModel):
+    def __init__(self, container: BiProcessesBrowserContainer):
+        super().__init__()
+        self._object_name = 'BiProcessesBrowserContainer'
         self.container = container
         self.container.addObserver(self)  
 
     def update(self, container: BiContainer):
-        if container.action == BiProcessesContainer.DirChanged:
+        if container.action == BiProcessesBrowserContainer.ProcessesDirChanged:
             if self.load():
-                self.container.notify(BiProcessesContainer.ProcessesLoaded)
+                self.container.notify(BiProcessesBrowserContainer.ProcessesLoaded)
     
     def load(self) -> bool:
+        if not self.loadProcesses():
+            return False
+        if not self.loadCategories():
+            return False    
+        return True   
+
+    def loadCategories(self):
+        categories_file = os.path.join(self.container.processesDir, "categories.json")
+        if os.path.getsize(categories_file) > 0:
+            with open(categories_file) as json_file:  
+                self.container.categories = json.load(json_file) 
+                return True
+        else:
+            return False             
+
+    def loadProcesses(self) -> bool:
         processesDirInfo = QFileInfo(self.container.processesDir)
 
         if processesDirInfo.exists() and processesDirInfo.isDir():
@@ -53,22 +88,18 @@ class BiProcessesModel(BiModel):
             files = dir.entryList()
             for file in files:
                 if file.endswith(".xml"):
-                    self.loadFile(self.container.processesDir + QDir.separator() + file)
-
+                    parser = BiProcessParser(self.container.processesDir + QDir.separator() + file)
+                    self.container.processes.append(parser.parse())
             return True
         else:
-            print("WARGNING: biProcessesModel::load: the processed dir ", self.container.processesDir, " does not exists")
+            print("WARNING: biProcessesModel::load: the processed dir ", self.container.processesDir, " does not exists")
             return False
+        
 
-    def loadFile(self, file: str):
-        parser = BiProcessParser(file)
-        self.container.processAdd(parser.parse())
-
-
-class BiProcessesToolBarComponent(BiComponent):
-    def __init__(self, container: BiProcessesContainer):
-        super(BiProcessesToolBarComponent, self).__init__()
-        self._object_name = 'BiProcessesToolBarComponent'
+class BiProcessesBrowserSearchBarComponent(BiComponent):
+    def __init__(self, container: BiProcessesBrowserContainer):
+        super().__init__()
+        self._object_name = 'BiProcessesSearchBarComponent'
         self.container = container
         self.container.addObserver(self)  
 
@@ -81,19 +112,44 @@ class BiProcessesToolBarComponent(BiComponent):
         return self.widget
 
 
-class BiProcessesComponent(BiComponent):
-    def __init__(self, container: BiProcessesContainer):
-        super(BiProcessesComponent, self).__init__()
+class BiProcessesBrowserComponent(BiComponent):
+    def __init__(self, container: BiProcessesBrowserContainer):
+        super().__init__()
         self._object_name = 'BiProcessesComponent'
         self.container = container
         self.container.addObserver(self)  
+        self.historyPaths = []
+        self.posHistory = 0
+        self.currentPath = ''
 
+        # Widget
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
+        #self.widget.setObjectName("BiWidget")
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
         self.widget.setLayout(layout)
+        
+        # NavBar
+        self.navBar = BiNavigationBar()
+        self.navBar.previousSignal.connect(self.moveToPrevious)
+        self.navBar.nextSignal.connect(self.moveToNext)
+        self.navBar.homeSignal.connect(self.moveToHome)
+        layout.addWidget(self.navBar)
 
+        # Browse area
+        browseWidget = QWidget()
+        browseWidget.setObjectName("BiWidget")
+        self.scrollWidget = QScrollArea()
+        self.scrollWidget.setWidgetResizable(True)
+        self.scrollWidget.setWidget(browseWidget)
+        layout.addWidget(self.scrollWidget)
+        
+        self.layout = BiFlowLayout()
+        browseWidget.setLayout(self.layout)
+
+        # tools table
         self.tableWidget = QTableWidget()
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(4)
@@ -101,74 +157,119 @@ class BiProcessesComponent(BiComponent):
         labels = ["Open", "Name", "Version", "Description"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
-
         layout.addWidget(self.tableWidget)
+        self.tableWidget.setVisible(False)
 
-    def update(self, container: BiContainer):
-        if container.action == BiProcessesContainer.ProcessesLoaded:
 
-            self.tableWidget.setRowCount(0)
-            self.tableWidget.setRowCount(container.processesCount())
+    def moveToPrevious(self):
+        self.container.moveToPrevious()
+        self.container.notify(BiProcessesBrowserContainer.PathChanged)
 
-            i= -1    
-            for info in self.container.processes:
+    def moveToNext(self):
+        self.container.moveToNext()
+        self.container.notify(BiProcessesBrowserContainer.PathChanged)
+
+    def moveToHome(self):
+        self.container.moveToHome()  
+        self.container.notify(BiProcessesBrowserContainer.PathChanged)      
+
+    def browse(self, categories: dict, processesDir: str, parent: str):
+        if self.hasChildCategory(parent):
+            self.browseCategories(categories, processesDir, parent)
+            self.tableWidget.setVisible(False)
+            self.scrollWidget.setVisible(True)
+        else:
+            self.browseTools(categories, processesDir, parent)  
+            self.tableWidget.setVisible(True)
+            self.scrollWidget.setVisible(False)  
+
+    def hasChildCategory(self, parent: str):
+        for category in self.container.categories["categories"]:
+            if category["parent"] == parent: 
+                return True
+        return False      
+
+    def browseTools(self, categories: dict, processesDir: str, parent: str):
+        self.tableWidget.setRowCount(0)
+        #self.tableWidget.setRowCount(len(self.container.processes))
+
+        i= -1    
+        for info in self.container.processes:
+            if parent in info.categories:    
                 i += 1
                 open = BiButton(self.widget.tr("Open"))
                 open.id = i
                 open.setObjectName("btnPrimary")
                 open.clicked.connect(self.openClicked)
+
+                self.tableWidget.insertRow( self.tableWidget.rowCount() )
                 self.tableWidget.setCellWidget(i, 0, open)
 
                 self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
                 self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))
-                self.tableWidget.setItem(i, 3, QTableWidgetItem(info.description))
-        
+                self.tableWidget.setItem(i, 3, QTableWidgetItem(info.description))     
+
+    def browseCategories(self, categories: dict, processesDir: str, parent: str):
+
+        # free layout
+        for i in reversed(range(self.layout.count())): 
+            self.layout.itemAt(i).widget().deleteLater()
+
+        # browse
+        for category in categories:
+            if category["parent"] == parent:    
+                widget = BiProcessCategoryTile(category, processesDir, self.widget)
+                widget.clickedSignal.connect(self.clickedTile)
+                self.layout.addWidget(widget)
+
+    def clickedTile(self, info: dict):
+        self.container.set_path(info["id"])
+        self.container.notify(BiProcessesBrowserContainer.PathChanged)  
+
     def openClicked(self, id: int):
         self.container.setClickedProcess(id)
-        self.container.notify(BiProcessesContainer.OpenProcess)
+        self.container.notify(BiProcessesBrowserContainer.OpenProcess)              
 
-    def get_widget(self):
-        return self.widget    
-
-class BiProcessesBrowserComponent(BiComponent):
-    def __init__(self, container: BiProcessesContainer):
-        super().__init__()
-        self._object_name = 'BiProcessesComponent'
-        self.container = container
-        self.container.addObserver(self)  
-
-        self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
-
-        self.layout = QVBoxLayout()
-
-    def browse(self, categories: dict):
-        for category in categories:
-            widget = BiProcessCategoryTile(category, self.widget)
-            self.layout.addWidget(widget)
-
-
-    def update(self, container: BiComponent):
-        pass
+    def update(self, container: BiContainer):
+        if (container.action == BiProcessesBrowserContainer.ProcessesLoaded or
+            container.action == BiProcessesBrowserContainer.PathChanged ):
+            self.navBar.set_path(self.container.currentPath)
+            self.browse(self.container.categories["categories"], self.container.processesDir, self.container.currentPath)
+            return
 
     def get_widget(self):
         return self.widget        
 
+
 class BiProcessCategoryTile(QWidget):
-    def __init__(self, info: dict, parent: QWidget = None):
+    clickedSignal = Signal(dict)
+
+    def __init__(self, info: dict, processesDir: str, parent: QWidget = None):
         super().__init__(parent)
         self.info = info
 
+        self.setCursor(PySide2.QtGui.QCursor(PySide2.QtCore.Qt.PointingHandCursor))
+
+        glayout = QVBoxLayout()
+        widget = QWidget()
+        glayout.addWidget(widget)
+        self.setLayout(glayout)
+
+        widget.setObjectName("BiProcessCategoryTile")
         layout = QVBoxLayout()
-        self.setLayout(layout)
+        widget.setLayout(layout)
 
         titleLabel = QLabel()
         titleLabel.setObjectName("BiProcessCategoryTileTitle")
         titleLabel.setText(info["name"])
-        layout.addWidget()
+        layout.addWidget(titleLabel, 0, PySide2.QtCore.Qt.AlignTop)
 
         thumbnailLabel = QLabel()
-        thumbnailLabel.setPixmap(QPixmap.fromImage(info["thumbnail"]))
+        img = QImage(os.path.join(processesDir, info["thumbnail"]))
+        thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(200, 200, PySide2.QtCore.Qt.KeepAspectRatio)))
+        layout.addWidget(thumbnailLabel, 0, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignHCenter)
+
+        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
 
     def mousePressEvent(self, event):
-        print("clicked", self.info["id"])
+        self.clickedSignal.emit(self.info)

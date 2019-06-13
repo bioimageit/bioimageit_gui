@@ -1014,7 +1014,7 @@ QProgressBar::chunk {
 }
 
 /* // ///////////////////////////////////////////////
-specifi widgets
+specific widgets
  // /////////////////////////////////////////////// */
 QLabel#BiExperimentsViewLabel{
   image: url(database.png);
@@ -1061,7 +1061,19 @@ QToolButton#BiBrowserToolBarPreviousButton{
   image: url(arrow-pointing-to-left.svg);
 }
 
+QToolButton#BiNavigationBarPreviousButton{
+  image: url(arrow-pointing-to-left.svg);
+}
+
+QToolButton#BiNavigationBarHomeButton{
+  image: url(home.svg);
+}
+
 QToolButton#BiBrowserToolBarNextButton{
+  image: url(arrow-pointing-to-right.svg);
+}
+
+QToolButton#BiNavigationBarNextButton{
   image: url(arrow-pointing-to-right.svg);
 }
 
@@ -1301,4 +1313,17 @@ QPushButton#BiCloseButton:disabled {
 color : #fff;
 background-color: #c9302c;
 border: 2px solid #c9302c;
+}
+
+QWidget#BiProcessCategoryTile{
+  background-color: #5A8E8E;
+  min-height: 210px;
+  max-height: 210px;
+  max-width: 250px;
+}
+
+QLabel#BiProcessCategoryTileTitle{
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 7px;
 }
