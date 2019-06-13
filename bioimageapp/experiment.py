@@ -1055,6 +1055,8 @@ class BiExperimentToolBarComponent(BiComponent):
         refreshButton.released.connect(self.refreshButtonClicked)
         layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
+        layout.addWidget(QWidget(), 1)
+
     def update(self, container: BiContainer):
         pass
 
