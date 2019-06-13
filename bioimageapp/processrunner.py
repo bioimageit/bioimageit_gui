@@ -13,7 +13,7 @@ class BiProcessMultiEditorContainer(BiContainer):
     def __init__(self):
         super(BiProcessMultiEditorContainer, self).__init__()
         self._object_name = 'BiProcessMultiEditorContainer'
-        self.processed = []
+        self.processes = []
         self.curentProcess = -1
 
     def processAdd(self, info: BiProcess):  

@@ -1320,6 +1320,11 @@ QWidget#BiProcessCategoryTile{
   min-height: 210px;
   max-height: 210px;
   max-width: 250px;
+  border: 2px solid #5A8E8E;
+}
+
+QWidget#BiProcessCategoryTile:hover{
+  border: 2px solid #ffffff;
 }
 
 QLabel#BiProcessCategoryTileTitle{

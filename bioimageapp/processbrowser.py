@@ -17,6 +17,7 @@ class BiProcessesBrowserContainer(BiContainer):
     ProcessesDirChanged = "BiProcessesContainer::ProcessedDirChanged"
     ProcessesLoaded = "BiProcessesContainer::ProcessesLoaded"
     PathChanged = "BiProcessesContainer::PathChanged"
+    OpenProcess = "BiProcessesContainer::OpenProcess"
 
     def __init__(self):
         super().__init__()
@@ -25,15 +26,21 @@ class BiProcessesBrowserContainer(BiContainer):
         self.processes = []
         self.categories = None
         self.historyPaths = ["root"]
+        self.historyPathsNames = ["Home"]
         self.currentPath = "root"
+        self.currentPathName = "Home"
         self.posHistory = 0
+        self.clickedProcess = -1
 
-    def set_path(self, path: str):
+    def set_path(self, path: str, name: str):
         self.currentPath = path
+        self.currentPathName = name
         if self.posHistory <= len(self.historyPaths):
             for i in range(len(self.historyPaths), self.posHistory):
                 self.historyPaths.pop(i)
+                self.historyPathsNames.pop(i)
         self.historyPaths.append(path)
+        self.historyPathsNames.append(name)
         self.posHistory = len(self.historyPaths) - 1 
 
     def moveToPrevious(self):
@@ -41,15 +48,20 @@ class BiProcessesBrowserContainer(BiContainer):
         if self.posHistory < 0 :
             self.posHistory = 0
         self.currentPath = self.historyPaths[self.posHistory]
+        self.currentPathName = self.historyPathsNames[self.posHistory]
 
     def moveToNext(self):
         self.posHistory += 1
         if self.posHistory >= len(self.historyPaths):
             self.posHistory = len(self.historyPaths) - 1
         self.currentPath = self.historyPaths[self.posHistory] 
+        self.currentPathName = self.historyPathsNames[self.posHistory] 
 
     def moveToHome(self):
-        self.set_path("root")  
+        self.set_path("root", "Home")  
+
+    def get_clickedProcess(self):
+        return self.processes[self.clickedProcess]        
 
 
 class BiProcessesBrowserModel(BiModel):
@@ -96,10 +108,10 @@ class BiProcessesBrowserModel(BiModel):
             return False
         
 
-class BiProcessesBrowserSearchBarComponent(BiComponent):
+class BiProcessesBrowserToolBarComponent(BiComponent):
     def __init__(self, container: BiProcessesBrowserContainer):
         super().__init__()
-        self._object_name = 'BiProcessesSearchBarComponent'
+        self._object_name = 'BiProcessesBrowserToolBarComponent'
         self.container = container
         self.container.addObserver(self)  
 
@@ -205,9 +217,12 @@ class BiProcessesBrowserComponent(BiComponent):
                 self.tableWidget.insertRow( self.tableWidget.rowCount() )
                 self.tableWidget.setCellWidget(i, 0, open)
 
+                description = info.description.replace('\n','')
+                description = description.replace('\t','')      
+
                 self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
                 self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))
-                self.tableWidget.setItem(i, 3, QTableWidgetItem(info.description))     
+                self.tableWidget.setItem(i, 3, QTableWidgetItem(description))     
 
     def browseCategories(self, categories: dict, processesDir: str, parent: str):
 
@@ -223,17 +238,17 @@ class BiProcessesBrowserComponent(BiComponent):
                 self.layout.addWidget(widget)
 
     def clickedTile(self, info: dict):
-        self.container.set_path(info["id"])
+        self.container.set_path(info["id"], info["name"])
         self.container.notify(BiProcessesBrowserContainer.PathChanged)  
 
     def openClicked(self, id: int):
-        self.container.setClickedProcess(id)
+        self.container.clickedProcess = id
         self.container.notify(BiProcessesBrowserContainer.OpenProcess)              
 
     def update(self, container: BiContainer):
         if (container.action == BiProcessesBrowserContainer.ProcessesLoaded or
             container.action == BiProcessesBrowserContainer.PathChanged ):
-            self.navBar.set_path(self.container.currentPath)
+            self.navBar.set_path(self.container.currentPathName)
             self.browse(self.container.categories["categories"], self.container.processesDir, self.container.currentPath)
             return
 

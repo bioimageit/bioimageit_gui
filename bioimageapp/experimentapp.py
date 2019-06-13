@@ -15,7 +15,7 @@ from experiment import (BiExperimentContainer, BiExperimentModel, BiExperimentCo
                     BiExperimentImportDataComponent, BiExperimentTitleToolBarComponent,
                     BiExperimentToolBarComponent, BiExperimentAddTagsContainer,
                     BiExperimentAddTagsModel)
-from processbrowser import BiProcessesContainer, BiProcessesModel, BiProcessesComponent, BiProcessesToolBarComponent
+from processbrowser import BiProcessesBrowserContainer, BiProcessesBrowserModel, BiProcessesBrowserComponent, BiProcessesBrowserToolBarComponent
 from processrunner import BiProcessMultiEditorContainer, BiProcessMultiEditorModel, BiProcessMultiEditorComponent, BiProcessMultiEditorToolBarComponent
 from settings import BiSettingsAccess
 from docviewer import BiDocViewerContainer, BiDocViewerModel, BiDocViewerComponent
@@ -123,7 +123,7 @@ class BiExperimentApp(BiComponent):
         # containers
         self.experimentAppContainer = BiExperimentAppContainer()
         self.experimentContainer = BiExperimentContainer()
-        self.processesContainer = BiProcessesContainer()
+        self.processesContainer = BiProcessesBrowserContainer()
         self.processMultiEditorContainer = BiProcessMultiEditorContainer()
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
         self.experimentAddTagsContainer = BiExperimentAddTagsContainer()
@@ -131,7 +131,7 @@ class BiExperimentApp(BiComponent):
  
         # Models
         self.experimentModel = BiExperimentModel(self.experimentContainer)
-        self.processesModel = BiProcessesModel(self.processesContainer)
+        self.processesModel = BiProcessesBrowserModel(self.processesContainer)
         self.processMultiEditorModel = BiProcessMultiEditorModel(self.processMultiEditorContainer)
         self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentContainer, self.experimentImportDataContainer)
         self.experimentAddTagsModel = BiExperimentAddTagsModel(self.experimentContainer, self.experimentAddTagsContainer)
@@ -141,7 +141,7 @@ class BiExperimentApp(BiComponent):
         # main components
         self.docViewerComponent = BiDocViewerComponent(self.docViewerContainer)
         self.experimentComponent = BiExperimentComponent(self.experimentContainer)
-        self.processsesComponent = BiProcessesComponent(self.processesContainer)
+        self.processsesComponent = BiProcessesBrowserComponent(self.processesContainer)
         self.processMultiEditorComponent = BiProcessMultiEditorComponent(self.processMultiEditorContainer, self.experimentContainer)
 
         # popup components
@@ -153,7 +153,7 @@ class BiExperimentApp(BiComponent):
         self.experimentAppToolBarComponent = BiExperimentAppToolBarComponent(self.experimentAppContainer)
         self.experimentTitleToolBarComponent = BiExperimentTitleToolBarComponent(self.experimentContainer)
         self.experimentToolBarComponent = BiExperimentToolBarComponent(self.experimentContainer)
-        self.processesToolBarComponent = BiProcessesToolBarComponent(self.processesContainer)
+        self.processesToolBarComponent = BiProcessesBrowserToolBarComponent(self.processesContainer)
         self.processMultiEditorToolBarComponent = BiProcessMultiEditorToolBarComponent(self.processMultiEditorContainer)
 
         # connections
@@ -174,7 +174,7 @@ class BiExperimentApp(BiComponent):
 
         processesDir = BiSettingsAccess().instance.value("Processes", "processesdir")
         self.processesContainer.processesDir = processesDir
-        self.processesContainer.notify(BiProcessesContainer.DirChanged)
+        self.processesContainer.notify(BiProcessesBrowserContainer.ProcessesDirChanged)
 
         
 
@@ -291,8 +291,8 @@ class BiExperimentApp(BiComponent):
             self.experimentImportDataComponent.get_widget().hide()
             return
 
-        if container.action == BiProcessesContainer.OpenProcess:
-            self.processMultiEditorContainer.processAdd(self.processesContainer.clickedProcess())
+        if container.action == BiProcessesBrowserContainer.OpenProcess:
+            self.processMultiEditorContainer.processAdd(self.processesContainer.get_clickedProcess())
             self.processMultiEditorContainer.notify(BiProcessMultiEditorContainer.ProcessAdded)
             self.experimentAppContainer.notify(BiExperimentAppContainer.ExecButtonClicked)
             return
