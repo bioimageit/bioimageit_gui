@@ -44,6 +44,9 @@ class BiProcessEditorContainer(BiContainer):
         self.progress = 0
         self.progressMessage = ''
 
+    def setProcessInfo(self, info: str):
+        self.processInfo = info    
+
 class BiProcessMultiEditorModel(BiModel):
     def __init__(self, container: BiProcessMultiEditorContainer):
         super(BiProcessMultiEditorModel, self).__init__()
@@ -90,8 +93,8 @@ class BiProcessEditorComponent(BiComponent):
     def __init__(self, container: BiProcessEditorContainer, experimentContainer: BiExperimentContainer):
         super(BiProcessEditorComponent, self).__init__()
         self._object_name = 'BiProcessMultiEditorComponent'
-        self.container = container
-        self.container.addObserver(self)
+        self.editorContainer = container
+        self.editorContainer.addObserver(self)
         self.experimentContainer = experimentContainer
         self.experimentContainer.addObserver(self)
 
@@ -116,7 +119,7 @@ class BiProcessEditorComponent(BiComponent):
         execScrollArea.setMinimumWidth(300)
         execScrollArea.setWidgetResizable(True)
         execScrollArea.setWidget(execWidget)
-        self.execLayout = QVBoxLayout
+        self.execLayout = QVBoxLayout()
         execWidget.setLayout(self.execLayout)
         splitter.addWidget(execScrollArea)
         splitter.setStretchFactor(0,1)
@@ -124,13 +127,13 @@ class BiProcessEditorComponent(BiComponent):
 
     def update(self, container: BiContainer):
         if container.action == BiProcessEditorContainer.ProcessInfoLoaded:
-            self.docWidget.setHomePage(self.editContainer.processInfo.doc(), True)
+            self.docWidget.setHomePage(self.editorContainer.processInfo.help, True)
             self.buildExecWidget()
 
         if container.action == BiProcessEditorContainer.ProgressChanged:
-            self.runWidget.setProgress(self.editContainer.progress())
-            self.runWidget.setProgressMessage(self.editContainer.progressMessage())
-            if self.editContainer.progress == 100:
+            self.runWidget.setProgress(self.editorContainer.progress())
+            self.runWidget.setProgressMessage(self.editorContainer.progressMessage())
+            if self.editorContainer.progress == 100:
                 self.runWidget.setRunFinished()
 
     def buildExecWidget(self):
@@ -222,7 +225,7 @@ class BiProcessMultiEditorComponent(BiComponent):
         processEditorModel = BiProcessEditorModel(processEditorContainer, self.experimentContainer)
 
         processEditorContainer.notify(BiProcessEditorContainer.ProcessInfoLoaded)
-        self.tabWidget.addTab(processExecComponent.widget(), processInfo.name())
+        self.tabWidget.addTab(processExecComponent.get_widget(), processInfo.name)
 
     def get_widget(self):
         return self.widget      

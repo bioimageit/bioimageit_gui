@@ -160,6 +160,9 @@ class BiExperimentApp(BiComponent):
         # toolbars width
         self.experimentToolBarComponent.get_widget().setFixedWidth(350)
         self.processesToolBarComponent.get_widget().setFixedWidth(350)
+        self.processesToolBarComponent.get_widget().setVisible(False)
+        self.processMultiEditorToolBarComponent.get_widget().setFixedWidth(350)
+        self.processMultiEditorToolBarComponent.get_widget().setVisible(False)
 
         # connections
         self.experimentAppContainer.addObserver(self)

@@ -61,7 +61,10 @@ class BiProcessesBrowserContainer(BiContainer):
         self.set_path("root", "Home")  
 
     def get_clickedProcess(self):
-        return self.processes[self.clickedProcess]        
+        for process in self.processes:
+            if process.id == self.clickedProcess:
+                return process
+        return None           
 
 
 class BiProcessesBrowserModel(BiModel):
@@ -210,9 +213,10 @@ class BiProcessesBrowserComponent(BiComponent):
             if parent in info.categories:    
                 i += 1
                 open = BiButton(self.widget.tr("Open"))
-                open.id = i
+                #open.id = i
+                open.content = info.id
                 open.setObjectName("btnPrimary")
-                open.clicked.connect(self.openClicked)
+                open.clickedContent.connect(self.openClicked)
 
                 self.tableWidget.insertRow( self.tableWidget.rowCount() )
                 self.tableWidget.setCellWidget(i, 0, open)
@@ -241,7 +245,7 @@ class BiProcessesBrowserComponent(BiComponent):
         self.container.set_path(info["id"], info["name"])
         self.container.notify(BiProcessesBrowserContainer.PathChanged)  
 
-    def openClicked(self, id: int):
+    def openClicked(self, id: str):
         self.container.clickedProcess = id
         self.container.notify(BiProcessesBrowserContainer.OpenProcess)              
 

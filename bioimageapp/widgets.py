@@ -43,7 +43,7 @@ class BiFileSelectWidget(QWidget):
 
         self.isDir = isDir
 
-        layout = QHBoxLayout
+        layout = QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)
         self.setLayout(layout)
 
@@ -128,7 +128,7 @@ class BiWebBrowser(QWidget):
     def __init__(self, parent: QWidget):
         super(BiWebBrowser, self).__init__(parent)
 
-        thisLayout = QVBoxLayout
+        thisLayout = QVBoxLayout()
         thisLayout.setContentsMargins(0,0,0,0)
         thisLayout.setSpacing(0)
 
@@ -166,7 +166,7 @@ class BiWebBrowser(QWidget):
         homeButton.pressed.connect(self.home)
         homeButton.setObjectName("BiWebBrowserHome")
 
-        barLayout = QHBoxLayout
+        barLayout = QHBoxLayout()
         barLayout.setSpacing(1)
         barLayout.setContentsMargins(2,2,2,2)
         barLayout.addWidget(backButton)
