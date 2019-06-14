@@ -1,5 +1,5 @@
 import PySide2.QtCore
-from PySide2.QtCore import QMimeData, QSize, QRect, QPoint
+from PySide2.QtCore import QMimeData, QSize, QRect, QPoint, QPropertyAnimation
 from PySide2.QtGui import QMouseEvent, QDrag
 from PySide2.QtWebEngineWidgets import QWebEngineView
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton, 
@@ -361,3 +361,83 @@ class BiNavigationBar(QWidget):
 
     def returnPressed(self):
         self.returnSignal.emit()       
+
+
+class BiHideableWidget(QWidget):
+    def __init__(self, title: str, level: int = 1, parent: QWidget = None, useFlowLayout: bool = False):
+        super().__init__(parent)
+
+        self.useFlowLayout = useFlowLayout
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
+
+        # title area
+        titleLabel = QLabel(title, self)
+        titleLabel.setObjectName("BiHideableWidgetTitleText" + "Level" + str(level))
+        self.button = QPushButton(self)
+        self.button.setCheckable(True)
+        self.button.setObjectName("biHideableWidgetTitleButton" + "Level" + str(level))
+
+        titleArea = QWidget(self)
+        titleArea.setObjectName("biHideableWidgetTitle" + "Level" + str(level))
+        titleLayout = QHBoxLayout()
+        titleLayout.setContentsMargins(0,0,0,0)
+        titleArea.setLayout(titleLayout)
+        titleLayout.addWidget(titleLabel, 1, PySide2.QtCore.Qt.AlignLeft)
+        titleLayout.addWidget(self.button, 0, PySide2.QtCore.Qt.AlignRight)
+
+        layout.addWidget(titleArea)
+
+        # hideable widget
+        self.hideableWidget = QWidget(self)
+        self.hideableWidget.setObjectName("BiHideableWidget" + "Level" + str(level))
+        self.isVisible = True
+        self.animation = QPropertyAnimation()
+        self.useAnimation = True
+
+        if useFlowLayout:
+            self.flowLayout = BiFlowLayout()
+            self.hideableWidget.setLayout(self.flowLayout)
+        else:
+            self.layout = QVBoxLayout()
+            self.layout.setContentsMargins(0,0,0,0)
+            self.hideableWidget.setLayout(self.layout)
+
+        layout.addWidget(self.hideableWidget)
+
+        # connections
+        self.button.released.connect(self.switchView)
+
+    def setUseAnimation(self, useAnimation: bool):
+        self.useAnimation = useAnimation
+
+    def switchView(self):
+        if self.isVisible:
+            if self.useAnimation:
+                self.animation.setDuration(1000)
+                self.animation.setStartValue(self.height)
+                self.animation.setEndValue(0)
+                self.animation.start()
+            else:
+                self.hideableWidget.setVisible(False)
+            self.isVisible = False
+        else:
+            if self.useAnimation:
+                self.animation.setDuration(2000)
+                self.animation.setStartValue(0)
+                self.animation.setEndValue(self.height)
+                self.animation.start()
+            else:
+                self.hideableWidget.setVisible(True)
+            self.isVisible = True
+
+
+    def addWidget(self, widget: QWidget):
+        if self.useFlowLayout:
+            self.flowLayout.addWidget(widget)
+        else:
+            self.layout.addWidget(widget)
+        self.height = 500

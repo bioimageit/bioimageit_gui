@@ -175,7 +175,6 @@ class BiProcessesBrowserComponent(BiComponent):
         layout.addWidget(self.tableWidget)
         self.tableWidget.setVisible(False)
 
-
     def moveToPrevious(self):
         self.container.moveToPrevious()
         self.container.notify(BiProcessesBrowserContainer.PathChanged)

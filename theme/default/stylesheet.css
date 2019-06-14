@@ -584,12 +584,12 @@ QSpinBox::down-arrow {
 	     QComboBox
 //////////////////////////////////////////////*/
 QComboBox {
-    color : #585858;
-    background-color: #fff;
+  color : #585858;
+  background-color: #fff;
 	border: 1px solid #e1e1e1;
-    border-radius: 4px;
-    padding: 6px 12px;
-    min-width: 6em;
+  border-radius: 4px;
+  padding: 6px 12px;
+  min-width: 6em;
 }
 
 QComboBox:editable {
@@ -1332,4 +1332,19 @@ QLabel#BiProcessCategoryTileTitle{
   color: #ffffff;
   font-weight: bold;
   margin-bottom: 7px;
+}
+
+QLabel#BiProcessDataSelectorWidgetLabel{
+  color: #ffffff;
+}
+
+QLabel#BiProcessDataFilterWidgetStatus{
+  padding: 7px 7px 7px 7px;
+  margin-top: 3;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: #256A6A;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  max-width: 30;
 }
