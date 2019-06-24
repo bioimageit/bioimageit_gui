@@ -16,9 +16,10 @@ from widgets import BiDragLabel, BiTagWidget
 from settings import BiSettingsAccess
 
 from bioimagepy.experiment import BiExperiment 
-from bioimagepy.metadata import BiRawData
+from bioimagepy.metadata import BiRawData, BiProcessedDataSet, BiProcessedData
 from  bioimagepy.metadata import create_rawdata
 import bioimagepy.experiment as experimentpy 
+from bioimagepy.process import BiProcessParser, BiProcessInfo
 
 
 class BiExperimentContainer(BiContainer):
@@ -34,6 +35,7 @@ class BiExperimentContainer(BiContainer):
     RawDataLoaded = "BiExperimentContainer::RawDataLoaded"
     DataAttributEdited = "BiExperimentContainer::DataAttributEdited"
     ThumbnailChanged = "BiExperimentContainer::ThumbnailChanged"
+    DataSetComboChanged = "BiExperimentContainer::DataSetComboChanged"
 
     def __init__(self):
         super(BiExperimentContainer, self).__init__()
@@ -42,7 +44,11 @@ class BiExperimentContainer(BiContainer):
         self.experiment = None
         self.lastEditedDataIdx = 0
         self.changed_thumbnail_id = -1
+        self.changed_thumbnail_row = -1
+        self.changed_thumbnail_column = -1
+        self.changed_thumbnail_data = None
         self.changed_thumbnail_url = ''
+        self.changed_combo_txt = ''
 
     def projectRootDir(self):
         return os.path.dirname(self.projectFile)
@@ -145,6 +151,40 @@ class BiThumbnailMaker(QThread):
                 arguments = [program, "--headless", "--console", "-macro", settingsGroups.value("Experiment", "thumbnail macro"), raw_data.url()]
                 subprocess.run(arguments)  
                 self.thumbnailChanged.emit(i, raw_data.thumbnail())
+
+class BiThumbnailMakerProcessedData(QThread):
+    thumbnailChanged = Signal(int, int, BiProcessedData)
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.experimentContainer = None
+        self.thumbnailChanged.connect(self.notifyThumbnailChanged)
+        self.data = []
+
+    def set_container(self, container: BiExperimentContainer):    
+        self.experimentContainer = container
+
+    def set_data(self, data: list):
+        self.data = data
+
+    def notifyThumbnailChanged(self, row: int, column: int, data: BiProcessedData):
+        self.experimentContainer.changed_thumbnail_row = row
+        self.experimentContainer.changed_thumbnail_column = column
+        self.experimentContainer.changed_thumbnail_data = data
+        self.experimentContainer.notify(BiExperimentContainer.ThumbnailChanged) 
+
+    def run(self):
+        for data in self.data:
+            processed_data = data['processeddata']
+            if processed_data.datatype() == 'image' and processed_data.thumbnail() == '':
+                fileName = os.path.splitext(processed_data.name())
+                processed_data.set_thumbnail(fileName[0]+'_thumb.jpg')
+                processed_data.write()
+                settingsGroups = BiSettingsAccess().instance
+                program = settingsGroups.value("Experiment", "fiji") # "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx"
+                arguments = [program, "--headless", "--console", "-macro", settingsGroups.value("Experiment", "thumbnail macro"), processed_data.url()]
+                subprocess.run(arguments)  
+                self.thumbnailChanged.emit(data['row'], data['column'], processed_data)
 
 
 class BiExperimentImportDataModel(BiModel):
@@ -266,12 +306,24 @@ class BiExperimentComponent(BiComponent):
 
         self.dataComponent = BiExperimentDataComponent(self.container)
         layout.addWidget(self.dataComponent.get_widget())    
+        self.processedDataComponent = BiExperimentProcessedDataComponent(self.container)
+        layout.addWidget(self.processedDataComponent.get_widget())  
+
+        self.dataComponent.get_widget().setVisible(True)
+        self.processedDataComponent.get_widget().setVisible(False)
 
     def update(self, container: BiContainer):
-        pass    
+        if container.action == BiExperimentContainer.DataSetComboChanged:
+            if self.container.changed_combo_txt == 'Data':
+                self.dataComponent.get_widget().setVisible(True)
+                self.processedDataComponent.get_widget().setVisible(False)
+            else:
+                self.dataComponent.get_widget().setVisible(False)
+                self.processedDataComponent.get_widget().setVisible(True)                    
 
     def get_widget(self):
         return self.widget      
+
 
 class BiExperimentHelpComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -279,6 +331,201 @@ class BiExperimentHelpComponent(BiComponent):
         self._object_name = 'BiExperimentHelpComponent'
         self.container = container
         self.container.addObserver(self)
+
+class BiExperimentProcessedDataComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiExperimentProcessedDataComponent'
+        self.container = container
+        self.container.addObserver(self)
+        self.thumbnailList = []
+        self.thumbnailMaker = BiThumbnailMakerProcessedData()
+        self.thumbnailMaker.set_container(self.container)
+        
+        self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(5,0,5,5)
+        self.widget.setLayout(layout)
+
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setColumnCount(2)
+
+        labels = ["", "Name"]
+        self.tableWidget.setHorizontalHeaderLabels(labels)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+        layout.addWidget(self.tableWidget) 
+
+    def update(self, container: BiComponent):
+        if container.action == BiExperimentContainer.DataSetComboChanged:
+            dataset = self.container.experiment.processeddataset_by_name(self.container.changed_combo_txt)
+            self.load(dataset)
+            self.thumbnailMaker.set_data(self.thumbnailList)
+            self.thumbnailMaker.start()
+
+        if container.action == BiExperimentContainer.ThumbnailChanged:
+            self.set_thumbnail(self.container.changed_thumbnail_row, self.container.changed_thumbnail_column, self.container.changed_thumbnail_data, self.container.changed_thumbnail_data.thumbnail())  
+
+    def load(self, processeddataset: BiProcessedDataSet):
+
+        # get process info
+        process_url = processeddataset.process_url()
+        parser = BiProcessParser(process_url)
+        process_info = parser.parse()
+
+        if process_info.type == 'sequential':
+            self.load_sequential(processeddataset, process_info)
+        else:
+            self.load_merge(processeddataset, process_info)    
+        
+    def load_merge(self, processeddataset: BiProcessedDataSet, process_info: BiProcessInfo):
+
+        # header
+        self.tableWidget.setColumnCount(1 + len(process_info.outputs))
+        labels = ["Name"]
+        for output in process_info.outputs:
+            labels.append(output.description)
+        self.tableWidget.setHorizontalHeaderLabels(labels)
+
+        # data
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setRowCount(1)
+
+        self.tableWidget.setItem(0, 0, QTableWidgetItem(process_info.name)) 
+
+        for j in range(processeddataset.size()):
+            processed_data = processeddataset.processed_data(j)
+            oID = 0
+            for output in process_info.outputs:
+                oID += 1
+                if processed_data.metadata['origin']['output']['label'] == output.description:
+                    if processed_data.metadata['origin']['output']['label'] == output.description:
+                        if processed_data.datatype() == 'image': 
+                            thumbInfo = dict()
+                            thumbInfo['row'] = 0
+                            thumbInfo['column'] = oID
+                            thumbInfo['processeddata'] = processed_data
+                            self.thumbnailList.append(thumbInfo)
+                            self.set_thumbnail(0, oID, processed_data, processed_data.thumbnail())
+                        elif processed_data.datatype() == 'number':
+                            with open(processed_data.url(), 'r') as content_file:
+                                p = content_file.read() 
+                                self.tableWidget.setItem(0, oID, QTableWidgetItem(p)) 
+                        elif processed_data.datatype() == 'array':
+                            with open(processed_data.url(), 'r') as content_file:
+                                p = content_file.read() 
+                                self.tableWidget.setItem(0, oID, QTableWidgetItem(p))  
+                        elif processed_data.datatype() == 'table':
+                                label = self.table_data_thumb(processed_data.url())
+                                self.tableWidget.setCellWidget(0, oID, label) 
+
+    def load_sequential(self, processeddataset: BiProcessedDataSet, process_info: BiProcessInfo):
+
+        # headers
+        processed_data_column_offset = 2 + self.container.experiment.tags_size()
+        self.tableWidget.setColumnCount(2 + self.container.experiment.tags_size() + len(process_info.outputs))
+        labels = ["", "Name"]
+        for tag in self.container.experiment.tags():
+            labels.append(tag)
+        for output in process_info.outputs:
+            labels.append(output.description)
+        self.tableWidget.setHorizontalHeaderLabels(labels)
+
+        exp_size = self.container.experiment.rawdataset().size()
+        if exp_size < 10:
+            self.tableWidget.verticalHeader().setFixedWidth(20)
+        elif exp_size >= 10 and exp_size < 100  :
+            self.tableWidget.verticalHeader().setFixedWidth(40)  
+        elif exp_size >= 100 and exp_size < 1000  :    
+            self.tableWidget.verticalHeader().setFixedWidth(60)  
+
+        # data
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setRowCount(self.container.experiment.rawdataset().size())
+
+        self.tableWidget.setColumnWidth(0, 64)
+        for i in range(self.container.experiment.rawdataset().size()):
+               
+            info = self.container.experiment.rawdataset().raw_data(i)
+
+            # thumbnail
+            self.set_thumbnail(i, 0, info, info.thumbnail())
+    
+            # name
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
+
+            # tags
+            for t in range(self.container.experiment.tags_size()):
+                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+
+            for t in range(self.container.experiment.tags_size()):
+                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+
+            # processed data
+            for j in range(processeddataset.size()):
+                processed_data = processeddataset.processed_data(j)
+                origin_raw_data = processed_data.origin_raw_data()
+                if info.url() == origin_raw_data.url():
+                    oID = 0
+                    for output in process_info.outputs:
+                        oID += 1
+                        if processed_data.metadata['origin']['output']['label'] == output.description:
+                            if processed_data.datatype() == 'image':
+                                thumbInfo = dict()
+                                thumbInfo['row'] = i
+                                thumbInfo['column'] = oID + processed_data_column_offset-1
+                                thumbInfo['processeddata'] = processed_data
+                                self.thumbnailList.append(thumbInfo)
+                                self.set_thumbnail(i, oID + processed_data_column_offset-1, processed_data, processed_data.thumbnail())
+                            elif processed_data.datatype() == 'number':
+                                with open(processed_data.url(), 'r') as content_file:
+                                    p = content_file.read() 
+                                    self.tableWidget.setItem(i, oID + processed_data_column_offset-1, QTableWidgetItem(p)) 
+                            elif processed_data.datatype() == 'array':
+                                with open(processed_data.url(), 'r') as content_file:
+                                    p = content_file.read() 
+                                    self.tableWidget.setItem(i, oID + processed_data_column_offset-1, QTableWidgetItem(p))  
+                            elif processed_data.datatype() == 'table':
+                                    label = self.table_data_thumb(processed_data.url())
+                                    self.tableWidget.setCellWidget(i, oID + processed_data_column_offset-1, label)              
+
+
+    def table_data_thumb(self, file: str) -> QLabel:
+        with open(file, 'r') as content_file:
+            p = content_file.read() 
+        
+        content = '<table border="0.2"><tbody>'
+        contentRows = p.split('\n')
+        for row in contentRows:
+            ds = row.split(',')
+            if len(ds) > 1:
+                content += '<tr>'
+                for d in ds:
+                    content += '<td>' + d + '</td>'
+                content += '</tr>'
+        content += '</tbody></table>'
+        label = QLabel(content)
+        label.setTextFormat(PySide2.QtCore.Qt.RichText)
+        return label
+
+
+    def set_thumbnail(self, row, column, info, thumbnail):
+        metaLabel = BiDragLabel(self.widget)
+        metaLabel.setMimeData(info.url())
+        if thumbnail != "":
+            image = QImage(thumbnail)
+            metaLabel.setPixmap(QPixmap.fromImage(image))
+            self.tableWidget.setRowHeight(row, 64)
+        else:
+            metaLabel.setObjectName("BiExperimentDataComponentLabel")
+            self.tableWidget.setRowHeight(row, 64)
+        self.tableWidget.setCellWidget(row, column, metaLabel) 
+
+    def get_widget(self):
+        return self.widget        
+
 
 class BiExperimentDataComponent(BiComponent):        
     def __init__(self, container: BiExperimentContainer):
@@ -1043,10 +1290,10 @@ class BiExperimentToolBarComponent(BiComponent):
         layout.addWidget(tagsButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # data selector
-        dataCombo = QComboBox()
-        dataCombo.addItem("Data")
-        dataCombo.currentTextChanged.connect(self.dataComboChanged)
-        layout.addWidget(dataCombo, 0, PySide2.QtCore.Qt.AlignLeft)
+        self.dataCombo = QComboBox()
+        self.dataCombo.addItem("Data")
+        self.dataCombo.currentTextChanged.connect(self.dataComboChanged)
+        layout.addWidget(self.dataCombo, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # refresh
         refreshButton = QToolButton()
@@ -1058,13 +1305,25 @@ class BiExperimentToolBarComponent(BiComponent):
         layout.addWidget(QWidget(), 1)
 
     def update(self, container: BiContainer):
-        pass
+        if container.action == BiExperimentContainer.Loaded:
+            for i in range(self.container.experiment.processeddatasets_size()):
+                processedDataSet = self.container.experiment.processeddataset(i)
+                # add the dataset to the list only if it is not already in
+                found = False
+                for n in range(self.dataCombo.count()):
+                    if self.dataCombo.itemText(n) == processedDataSet.name():
+                        found = True  
+                        break
+                if not found:
+                    self.dataCombo.addItem(processedDataSet.name())
+        
 
     def infoButtonClicked(self):
         self.container.notify(BiExperimentContainer.InfoClicked)
 
     def dataComboChanged(self, text: str):
-        pass
+        self.container.changed_combo_txt = text
+        self.container.notify(BiExperimentContainer.DataSetComboChanged)
 
     def refreshButtonClicked(self):
         self.container.notify(BiExperimentContainer.RefreshClicked)

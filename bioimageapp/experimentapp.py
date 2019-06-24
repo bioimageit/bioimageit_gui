@@ -156,7 +156,6 @@ class BiExperimentApp(BiComponent):
         self.processesToolBarComponent = BiProcessesBrowserToolBarComponent(self.processesContainer)
         self.processMultiEditorToolBarComponent = BiProcessMultiEditorToolBarComponent(self.processMultiEditorContainer)
 
-
         # toolbars width
         self.experimentToolBarComponent.get_widget().setFixedWidth(350)
         self.processesToolBarComponent.get_widget().setFixedWidth(350)

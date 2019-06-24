@@ -46,11 +46,18 @@ class BiProcessEditorContainer(BiContainer):
         self._object_name = 'BiProcessEditorContainer'
         self.processInfo = None
         self.selectedDataList = None
+        self.parametersList = []
         self.progress = 0
         self.progressMessage = ''
 
     def setProcessInfo(self, info: str):
         self.processInfo = info    
+
+    def setParameters(self, parameters: list):
+        self.parametersList = parameters  
+
+    def setSelectedData(self, data: list):
+        self.selectedDataList = data          
 
 class BiProcessMultiEditorModel(BiModel):
     def __init__(self, container: BiProcessMultiEditorContainer):
@@ -141,6 +148,20 @@ class BiProcessEditorComponent(BiComponent):
             if self.editorContainer.progress == 100:
                 self.runWidget.setRunFinished()
 
+    def get_experiment_data_list(self):
+
+        data_list = ['data:data']  
+        experiment = self.experimentContainer.experiment
+        for i in range(experiment.processeddatasets_size()):
+            processeddataset = experiment.processeddataset(i)
+            parser = processpy.BiProcessParser(processeddataset.process_url())
+            process_info = parser.parse()
+            for output in process_info.outputs:
+                data_list.append(processeddataset.name + ':' + output.description)
+
+        return data_list       
+                
+
     def buildExecWidget(self):
 
         processInfo = self.editorContainer.processInfo
@@ -148,10 +169,8 @@ class BiProcessEditorComponent(BiComponent):
         # inputs gui
         inputLabel = QLabel(self.widget.tr("Inputs"))
         inputLabel.setObjectName("BiLabelFormHeader1Negative")
-        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo)
-        #self.dataSelectorWidget.setTags(self.experimentContainer.info().tags())
-        #dataList = ["Data"]
-        #self.dataSelectorWidget.setDataList(dataList)
+
+        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo, self.get_experiment_data_list())
 
         self.execLayout.addWidget(inputLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.dataSelectorWidget, 0, PySide2.QtCore.Qt.AlignTop)
@@ -183,12 +202,17 @@ class BiProcessEditorComponent(BiComponent):
             parametersLabel.setVisible(False)
             self.parametersSelectorWidget.setVisible(False)
         
-
     def run(self):
         # create the input datalist
         selectedDataList = self.dataSelectorWidget.selectedData()
-        self.editContainer.setSelectedData(selectedDataList)
-        self.editContainer.notify(BiProcessEditorContainer.RunProcess)
+        parameters = self.parametersSelectorWidget.parameters() 
+
+        print('run clicked with data:')
+        print('selectedDataList:', selectedDataList)
+        print('parameters:', parameters)
+        self.editorContainer.setSelectedData(selectedDataList)
+        self.editorContainer.setParameters(parameters)
+        self.editorContainer.notify(BiProcessEditorContainer.RunProcess)
 
     def get_widget(self):
         return self.widget      
@@ -226,8 +250,8 @@ class BiProcessDataFilterWidget(QWidget):
 
         tagLabel = QLabel(self.tr("Tag"))
         valueLabel = QLabel(self.tr("Value"))
-        self.filterAreaLayout.addWidget(tagLabel, 1, 0)
-        self.filterAreaLayout.addWidget(valueLabel, 1, 1)
+        self.filterAreaLayout.addWidget(tagLabel, 0, 0)
+        self.filterAreaLayout.addWidget(valueLabel, 0, 1)
         self.addFilter()
 
         addFilterButton = QPushButton(self.tr("Add filter"))
@@ -261,6 +285,17 @@ class BiProcessDataFilterWidget(QWidget):
 
     def hideFilter(self):    
         self.filterWidget.setVisible(False)
+
+    def get_filters(self):
+        filters = []
+        for row in range(self.filterAreaLayout.rowCount()):
+            if row > 0:
+                f = dict()
+                f["name"] = self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText()
+                f["value"] = self.filterAreaLayout.itemAtPosition(row, 1).widget().text()
+                if f['name'] != "No filter" and f["value"] != '':
+                    filters.append(f)
+        return filters    
 
 
 class BiProcessRunWidget(QWidget):
@@ -342,11 +377,11 @@ class BiProcessStandardOutputViewer(QWidget):
 
 
 class BiProcessDataSelectorWidget(QWidget):
-    def __init__(self, info: BiProcessInfo, parent: QWidget = None):
+    def __init__(self, info: BiProcessInfo, datalist: list, parent: QWidget = None):
         super().__init__(parent)
         self.info = info
 
-        layout = QGridLayout()
+        self.layout = QGridLayout()
         row = -1
         for inp in self.info.inputs:
             if inp.io == processpy.IO_INPUT():
@@ -354,14 +389,25 @@ class BiProcessDataSelectorWidget(QWidget):
                 nameLabel = QLabel(inp.description)
                 nameLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
                 dataComboBox = QComboBox()
-                dataComboBox.addItem('Data')
+                for data in datalist:
+                    dataComboBox.addItem(data)
                 filterWidget = BiProcessDataFilterWidget(inp.description)
                 filterWidget.setObjectName("btnDefault")
-                layout.addWidget(nameLabel, row, 0)
-                layout.addWidget(dataComboBox, row, 1)
-                layout.addWidget(filterWidget, row, 2)
+                self.layout.addWidget(nameLabel, row, 0)
+                self.layout.addWidget(dataComboBox, row, 1)
+                self.layout.addWidget(filterWidget, row, 2)
 
-        self.setLayout(layout)    
+        self.setLayout(self.layout)     
+
+    def selectedData(self) -> list:
+        selectedData = []
+        for row in range(self.layout.rowCount()):
+            d = dict()
+            d['name'] =  self.layout.itemAtPosition(row, 1).widget().currentText()
+            filterWidget = self.layout.itemAtPosition(row, 2).widget()
+            d['filters'] = filterWidget.get_filters()
+            selectedData.append(d)
+        return selectedData    
 
             
 class BiProcessParameterSelectorWidget(QWidget):
@@ -438,6 +484,16 @@ class BiProcessParameterSelectorWidget(QWidget):
                 widget.setVisible(False) 
 
         # TODO: add here code to show/hide conditionnal advanced
+
+    def parameters(self) -> list:
+        parameters = []
+        for key in self.labels:
+            p = dict()
+            p['name'] = key
+            p['value'] = self.widgets[key].value()
+            parameters.append(p)
+        return parameters    
+
 
 
 class BiProcessMultiEditorComponent(BiComponent):
