@@ -36,6 +36,8 @@ class BiExperimentContainer(BiContainer):
     DataAttributEdited = "BiExperimentContainer::DataAttributEdited"
     ThumbnailChanged = "BiExperimentContainer::ThumbnailChanged"
     DataSetComboChanged = "BiExperimentContainer::DataSetComboChanged"
+    NewProcessedDataSet = "BiExperimentContainer::NewProcessedDataSet"
+    NewProcessedDataSetLoaded = "BiExperimentContainer::NewProcessedDataSetLoaded"
 
     def __init__(self):
         super(BiExperimentContainer, self).__init__()
@@ -109,6 +111,11 @@ class BiExperimentModel(BiModel):
             self.container.experiment = BiExperiment(self.container.projectFile)
             self.container.notify(BiExperimentContainer.Loaded)
             return
+
+        if container.action == BiExperimentContainer.NewProcessedDataSet:
+            self.container.experiment.read()
+            self.container.notify(BiExperimentContainer.NewProcessedDataSetLoaded)
+            return    
 
         if container.action == BiExperimentContainer.InfoModified or container.action == BiExperimentContainer.TagsModified:
             self.container.experiment.write()
@@ -1305,7 +1312,7 @@ class BiExperimentToolBarComponent(BiComponent):
         layout.addWidget(QWidget(), 1)
 
     def update(self, container: BiContainer):
-        if container.action == BiExperimentContainer.Loaded:
+        if container.action == BiExperimentContainer.Loaded or container.action == BiExperimentContainer.NewProcessedDataSetLoaded:
             for i in range(self.container.experiment.processeddatasets_size()):
                 processedDataSet = self.container.experiment.processeddataset(i)
                 # add the dataset to the list only if it is not already in

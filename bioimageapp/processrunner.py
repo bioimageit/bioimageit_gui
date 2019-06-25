@@ -102,9 +102,10 @@ class BiProcessEditorModel(BiModel):
         self.progress(progress['progress'], progress['message'])
 
     def progress(self, pourcentage: int, message: str):
-        print('notify progress exec container:', pourcentage, ", ", message)
         self.container.setProgress(pourcentage, message)
         self.container.notify(BiProcessEditorContainer.ProgressChanged)
+        if pourcentage == 100 :
+            self.experimentContainer.notify(BiExperimentContainer.NewProcessedDataSet)    
 
 class BiProcessRunObserver(QObject):
     progressSignal = Signal(dict)
@@ -160,7 +161,7 @@ class BiProcessRunThread(QThread):
 
             _query = ''
             for _filter in data['filters']:
-                _query += _filter['name'] + "=" + _filter['value']
+                _query += _filter['name'] + _filter['operator'] + _filter['value']
             
             runner.add_input(_id, _dataset_name, _query, _data_name)
 
@@ -240,7 +241,7 @@ class BiProcessEditorComponent(BiComponent):
             parser = processpy.BiProcessParser(processeddataset.process_url())
             process_info = parser.parse()
             for output in process_info.outputs:
-                data_list.append(processeddataset.name + ':' + output.description)
+                data_list.append(processeddataset.name() + ':' + output.description)
 
         return data_list       
                 
@@ -317,6 +318,7 @@ class BiProcessDataFilterWidget(QWidget):
         self.inputId = inputId
         self.tags = tags
         self.filtersTags = []
+        self.filtersOperations = []
         self.filtersValues = []
 
         filterButton.released.connect(self.showFilter)
@@ -334,9 +336,11 @@ class BiProcessDataFilterWidget(QWidget):
         filterAreaWidget.setLayout(self.filterAreaLayout)
 
         tagLabel = QLabel(self.tr("Tag"))
+        operatorLabel = QLabel(self.tr("Operator"))
         valueLabel = QLabel(self.tr("Value"))
         self.filterAreaLayout.addWidget(tagLabel, 0, 0)
-        self.filterAreaLayout.addWidget(valueLabel, 0, 1)
+        self.filterAreaLayout.addWidget(operatorLabel, 0, 1)
+        self.filterAreaLayout.addWidget(valueLabel, 0, 2)
         self.addFilter()
 
         addFilterButton = QPushButton(self.tr("Add filter"))
@@ -359,13 +363,22 @@ class BiProcessDataFilterWidget(QWidget):
         for t in self.tags:
             comboBox.addItem(t)
         valueEdit = QLineEdit(self)
+
+        operationComboBox = QComboBox(self)
+        operationComboBox.addItem('=')
+        operationComboBox.addItem('<')
+        operationComboBox.addItem('>')
+        operationComboBox.addItem('<=')
+        operationComboBox.addItem('>=')
         
         self.filtersTags.append(comboBox)
+        self.filtersOperations.append(operationComboBox)
         self.filtersValues.append(valueEdit)
 
         row = self.filterAreaLayout.rowCount()
         self.filterAreaLayout.addWidget(comboBox, row, 0)
-        self.filterAreaLayout.addWidget(valueEdit, row, 1)
+        self.filterAreaLayout.addWidget(operationComboBox, row, 1)
+        self.filterAreaLayout.addWidget(valueEdit, row, 2)
 
     def showFilter(self):
         self.filterWidget.setVisible(True)
@@ -375,7 +388,7 @@ class BiProcessDataFilterWidget(QWidget):
         on = False
         for row in range(self.filterAreaLayout.rowCount()):
             if row > 0:
-                if self.filterAreaLayout.itemAtPosition(row, 1).widget().text() != '' and self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText() != "No filter":
+                if self.filterAreaLayout.itemAtPosition(row, 2).widget().text() != '' and self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText() != "No filter":
                     on = True
         if on:
             self.statusLabel.setText("ON")
@@ -391,7 +404,8 @@ class BiProcessDataFilterWidget(QWidget):
             if row > 0:
                 f = dict()
                 f["name"] = self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText()
-                f["value"] = self.filterAreaLayout.itemAtPosition(row, 1).widget().text()
+                f["operator"] = self.filterAreaLayout.itemAtPosition(row, 1).widget().currentText()
+                f["value"] = self.filterAreaLayout.itemAtPosition(row, 2).widget().text()
                 if f['name'] != "No filter" and f["value"] != '':
                     filters.append(f)
         return filters    
