@@ -1,8 +1,10 @@
 from bioimagepy.process import BiProcess, BiProcessInfo
 import bioimagepy.process as processpy
+import bioimagepy.runner as runnerpy
+from bioimagepy.core import BiProgressObserver
 
 import PySide2.QtCore
-from PySide2.QtCore import Signal
+from PySide2.QtCore import Signal, QThread, QObject
 from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter, 
                                QScrollArea, QLabel, QGridLayout, QComboBox,
                                QPushButton, QLineEdit, QCheckBox, QFileDialog,
@@ -57,7 +59,12 @@ class BiProcessEditorContainer(BiContainer):
         self.parametersList = parameters  
 
     def setSelectedData(self, data: list):
-        self.selectedDataList = data          
+        self.selectedDataList = data   
+
+    def setProgress(self, progress: int, message: str):
+        self.progress = progress
+        self.progressMessage = message
+
 
 class BiProcessMultiEditorModel(BiModel):
     def __init__(self, container: BiProcessMultiEditorContainer):
@@ -77,18 +84,94 @@ class BiProcessEditorModel(BiModel):
         self.container.addObserver(self)  
         self.experimentContainer = experimentContainer
         self.experimentContainer.addObserver(self)
+        self.runThread = BiProcessRunThread()
+        self.runThread.progressSignal.connect(self.notifyProgress)
 
     def update(self, container: BiContainer):
         if container.action == BiProcessEditorContainer.RunProcess:
             self.runProcess()
 
     def runProcess(self):
-        print("Run process not yet implemented")
+        self.runThread.experiment = self.experimentContainer.experiment
+        self.runThread.processInfo = self.container.processInfo
+        self.runThread.parametersList = self.container.parametersList
+        self.runThread.selectedDataList = self.container.selectedDataList
+        self.runThread.start()
+
+    def notifyProgress(self, progress: dict):
+        self.progress(progress['progress'], progress['message'])
 
     def progress(self, pourcentage: int, message: str):
-        self.processExecContainer.setProgress(pourcentage, message)
-        self.processExecContainer.notify(BiProcessEditorContainer.ProgressChanged)
+        print('notify progress exec container:', pourcentage, ", ", message)
+        self.container.setProgress(pourcentage, message)
+        self.container.notify(BiProcessEditorContainer.ProgressChanged)
 
+class BiProcessRunObserver(QObject):
+    progressSignal = Signal(dict)
+
+    def __init__(self):
+        super().__init__()
+        self._objectname = "BiProcessRunObserver"  
+
+    def notify(self, data: dict):
+        self.progressSignal.emit(data)
+
+class BiProcessRunThread(QThread):
+    progressSignal = Signal(dict)
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.experiment = None
+        self.processInfo = None
+        self.parametersList = []
+        self.selectedDataList = []
+
+        self.runObserver = BiProcessRunObserver()
+        self.runObserver.progressSignal.connect(self.emitProgress)
+
+    def emitProgress(self, progress: dict):
+        self.progressSignal.emit(progress)    
+
+    def run(self): 
+        # instanciate runner
+        runner = runnerpy.BiRunnerExperiment(self.experiment) 
+        runner.add_observer(self.runObserver)
+
+        # set process and parameters
+        params = []
+        for p in self.parametersList:
+            params.append(p["name"])
+            params.append(p["value"])
+        runner.set_process(self.processInfo.xml_file_url, *params) 
+
+        # set inputs
+        for data in self.selectedDataList:
+            _id = data['id']
+            
+            _dataset_name = ''
+            _data_name = ''
+
+            _names = data['name'].split(':')
+            if len(_names) == 2:
+                _dataset_name = _names[0]  
+                _data_name = _names[1] 
+            else:
+                _dataset_name = data['name']    
+
+            _query = ''
+            for _filter in data['filters']:
+                _query += _filter['name'] + "=" + _filter['value']
+            
+            runner.add_input(_id, _dataset_name, _query, _data_name)
+
+        #run
+        runner.run()  
+
+        # final progress
+        progress = dict()
+        progress["progress"] = 100
+        progress["message"] = 'done'
+        self.progressSignal.emit(progress) 
 
 class BiProcessMultiEditorToolBarComponent(BiComponent):
     def __init__(self, container: BiProcessMultiEditorContainer):
@@ -143,8 +226,8 @@ class BiProcessEditorComponent(BiComponent):
             self.buildExecWidget()
 
         if container.action == BiProcessEditorContainer.ProgressChanged:
-            self.runWidget.setProgress(self.editorContainer.progress())
-            self.runWidget.setProgressMessage(self.editorContainer.progressMessage())
+            self.runWidget.setProgress(self.editorContainer.progress)
+            self.runWidget.setProgressMessage(self.editorContainer.progressMessage)
             if self.editorContainer.progress == 100:
                 self.runWidget.setRunFinished()
 
@@ -170,7 +253,7 @@ class BiProcessEditorComponent(BiComponent):
         inputLabel = QLabel(self.widget.tr("Inputs"))
         inputLabel.setObjectName("BiLabelFormHeader1Negative")
 
-        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo, self.get_experiment_data_list())
+        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo, self.get_experiment_data_list(), self.experimentContainer.experiment.tags())
 
         self.execLayout.addWidget(inputLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.dataSelectorWidget, 0, PySide2.QtCore.Qt.AlignTop)
@@ -218,7 +301,7 @@ class BiProcessEditorComponent(BiComponent):
         return self.widget      
 
 class BiProcessDataFilterWidget(QWidget):
-    def __init__(self, inputName: str, parent: QWidget = None):
+    def __init__(self, inputId: str, inputName: str, tags: list, parent: QWidget = None):
         super().__init__(parent)
 
         layout = QHBoxLayout()
@@ -226,11 +309,13 @@ class BiProcessDataFilterWidget(QWidget):
         layout.setSpacing(0)
         filterButton = QPushButton(self.tr("Filter"))
         filterButton.setObjectName('btnDefaultLeft')
-        statusLabel = QLabel('OFF')
-        statusLabel.setObjectName('BiProcessDataFilterWidgetStatus')
+        self.statusLabel = QLabel('OFF')
+        self.statusLabel.setObjectName('BiProcessDataFilterWidgetStatus')
         layout.addWidget(filterButton)
-        layout.addWidget(statusLabel)
+        layout.addWidget(self.statusLabel)
         self.setLayout(layout)
+        self.inputId = inputId
+        self.tags = tags
         self.filtersTags = []
         self.filtersValues = []
 
@@ -271,6 +356,8 @@ class BiProcessDataFilterWidget(QWidget):
 
         comboBox = QComboBox(self)
         comboBox.addItem('No filter')
+        for t in self.tags:
+            comboBox.addItem(t)
         valueEdit = QLineEdit(self)
         
         self.filtersTags.append(comboBox)
@@ -283,8 +370,20 @@ class BiProcessDataFilterWidget(QWidget):
     def showFilter(self):
         self.filterWidget.setVisible(True)
 
-    def hideFilter(self):    
+    def hideFilter(self):  
         self.filterWidget.setVisible(False)
+        on = False
+        for row in range(self.filterAreaLayout.rowCount()):
+            if row > 0:
+                if self.filterAreaLayout.itemAtPosition(row, 1).widget().text() != '' and self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText() != "No filter":
+                    on = True
+        if on:
+            self.statusLabel.setText("ON")
+        else:
+            self.statusLabel.setText("OFF")    
+
+    def get_input_id(self) -> str:
+        return self.inputId
 
     def get_filters(self):
         filters = []
@@ -327,6 +426,7 @@ class BiProcessRunWidget(QWidget):
         layout.addWidget(self.progressBar)
 
         self.setLayout(layout)
+        self.setMaximumWidth(350)
 
         self.progressBar.setRange(0, 0)
         self.progressBar.setVisible(False)
@@ -377,7 +477,7 @@ class BiProcessStandardOutputViewer(QWidget):
 
 
 class BiProcessDataSelectorWidget(QWidget):
-    def __init__(self, info: BiProcessInfo, datalist: list, parent: QWidget = None):
+    def __init__(self, info: BiProcessInfo, datalist: list, tags: list, parent: QWidget = None):
         super().__init__(parent)
         self.info = info
 
@@ -391,7 +491,7 @@ class BiProcessDataSelectorWidget(QWidget):
                 dataComboBox = QComboBox()
                 for data in datalist:
                     dataComboBox.addItem(data)
-                filterWidget = BiProcessDataFilterWidget(inp.description)
+                filterWidget = BiProcessDataFilterWidget(inp.name, inp.description, tags)
                 filterWidget.setObjectName("btnDefault")
                 self.layout.addWidget(nameLabel, row, 0)
                 self.layout.addWidget(dataComboBox, row, 1)
@@ -405,6 +505,7 @@ class BiProcessDataSelectorWidget(QWidget):
             d = dict()
             d['name'] =  self.layout.itemAtPosition(row, 1).widget().currentText()
             filterWidget = self.layout.itemAtPosition(row, 2).widget()
+            d['id'] =  filterWidget.get_input_id()
             d['filters'] = filterWidget.get_filters()
             selectedData.append(d)
         return selectedData    
