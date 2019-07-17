@@ -38,6 +38,7 @@ class BiExperimentContainer(BiContainer):
     DataSetComboChanged = "BiExperimentContainer::DataSetComboChanged"
     NewProcessedDataSet = "BiExperimentContainer::NewProcessedDataSet"
     NewProcessedDataSetLoaded = "BiExperimentContainer::NewProcessedDataSetLoaded"
+    DataThumbnailChanged = "BiExperimentContainer::DataThumbnailChanged"
 
     def __init__(self):
         super(BiExperimentContainer, self).__init__()
@@ -45,12 +46,13 @@ class BiExperimentContainer(BiContainer):
         self.projectFile = ''
         self.experiment = None
         self.lastEditedDataIdx = 0
-        self.changed_thumbnail_id = -1
         self.changed_thumbnail_row = -1
         self.changed_thumbnail_column = -1
         self.changed_thumbnail_data = None
         self.changed_thumbnail_url = ''
         self.changed_combo_txt = ''
+        self.changed_data_thumbnail_id = -1
+        self.changed_data_thumbnail_url = "" 
 
     def projectRootDir(self):
         return os.path.dirname(self.projectFile)
@@ -104,6 +106,8 @@ class BiExperimentModel(BiModel):
         self._object_name = 'BiExperimentModel'
         self.container = container
         self.container.addObserver(self)  
+        self.thumbnailCreator = BiThumbnailMaker()
+        self.thumbnailCreator.experimentContainer = self.container
 
     def update(self, container: BiContainer):
         if container.action == BiExperimentContainer.OriginModified:
@@ -133,6 +137,9 @@ class BiExperimentModel(BiModel):
             rawData.write()
             return
 
+        if container.action == BiExperimentContainer.RefreshClicked:
+            self.thumbnailCreator.start()              
+
 class BiThumbnailMaker(QThread):
     thumbnailChanged = Signal(int, str)
 
@@ -142,9 +149,9 @@ class BiThumbnailMaker(QThread):
         self.thumbnailChanged.connect(self.notifyThumbnailChanged)
 
     def notifyThumbnailChanged(self, i: int, thumbnail_url: str):
-        self.experimentContainer.changed_thumbnail_id = i
-        self.experimentContainer.changed_thumbnail_url = thumbnail_url
-        self.experimentContainer.notify(BiExperimentContainer.ThumbnailChanged) 
+        self.experimentContainer.changed_data_thumbnail_id = i
+        self.experimentContainer.changed_data_thumbnail_url = thumbnail_url
+        self.experimentContainer.notify(BiExperimentContainer.DataThumbnailChanged) 
 
     def run(self):
         for i in range(self.experimentContainer.experiment.rawdataset().size()):
@@ -561,66 +568,70 @@ class BiExperimentDataComponent(BiComponent):
     def update(self, container: BiContainer):
         if (container.action == BiExperimentContainer.Loaded or 
             container.action == BiExperimentContainer.TagsModified or 
-            container.action == BiExperimentContainer.RawDataLoaded or
-            container.action == BiExperimentContainer.RefreshClicked):
+            container.action == BiExperimentContainer.RawDataLoaded
+            ):
+            self.update_table()
+            return
+ 
 
-            # headers
-            self.tableWidget.setColumnCount(4 + self.container.experiment.tags_size())
-            labels = ["", "Name"]
-            for tag in self.container.experiment.tags():
-                labels.append(tag)
-            labels.append("Author")
-            labels.append("Date")
-            self.tableWidget.setHorizontalHeaderLabels(labels)
+        if container.action == BiExperimentContainer.DataThumbnailChanged:
+            i = self.container.changed_data_thumbnail_id
+            thumbnail = self.container.changed_data_thumbnail_url
+            info = self.container.experiment.rawdataset().raw_data(i)
+            self.set_thumbnail(i, info, thumbnail)
 
-            exp_size = self.container.experiment.rawdataset().size()
-            if exp_size < 10:
-                self.tableWidget.verticalHeader().setFixedWidth(20)
-            elif exp_size >= 10 and exp_size < 100  :
-                self.tableWidget.verticalHeader().setFixedWidth(40)  
-            elif exp_size >= 100 and exp_size < 1000  :    
-                self.tableWidget.verticalHeader().setFixedWidth(60)  
+    def update_table(self):
+        # headers
+        self.tableWidget.setColumnCount(4 + self.container.experiment.tags_size())
+        labels = ["", "Name"]
+        for tag in self.container.experiment.tags():
+            labels.append(tag)
+        labels.append("Author")
+        labels.append("Date")
+        self.tableWidget.setHorizontalHeaderLabels(labels)
 
-            # data
-            self.tableWidget.cellChanged.disconnect(self.cellChanged)
-            self.tableWidget.setRowCount(0)
-            self.tableWidget.setRowCount(self.container.experiment.rawdataset().size())
+        exp_size = self.container.experiment.rawdataset().size()
+        if exp_size < 10:
+            self.tableWidget.verticalHeader().setFixedWidth(20)
+        elif exp_size >= 10 and exp_size < 100  :
+            self.tableWidget.verticalHeader().setFixedWidth(40)  
+        elif exp_size >= 100 and exp_size < 1000  :    
+            self.tableWidget.verticalHeader().setFixedWidth(60)  
 
-            self.tableWidget.setColumnWidth(0, 64)
-            for i in range(self.container.experiment.rawdataset().size()):
+        # data
+        self.tableWidget.cellChanged.disconnect(self.cellChanged)
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setRowCount(self.container.experiment.rawdataset().size())
+
+        self.tableWidget.setColumnWidth(0, 64)
+        for i in range(self.container.experiment.rawdataset().size()):
                
-                info = self.container.experiment.rawdataset().raw_data(i)
+            info = self.container.experiment.rawdataset().raw_data(i)
 
-                # thumbnail
-                self.set_thumbnail(i, info, info.thumbnail())
+            # thumbnail
+            self.set_thumbnail(i, info, info.thumbnail())
 
-                # name
-                self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
+            # name
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
 
-                # tags
-                for t in range(self.container.experiment.tags_size()):
-                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+            # tags
+            for t in range(self.container.experiment.tags_size()):
+                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
 
-                for t in range(self.container.experiment.tags_size()):
-                    self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+            for t in range(self.container.experiment.tags_size()):
+                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
 
-                # author
-                itemAuthor = QTableWidgetItem(info.author())
-                itemAuthor.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
-                self.tableWidget.setItem(i, 2 + self.container.experiment.tags_size(), itemAuthor)
+            # author
+            itemAuthor = QTableWidgetItem(info.author())
+            itemAuthor.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 2 + self.container.experiment.tags_size(), itemAuthor)
 
-                # created date
-                itemCreatedDate = QTableWidgetItem(info.createddate())
-                itemCreatedDate.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
-                self.tableWidget.setItem(i, 3 + self.container.experiment.tags_size(), itemCreatedDate)
+            # created date
+            itemCreatedDate = QTableWidgetItem(info.createddate())
+            itemCreatedDate.setFlags(PySide2.QtCore.Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 3 + self.container.experiment.tags_size(), itemCreatedDate)
             
-            self.tableWidget.cellChanged.connect(self.cellChanged)
-
-        if container.action == BiExperimentContainer.ThumbnailChanged:
-            idx = self.container.changed_thumbnail_id  
-            thumbnail_url = self.container.changed_thumbnail_url
-            info = self.container.experiment.rawdataset().data(idx)
-            self.set_thumbnail(idx, info, thumbnail_url)
+        self.tableWidget.cellChanged.connect(self.cellChanged)
 
     def set_thumbnail(self, i, info, thumbnail):
         # thumbnail

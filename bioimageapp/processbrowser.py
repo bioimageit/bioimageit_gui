@@ -22,6 +22,7 @@ class BiProcessesBrowserContainer(BiContainer):
     def __init__(self):
         super().__init__()
         self._object_name = 'BiExperimentContainer'
+        self.categoriesFile = ''
         self.processesDir = ''
         self.processes = []
         self.categories = None
@@ -80,14 +81,17 @@ class BiProcessesBrowserModel(BiModel):
                 self.container.notify(BiProcessesBrowserContainer.ProcessesLoaded)
     
     def load(self) -> bool:
-        if not self.loadProcesses():
-            return False
-        if not self.loadCategories():
-            return False    
-        return True   
+        self.loadProcesses()
+        self.loadCategories()
+        return True
+        #if not self.loadProcesses():
+        #    return False
+        #if not self.loadCategories():
+        #    return False    
+        #return True   
 
     def loadCategories(self):
-        categories_file = os.path.join(self.container.processesDir, "categories.json")
+        categories_file = self.container.categoriesFile
         if os.path.getsize(categories_file) > 0:
             with open(categories_file) as json_file:  
                 self.container.categories = json.load(json_file) 
@@ -96,18 +100,25 @@ class BiProcessesBrowserModel(BiModel):
             return False             
 
     def loadProcesses(self) -> bool:
-        processesDirInfo = QFileInfo(self.container.processesDir)
+        self.loadProcessesDir(self.container.processesDir)
+
+    def loadProcessesDir(self, rootDir) -> bool:
+        processesDirInfo = QFileInfo(rootDir)
 
         if processesDirInfo.exists() and processesDirInfo.isDir():
-            dir = QDir(self.container.processesDir)
+            dir = QDir(rootDir)
             files = dir.entryList()
             for file in files:
-                if file.endswith(".xml"):
-                    parser = BiProcessParser(self.container.processesDir + QDir.separator() + file)
+                subfileinfo = QFileInfo(rootDir + QDir.separator() + file)
+                if subfileinfo.isDir() and file !="." and file !="..":
+                    self.loadProcessesDir(rootDir + QDir.separator() + file)
+                elif file.endswith(".xml"):
+                    print("load process xml :", rootDir + QDir.separator() + file)
+                    parser = BiProcessParser(rootDir + QDir.separator() + file)
                     self.container.processes.append(parser.parse())
             return True
         else:
-            print("WARNING: biProcessesModel::load: the processed dir ", self.container.processesDir, " does not exists")
+            print("WARNING: biProcessesModel::load: the processed dir ", rootDir, " does not exists")
             return False
         
 
@@ -187,9 +198,9 @@ class BiProcessesBrowserComponent(BiComponent):
         self.container.moveToHome()  
         self.container.notify(BiProcessesBrowserContainer.PathChanged)      
 
-    def browse(self, categories: dict, processesDir: str, parent: str):
+    def browse(self, categories: dict, categoriesFile: str, processesDir: str, parent: str):
         if self.hasChildCategory(parent):
-            self.browseCategories(categories, processesDir, parent)
+            self.browseCategories(categories, categoriesFile, parent)
             self.tableWidget.setVisible(False)
             self.scrollWidget.setVisible(True)
         else:
@@ -227,7 +238,7 @@ class BiProcessesBrowserComponent(BiComponent):
                 self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))
                 self.tableWidget.setItem(i, 3, QTableWidgetItem(description))     
 
-    def browseCategories(self, categories: dict, processesDir: str, parent: str):
+    def browseCategories(self, categories: dict, categoriesFile: str, parent: str):
 
         # free layout
         for i in reversed(range(self.layout.count())): 
@@ -236,7 +247,7 @@ class BiProcessesBrowserComponent(BiComponent):
         # browse
         for category in categories:
             if category["parent"] == parent:    
-                widget = BiProcessCategoryTile(category, processesDir, self.widget)
+                widget = BiProcessCategoryTile(category, categoriesFile, self.widget)
                 widget.clickedSignal.connect(self.clickedTile)
                 self.layout.addWidget(widget)
 
@@ -252,7 +263,7 @@ class BiProcessesBrowserComponent(BiComponent):
         if (container.action == BiProcessesBrowserContainer.ProcessesLoaded or
             container.action == BiProcessesBrowserContainer.PathChanged ):
             self.navBar.set_path(self.container.currentPathName)
-            self.browse(self.container.categories["categories"], self.container.processesDir, self.container.currentPath)
+            self.browse(self.container.categories["categories"], self.container.categoriesFile, self.container.processesDir, self.container.currentPath)
             return
 
     def get_widget(self):
@@ -262,7 +273,7 @@ class BiProcessesBrowserComponent(BiComponent):
 class BiProcessCategoryTile(QWidget):
     clickedSignal = Signal(dict)
 
-    def __init__(self, info: dict, processesDir: str, parent: QWidget = None):
+    def __init__(self, info: dict, categoriesFile: str, parent: QWidget = None):
         super().__init__(parent)
         self.info = info
 
@@ -283,7 +294,11 @@ class BiProcessCategoryTile(QWidget):
         layout.addWidget(titleLabel, 0, PySide2.QtCore.Qt.AlignTop)
 
         thumbnailLabel = QLabel()
-        img = QImage(os.path.join(processesDir, info["thumbnail"]))
+
+        
+        categories_dir_path = os.path.dirname(categoriesFile)
+
+        img = QImage(os.path.join(categories_dir_path, info["thumbnail"]))
         thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(200, 200, PySide2.QtCore.Qt.KeepAspectRatio)))
         layout.addWidget(thumbnailLabel, 0, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignHCenter)
 

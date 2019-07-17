@@ -179,7 +179,9 @@ class BiExperimentApp(BiComponent):
         self.docViewerContainer.notify(BiDocViewerContainer.PathChanged)
         self.docViewerContainer.addObserver(self)
 
-        processesDir = BiSettingsAccess().instance.value("Processes", "processesdir")
+        categoriesFile = BiSettingsAccess().instance.value("Processes", "Categories json") 
+        processesDir = BiSettingsAccess().instance.value("Processes", "Processes directory")
+        self.processesContainer.categoriesFile = categoriesFile
         self.processesContainer.processesDir = processesDir
         self.processesContainer.notify(BiProcessesBrowserContainer.ProcessesDirChanged)
 

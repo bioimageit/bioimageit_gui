@@ -551,7 +551,7 @@ class BiProcessParameterSelectorWidget(QWidget):
                 self.labels[parameter.name] = titleLabel
                 self.layout.addWidget(titleLabel, row, 0)
 
-                if parameter.type == "integer" or parameter.type == processpy.PARAM_NUMBER():
+                if parameter.type == "integer" or parameter.type == processpy.PARAM_NUMBER() or parameter.type == processpy.PARAM_STRING():
                     valueEdit = BiProcessInputValue(self) 
                     valueEdit.setKey(parameter.name)
                     valueEdit.setValue(parameter.value)
@@ -637,7 +637,7 @@ class BiProcessMultiEditorComponent(BiComponent):
 
     def openProcess(self):
         processInfo = self.container.lastAddedProcess()
-
+        
         processEditorContainer = BiProcessEditorContainer()
         processEditorContainer.setProcessInfo(processInfo)
 
