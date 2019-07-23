@@ -668,7 +668,7 @@ class BiProcessMultiEditorComponent(BiComponent):
 
         processEditorContainer.emit(BiProcessEditorStates.ProcessInfoLoaded)
         self.tabWidget.addTab(processExecComponent.get_widget(), processInfo.name)
-
+ 
     def get_widget(self):
         return self.widget      
 
