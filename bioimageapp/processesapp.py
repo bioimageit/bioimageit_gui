@@ -5,8 +5,9 @@ from PySide2.QtWidgets import QApplication
 # add bioimagepy to path for dev
 sys.path.append("/Users/sprigent/Documents/code/bioimagepy")
 
-from framework import BiComponent, BiContainer
-from processbrowser import (BiProcessesBrowserComponent, BiProcessesBrowserContainer, BiProcessesBrowserModel)
+from framework import BiStates, BiAction, BiComponent, BiContainer
+from processbrowser import (BiProcessesBrowserStates, BiProcessesBrowserComponent, 
+                            BiProcessesBrowserContainer, BiProcessesBrowserModel)
 
 
 
@@ -21,10 +22,10 @@ class BiProcessesBrowserApp(BiComponent):
 
         # initialization
         self.processesBrowserContainer.processesDir = processesDir
-        self.processesBrowserContainer.notify(BiProcessesBrowserContainer.ProcessesDirChanged)
+        self.processesBrowserContainer.emit(BiProcessesBrowserStates.ProcessesDirChanged)
 
 
-    def update(self, container: BiContainer):
+    def update(self, action: BiAction):
         pass
 
     def get_widget(self):

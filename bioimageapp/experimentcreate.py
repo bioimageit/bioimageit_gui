@@ -1,18 +1,26 @@
-from framework import BiContainer, BiModel, BiComponent
+from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
 import bioimagepy.experiment as experimentpy
 
 import PySide2.QtCore
 from PySide2.QtWidgets import QWidget, QLabel, QGridLayout, QLineEdit, QPushButton, QFileDialog
 
-class BiExperimentCreateContainer(BiContainer):
+class BiExperimentCreateStates(BiStates):
     CreateClicked = "BiExperimentCreateContainer::CreateClicked"
     CancelClicked = "BiExperimentCreateContainer::CancelClicked"
     ExperimentCreated = "BiExperimentCreateContainer::ExperimentCreated"
     ExperimentCreationError = "BiExperimentCreateContainer::ExperimentCreationError"
 
+class BiExperimentCreateContainer(BiContainer):
+
+
     def __init__(self):
         super(BiExperimentCreateContainer, self).__init__()
         self._object_name = 'BiExperimentCreateContainer'
+
+        # states
+        self.states = BiExperimentCreateStates()
+
+        # data
         self.experiment_destination_dir = ''
         self.experiment_name = ''
         self.experiment_author = ''
@@ -25,18 +33,18 @@ class BiExperimentCreateModel(BiModel):
         super(BiExperimentCreateModel, self).__init__()
         self._object_name = 'BiExperimentCreateModel'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
-    def update(self, container: BiContainer):
-        if container.action == BiExperimentCreateContainer.CreateClicked:
+    def update(self, action: BiAction):
+        if action.state == BiExperimentCreateStates.CreateClicked:
             try:
                 experimentpy.create(name=self.container.experiment_name, 
                                   author=self.container.experiment_author, 
                                   path=self.container.experiment_destination_dir) 
-                self.container.notify(BiExperimentCreateContainer.ExperimentCreated)                   
+                self.container.emit(BiExperimentCreateStates.ExperimentCreated)                   
             except FileNotFoundError as err:
                 self.container.errorMessage = err
-                self.container.notify(BiExperimentCreateContainer.ExperimentCreationError)
+                self.container.emit(BiExperimentCreateStates.ExperimentCreationError)
 
 
 class BiExperimentCreateComponent(BiComponent):
@@ -44,7 +52,7 @@ class BiExperimentCreateComponent(BiComponent):
         super(BiExperimentCreateComponent, self).__init__()
         self._object_name = 'BiExperimentCreateComponent'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
         self.widget = QWidget()
         layout = QGridLayout()
@@ -91,7 +99,7 @@ class BiExperimentCreateComponent(BiComponent):
         self.container.experiment_destination_dir = self.destinationEdit.text()
         self.container.experiment_name = self.nameEdit.text()
         self.container.experiment_author = self.authorEdit.text()
-        self.container.notify(BiExperimentCreateContainer.CreateClicked)
+        self.container.emit(BiExperimentCreateStates.CreateClicked)
 
     def reset(self):
         self.destinationEdit.setText('')
@@ -101,7 +109,7 @@ class BiExperimentCreateComponent(BiComponent):
     def setDestination(self, path: str):
         self.destinationEdit.setText(path)
 
-    def update(self, contaier: BiContainer):
+    def update(self, action: BiAction):
         pass
 
     def get_widget(self):

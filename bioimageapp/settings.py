@@ -4,7 +4,7 @@ import json
 import PySide2.QtCore
 from PySide2.QtWidgets import (QWidget, QPushButton, QGridLayout, QLabel, QComboBox, QSpinBox, QLineEdit) 
 
-from framework import BiContainer, BiComponent
+from framework import BiAction, BiContainer, BiComponent
 from widgets import BiFileSelectWidget
 
 class BiSettings():
@@ -117,12 +117,12 @@ class BiSettingsComponent(BiComponent):
                     layout.addWidget(comboBox, line, 1, 1, 2)
                     self.widgets[settingId] = comboBox
                 elif ttype == BiSettings.TypeFile:
-                    fileWidget = BiFileSelectWidget()
+                    fileWidget = BiFileSelectWidget(False, None)
                     fileWidget.setText(value)
                     layout.addWidget(fileWidget, line, 1, 1, 2)
                     self.widgets[settingId] = fileWidget
                 elif ttype == BiSettings.TypeDir:
-                    fileWidget = BiFileSelectWidget(True)
+                    fileWidget = BiFileSelectWidget(True, None)
                     fileWidget.setText(setting.value())
                     layout.addWidget(fileWidget, line, 1, 1, 2)
                     self.widgets[settingId] = fileWidget
@@ -161,7 +161,7 @@ class BiSettingsComponent(BiComponent):
                 if type(widget).__name__ == 'BiFileSelectWidget':
                     groups.set(group, settingKey, widget.text())
                 
-        BiSettingsAccess.instance.save()
+        BiSettingsAccess.instance.write()
 
-    def update(self, container: BiContainer):
+    def update(self, action: BiAction):
         pass

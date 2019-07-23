@@ -10,16 +10,24 @@ from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter,
                                QPushButton, QLineEdit, QCheckBox, QFileDialog,
                                QHBoxLayout, QProgressBar, QTextEdit)
 
-from framework import BiContainer, BiModel, BiComponent
-from experiment import BiExperimentContainer
+from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
+from experiment import BiExperimentStates, BiExperimentContainer
 from widgets import BiWebBrowser, BiHideableWidget
 
-class BiProcessMultiEditorContainer(BiContainer):
+class BiProcessMultiEditorStates(BiStates):
     ProcessAdded = "BiProcessMultiEditorContainer::ProcessAdded"
 
+
+class BiProcessMultiEditorContainer(BiContainer):
+    
     def __init__(self):
         super(BiProcessMultiEditorContainer, self).__init__()
         self._object_name = 'BiProcessMultiEditorContainer'
+
+        #states
+        self.states = BiProcessMultiEditorStates
+
+        # data
         self.processes = []
         self.curentProcess = -1
 
@@ -38,14 +46,23 @@ class BiProcessMultiEditorContainer(BiContainer):
     def lastAddedProcess(self) -> BiProcess:
         return self.processes[len(self.processes) - 1]
 
-class BiProcessEditorContainer(BiContainer):
+
+class BiProcessEditorStates(BiStates):
     ProcessInfoLoaded = "BiProcessEditorContainer::ProcessInfoLoaded"
     RunProcess = "BiProcessEditorContainer::RunProcess"
     ProgressChanged = "BiProcessEditorContainer::ProgressChanged"
 
+
+class BiProcessEditorContainer(BiContainer):
+
     def __init__(self):
         super(BiProcessEditorContainer, self).__init__()
         self._object_name = 'BiProcessEditorContainer'
+
+        # states
+        self.states = BiProcessEditorStates()
+
+        # data
         self.processInfo = None
         self.selectedDataList = None
         self.parametersList = []
@@ -71,9 +88,9 @@ class BiProcessMultiEditorModel(BiModel):
         super(BiProcessMultiEditorModel, self).__init__()
         self._object_name = 'BiProcessMultiEditorModel'
         self.container = container
-        self.container.addObserver(self)  
+        self.container.register(self)  
 
-    def update(self, container: BiContainer):
+    def update(self, action: BiAction):
         pass
 
 class BiProcessEditorModel(BiModel):
@@ -81,14 +98,14 @@ class BiProcessEditorModel(BiModel):
         super(BiProcessEditorModel, self).__init__()
         self._object_name = 'BiProcessEditorModel'
         self.container = container
-        self.container.addObserver(self)  
+        self.container.register(self)  
         self.experimentContainer = experimentContainer
-        self.experimentContainer.addObserver(self)
+        self.experimentContainer.register(self)
         self.runThread = BiProcessRunThread()
         self.runThread.progressSignal.connect(self.notifyProgress)
 
-    def update(self, container: BiContainer):
-        if container.action == BiProcessEditorContainer.RunProcess:
+    def update(self, action: BiAction):
+        if action.state == BiProcessEditorStates.RunProcess:
             self.runProcess()
 
     def runProcess(self):
@@ -103,9 +120,9 @@ class BiProcessEditorModel(BiModel):
 
     def progress(self, pourcentage: int, message: str):
         self.container.setProgress(pourcentage, message)
-        self.container.notify(BiProcessEditorContainer.ProgressChanged)
+        self.container.emit(BiProcessEditorStates.ProgressChanged)
         if pourcentage == 100 :
-            self.experimentContainer.notify(BiExperimentContainer.NewProcessedDataSet)    
+            self.experimentContainer.emit(BiExperimentStates.NewProcessedDataSet)    
 
 class BiProcessRunObserver(QObject):
     progressSignal = Signal(dict)
@@ -176,10 +193,14 @@ class BiProcessRunThread(QThread):
 
 class BiProcessMultiEditorToolBarComponent(BiComponent):
     def __init__(self, container: BiProcessMultiEditorContainer):
-        super(BiProcessMultiEditorToolBarComponent, self).__init__()
+        super().__init__()
+        self._object_name = "BiProcessMultiEditorToolBarComponent"
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
         self.widget = QWidget()
+
+    def update(self, action: BiAction):
+        pass
 
     def get_widget(self):
         return self.widget    
@@ -190,9 +211,9 @@ class BiProcessEditorComponent(BiComponent):
         super(BiProcessEditorComponent, self).__init__()
         self._object_name = 'BiProcessMultiEditorComponent'
         self.editorContainer = container
-        self.editorContainer.addObserver(self)
+        self.editorContainer.register(self)
         self.experimentContainer = experimentContainer
-        self.experimentContainer.addObserver(self)
+        self.experimentContainer.register(self)
 
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
@@ -221,12 +242,12 @@ class BiProcessEditorComponent(BiComponent):
         splitter.setStretchFactor(0,1)
         splitter.setStretchFactor(1,3)
 
-    def update(self, container: BiContainer):
-        if container.action == BiProcessEditorContainer.ProcessInfoLoaded:
+    def update(self, action: BiAction):
+        if action.state == BiProcessEditorStates.ProcessInfoLoaded:
             self.docWidget.setHomePage(self.editorContainer.processInfo.help, True)
             self.buildExecWidget()
 
-        if container.action == BiProcessEditorContainer.ProgressChanged:
+        if action.state == BiProcessEditorStates.ProgressChanged:
             self.runWidget.setProgress(self.editorContainer.progress)
             self.runWidget.setProgressMessage(self.editorContainer.progressMessage)
             if self.editorContainer.progress == 100:
@@ -296,7 +317,7 @@ class BiProcessEditorComponent(BiComponent):
         print('parameters:', parameters)
         self.editorContainer.setSelectedData(selectedDataList)
         self.editorContainer.setParameters(parameters)
-        self.editorContainer.notify(BiProcessEditorContainer.RunProcess)
+        self.editorContainer.emit(BiProcessEditorStates.RunProcess)
 
     def get_widget(self):
         return self.widget      
@@ -616,7 +637,7 @@ class BiProcessMultiEditorComponent(BiComponent):
         super(BiProcessMultiEditorComponent, self).__init__()
         self._object_name = 'BiProcessMultiEditorComponent'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
         self.experimentContainer = experimentContainer
 
@@ -631,8 +652,8 @@ class BiProcessMultiEditorComponent(BiComponent):
         self.tabWidget = QTabWidget()
         layout.addWidget(self.tabWidget)
 
-    def update(self, container: BiContainer):
-        if container.action == BiProcessMultiEditorContainer.ProcessAdded:
+    def update(self, action: BiAction):
+        if action.state == BiProcessMultiEditorStates.ProcessAdded:
             self.openProcess()
 
     def openProcess(self):
@@ -645,7 +666,7 @@ class BiProcessMultiEditorComponent(BiComponent):
 
         processEditorModel = BiProcessEditorModel(processEditorContainer, self.experimentContainer)
 
-        processEditorContainer.notify(BiProcessEditorContainer.ProcessInfoLoaded)
+        processEditorContainer.emit(BiProcessEditorStates.ProcessInfoLoaded)
         self.tabWidget.addTab(processExecComponent.get_widget(), processInfo.name)
 
     def get_widget(self):

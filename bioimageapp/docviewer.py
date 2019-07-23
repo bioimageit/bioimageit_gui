@@ -5,16 +5,23 @@ import PySide2.QtCore
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea, QToolButton, QPushButton 
 
-from framework import BiContainer, BiModel, BiComponent
+from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
 from widgets import BiToolButton
 
+class BiDocViewerStates(BiStates):
+    ContentLoaded = "BiDocViewerStates.ContentLoaded"
+    PathChanged = "BiDocViewerStates.PathChanged"
+
 class BiDocViewerContainer(BiContainer):
-    ContentLoaded = "BiDocViewerContainer::ContentLoaded"
-    PathChanged = "BiDocViewerContainer::PathChanged"
 
     def __init__(self):
         super(BiDocViewerContainer, self).__init__()
         self._object_name = 'BiDocViewerContainer'
+
+        # states
+        self.states = BiDocViewerStates()
+
+        # data
         self.content_path = ''
         self.content = ''
  
@@ -24,14 +31,14 @@ class BiDocViewerModel(BiModel):
         super(BiDocViewerModel, self).__init__()
         self._object_name = 'BiDocViewerModel'  
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
-    def update(self, container: BiContainer):
-        if container.action == BiDocViewerContainer.PathChanged:
+    def update(self, action: BiAction):
+        if action.state == BiDocViewerStates.PathChanged:
             if os.path.getsize(self.container.content_path) > 0:
                 with open(self.container.content_path) as json_file:  
                     self.container.content = json.load(json_file)  
-                    self.container.notify(BiDocViewerContainer.ContentLoaded) 
+                    self.container.emit(BiDocViewerStates.ContentLoaded) 
 
 
 class BiDocViewerComponent(BiComponent):
@@ -40,7 +47,7 @@ class BiDocViewerComponent(BiComponent):
         super(BiDocViewerComponent, self).__init__()
         self._object_name = 'BiDocEditorComponent'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
         self.widget = QScrollArea()
         
@@ -84,11 +91,11 @@ class BiDocViewerComponent(BiComponent):
         self.layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop )             
 
     def actionClicked(self, content: str):
-        print('cutton clicked with content:', content)
-        self.container.notify(content)
+        print('button clicked with content:', content)
+        self.container.emit(content)
 
-    def update(self, container: BiContainer):
-        if container.action == BiDocViewerContainer.ContentLoaded:
+    def update(self, action: BiAction):
+        if action.state == BiDocViewerStates.ContentLoaded:
             self.fillWidget()      
 
     def get_widget(self): 
@@ -112,7 +119,7 @@ if __name__ == '__main__':
     component = BiDocViewerComponent(container)
 
     container.content_path = json_doc_file
-    container.notify(BiDocViewerContainer.PathChanged)
+    container.emit(BiDocViewerStates.PathChanged)
 
     component.get_widget().show() 
     # Run the main Qt loop

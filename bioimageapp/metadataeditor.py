@@ -6,18 +6,25 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton,
                             QTextEdit, QGridLayout, QVBoxLayout,
                             QToolButton, QLineEdit, QMessageBox,
                             QHBoxLayout)
-from framework import BiObject, BiContainer, BiModel, BiComponent
+from framework import BiObject, BiStates, BiAction, BiContainer, BiModel, BiComponent
 
-
-class BiMetadataEditorContainer(BiContainer):
+class BiMetadataEditorStates(BiStates):
     FileModified = "BiMetadataEditorContainer::FileModified"
     JsonRead = "BiMetadataEditorContainer::JsonRead"
     JsonWrote = "BiMetadataEditorContainer::JsonWrote"
     JsonModified = "BiMetadataEditorContainer::JsonModified"
 
+
+class BiMetadataEditorContainer(BiContainer):
+
     def __init__(self):
         super(BiMetadataEditorContainer, self).__init__()
         self._object_name = 'BiMetadataEditorContainer'
+
+        # states
+        self.states = BiMetadataEditorStates()
+
+        # data
         self.file = ''
         self.content = ''
 
@@ -26,17 +33,17 @@ class BiMetadataEditorModel(BiModel):
         super(BiMetadataEditorModel, self).__init__()
         self._object_name = 'BiMetadataEditorModel'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
-    def update(self, container: BiContainer):
-        if container.action == BiMetadataEditorContainer.FileModified:
+    def update(self, action: BiAction):
+        if action.state == BiMetadataEditorStates.FileModified:
             self.read(self.container.file)
-            self.container.notify(BiMetadataEditorContainer.JsonRead)
+            self.container.emit(BiMetadataEditorStates.JsonRead)
             return
 
-        if container.action == BiMetadataEditorContainer.JsonModified:
+        if action.state == BiMetadataEditorStates.JsonModified:
             self.write(self.container.file, self.container.content)
-            self.container.notify(BiMetadataEditorContainer.JsonWrote)
+            self.container.emit(BiMetadataEditorStates.JsonWrote)
     
     def read(self, file : str):
         """Read the metadata from the a json file"""
@@ -111,7 +118,7 @@ class BiMetadataEditorComponent(BiComponent):
         super(BiMetadataEditorComponent, self).__init__()
         self._object_name = 'BiMetadataEditorComponent'
         self.container = container
-        self.container.addObserver(self)
+        self.container.register(self)
 
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
@@ -143,15 +150,15 @@ class BiMetadataEditorComponent(BiComponent):
         saveButton.released.connect(self.save)
         cancelButton.released.connect(self.cancel)
 
-    def update(self, container: BiContainer):
-        if container.action == BiMetadataEditorContainer.JsonRead:
+    def update(self, action: BiAction):
+        if action.state == BiMetadataEditorStates.JsonRead:
             print('fill editor with file=', self.container.file)
             self.fileNameLabel.setText(self.container.file)
             self.textEdit.setText(self.container.content)
 
     def save(self):
         self.container.content = self.textEdit.toPlainText()
-        self.container.notify(BiMetadataEditorContainer.JsonModified)
+        self.container.emit(BiMetadataEditorStates.JsonModified)
 
     def cancel(self):
         self.textEdit.setText(self.container.content)

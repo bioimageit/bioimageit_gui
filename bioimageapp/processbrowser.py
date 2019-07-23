@@ -8,20 +8,28 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem, QAbstractItemView,
                                QHBoxLayout, QToolButton)
 
-from framework import BiContainer, BiModel, BiComponent
+from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
 from widgets import BiButton, BiFlowLayout, BiNavigationBar
 from bioimagepy.process import BiProcessInfo, BiProcessParser
 
 
-class BiProcessesBrowserContainer(BiContainer):
+class BiProcessesBrowserStates(BiStates):
     ProcessesDirChanged = "BiProcessesContainer::ProcessedDirChanged"
     ProcessesLoaded = "BiProcessesContainer::ProcessesLoaded"
     PathChanged = "BiProcessesContainer::PathChanged"
     OpenProcess = "BiProcessesContainer::OpenProcess"
 
+
+class BiProcessesBrowserContainer(BiContainer):
+
     def __init__(self):
         super().__init__()
         self._object_name = 'BiExperimentContainer'
+
+        # states
+        self.states = BiProcessesBrowserStates()
+
+        # data
         self.categoriesFile = ''
         self.processesDir = ''
         self.processes = []
@@ -73,12 +81,12 @@ class BiProcessesBrowserModel(BiModel):
         super().__init__()
         self._object_name = 'BiProcessesBrowserContainer'
         self.container = container
-        self.container.addObserver(self)  
+        self.container.register(self)  
 
-    def update(self, container: BiContainer):
-        if container.action == BiProcessesBrowserContainer.ProcessesDirChanged:
+    def update(self, action: BiAction):
+        if action.state == BiProcessesBrowserStates.ProcessesDirChanged:
             if self.load():
-                self.container.notify(BiProcessesBrowserContainer.ProcessesLoaded)
+                self.container.emit(BiProcessesBrowserStates.ProcessesLoaded)
     
     def load(self) -> bool:
         self.loadProcesses()
@@ -127,11 +135,11 @@ class BiProcessesBrowserToolBarComponent(BiComponent):
         super().__init__()
         self._object_name = 'BiProcessesBrowserToolBarComponent'
         self.container = container
-        self.container.addObserver(self)  
+        self.container.register(self)  
 
         self.widget = QWidget()
 
-    def update(self, container: BiContainer):
+    def update(self, action: BiAction):
         pass
 
     def get_widget(self):
@@ -143,7 +151,7 @@ class BiProcessesBrowserComponent(BiComponent):
         super().__init__()
         self._object_name = 'BiProcessesComponent'
         self.container = container
-        self.container.addObserver(self)  
+        self.container.register(self)  
         self.historyPaths = []
         self.posHistory = 0
         self.currentPath = ''
@@ -188,15 +196,15 @@ class BiProcessesBrowserComponent(BiComponent):
 
     def moveToPrevious(self):
         self.container.moveToPrevious()
-        self.container.notify(BiProcessesBrowserContainer.PathChanged)
+        self.container.emit(BiProcessesBrowserStates.PathChanged)
 
     def moveToNext(self):
         self.container.moveToNext()
-        self.container.notify(BiProcessesBrowserContainer.PathChanged)
+        self.container.emit(BiProcessesBrowserStates.PathChanged)
 
     def moveToHome(self):
         self.container.moveToHome()  
-        self.container.notify(BiProcessesBrowserContainer.PathChanged)      
+        self.container.emit(BiProcessesBrowserStates.PathChanged)      
 
     def browse(self, categories: dict, categoriesFile: str, processesDir: str, parent: str):
         if self.hasChildCategory(parent):
@@ -253,15 +261,15 @@ class BiProcessesBrowserComponent(BiComponent):
 
     def clickedTile(self, info: dict):
         self.container.set_path(info["id"], info["name"])
-        self.container.notify(BiProcessesBrowserContainer.PathChanged)  
+        self.container.emit(BiProcessesBrowserStates.PathChanged)  
 
     def openClicked(self, id: str):
         self.container.clickedProcess = id
-        self.container.notify(BiProcessesBrowserContainer.OpenProcess)              
+        self.container.emit(BiProcessesBrowserStates.OpenProcess)              
 
-    def update(self, container: BiContainer):
-        if (container.action == BiProcessesBrowserContainer.ProcessesLoaded or
-            container.action == BiProcessesBrowserContainer.PathChanged ):
+    def update(self, action: BiAction):
+        if (action.state == BiProcessesBrowserStates.ProcessesLoaded or
+            action.state == BiProcessesBrowserStates.PathChanged ):
             self.navBar.set_path(self.container.currentPathName)
             self.browse(self.container.categories["categories"], self.container.categoriesFile, self.container.processesDir, self.container.currentPath)
             return

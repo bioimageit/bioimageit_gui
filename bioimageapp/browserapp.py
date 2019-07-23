@@ -2,10 +2,11 @@ import sys
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSplitter, QHBoxLayout
 from framework import (BiComponent, BiContainer)
-from browser import (BiBrowserContainer, BiBrowserModel, BiBrowserToolBarComponent, BiBrowserShortCutsComponent, BiBrowserTableComponent, BiBrowserPreviewComponent)
+from browser import (BiBrowserStates, BiBrowserContainer, BiBrowserModel, BiBrowserToolBarComponent, BiBrowserShortCutsComponent, BiBrowserTableComponent, BiBrowserPreviewComponent)
 from metadataeditor import BiMetadataEditorComponent, BiMetadataEditorContainer, BiMetadataEditorModel                   
 from settings import BiSettingsAccess
 from experimentcreate import BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
+
 
 class BiBrowserApp(BiComponent):
     def __init__(self):
@@ -32,15 +33,15 @@ class BiBrowserApp(BiComponent):
         self.experimentCreateComponent = BiExperimentCreateComponent(self.experimentCreateContainer)
         
         # connections
-        self.browserContainer.addObserver(self)
-        self.metadataEditorContainer.addObserver(self)
-        self.experimentCreateContainer.addObserver(self)
+        self.browserContainer.register(self)
+        self.metadataEditorContainer.register(self)
+        self.experimentCreateContainer.register(self)
 
         # load settings
         settingsAccess = BiSettingsAccess().instance
         homeDir = settingsAccess.value("Browser", "home")
         self.browserContainer.currentPath = homeDir
-        self.browserContainer.notify(BiBrowserContainer.DirectoryModified)
+        self.browserContainer.emit(BiBrowserStates.DirectoryModified)
 
         self.browserModel.loadBookmarks(settingsAccess.value("Browser", "bookmarks"))
         self.shortCutComponent.reloadBookmarks()
@@ -74,24 +75,24 @@ class BiBrowserApp(BiComponent):
         splitterRight.setObjectName('BiBrowserAppSplitterRight')
         splitterLeft.setObjectName('BiBrowserAppSplitterLeft')
         
-    def update(self, container: BiContainer):
-        if container.action == BiBrowserContainer.OpenJson:
+    def update(self, action: BiAction):
+        if action.state == BiBrowserStates.OpenJson:
             self.metadataEditorContainer.file = self.browserContainer.doubleClickedFile()
-            self.metadataEditorContainer.notify( BiMetadataEditorContainer.FileModified )
+            self.metadataEditorContainer.emit( BiMetadataEditorStates.FileModified )
             self.metadataEditorComponent.get_widget().show()
             return
 
-        if container.action == BiMetadataEditorContainer.JsonWrote:
-            self.browserContainer.notify(BiBrowserContainer.RefreshClicked)
+        if action.state == BiMetadataEditorStates.JsonWrote:
+            self.browserContainer.emit(BiBrowserStates.RefreshClicked)
             return
 
-        if container.action == BiBrowserContainer.NewExperimentClicked:
+        if action.state == BiBrowserStates.NewExperimentClicked:
             self.experimentCreateComponent.reset()
             self.experimentCreateComponent.setDestination(self.browserContainer.currentPath)
             self.experimentCreateComponent.get_widget().setVisible(True)
             return
 
-        if container.action == BiExperimentCreateContainer.ExperimentCreated:
+        if action.state == BiExperimentCreateStates.ExperimentCreated:
             self.experimentCreateComponent.get_widget().setVisible(False)
 
         
