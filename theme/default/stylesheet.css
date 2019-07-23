@@ -1028,6 +1028,10 @@ QToolButton#BiExperimentToolBarInfoButton{
   image: url(exclamation-sign.svg);
 }
 
+QToolButton#BiExperimentToolBarSettingsButton{
+  image: url(cog-wheel-silhouette.svg);
+}
+
 QToolButton#BiExperimentsToolBarBrowseButton{
   image: url(magnifying-glass.svg);
 }

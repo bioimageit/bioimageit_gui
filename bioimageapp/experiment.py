@@ -24,6 +24,7 @@ from bioimagepy.process import BiProcessParser, BiProcessInfo
 class BiExperimentStates(BiStates):
     OriginModified = "BiExperimentContainer.OriginModified"
     Loaded = "BiExperimentContainer.Loaded"
+    SettingsClicked = "BiExperimentContainer.SettingsClicked"
     InfoClicked = "BiExperimentContainer.InfoClicked"
     ImportClicked = "BiExperimentContainer.ImportClicked"
     TagsClicked = "BiExperimentContainer.TagsClicked"
@@ -1308,6 +1309,13 @@ class BiExperimentToolBarComponent(BiComponent):
         layout.setContentsMargins(7,0,7,0)
         self.widget.setLayout(layout)
 
+        # settings
+        settingsButton = QToolButton()
+        settingsButton.setObjectName("BiExperimentToolBarSettingsButton")
+        settingsButton.setToolTip(self.widget.tr("Application settings"))
+        settingsButton.released.connect(self.settingsButtonClicked)
+        layout.addWidget(settingsButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
         # info
         openInfoButton = QToolButton()
         openInfoButton.setObjectName("BiExperimentToolBarInfoButton")
@@ -1357,6 +1365,8 @@ class BiExperimentToolBarComponent(BiComponent):
                 if not found:
                     self.dataCombo.addItem(processedDataSet.name())
         
+    def settingsButtonClicked(self):
+        self.container.emit(BiExperimentStates.SettingsClicked)
 
     def infoButtonClicked(self):
         self.container.emit(BiExperimentStates.InfoClicked)

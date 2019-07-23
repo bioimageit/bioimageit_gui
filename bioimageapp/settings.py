@@ -2,7 +2,9 @@ import os
 import json
 
 import PySide2.QtCore
-from PySide2.QtWidgets import (QWidget, QPushButton, QGridLayout, QLabel, QComboBox, QSpinBox, QLineEdit) 
+from PySide2.QtWidgets import (QWidget, QPushButton, QGridLayout, 
+                               QLabel, QComboBox, QSpinBox, QLineEdit,
+                               QMessageBox) 
 
 from framework import BiAction, BiContainer, BiComponent
 from widgets import BiFileSelectWidget
@@ -44,8 +46,14 @@ class BiSettings():
             keys.append(key)
         return keys   
 
-    def set(self, group: str, key: str, value: str):
-        self.data[group][key] = value   
+    def set(self, group: str, key: str, value: str) -> bool:
+        found = False
+        for entry in self.data[group]:
+            if entry["key"] == key:
+                found = True
+                entry["value"] = value
+
+        return found  
 
     def value(self, group: str, key: str):
         data = self.data[group]
@@ -67,9 +75,9 @@ class BiSettingsComponent(BiComponent):
 
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
-        layout = QGridLayout
+        layout = QGridLayout()
         self.widget.setLayout(layout)
-        self.widgets = []
+        self.widgets = {}
 
         groups = BiSettingsAccess.instance
         titles = groups.groups()
@@ -123,7 +131,7 @@ class BiSettingsComponent(BiComponent):
                     self.widgets[settingId] = fileWidget
                 elif ttype == BiSettings.TypeDir:
                     fileWidget = BiFileSelectWidget(True, None)
-                    fileWidget.setText(setting.value())
+                    fileWidget.setText(value)
                     layout.addWidget(fileWidget, line, 1, 1, 2)
                     self.widgets[settingId] = fileWidget
                 else:
@@ -142,7 +150,7 @@ class BiSettingsComponent(BiComponent):
 
         groups = BiSettingsAccess.instance
         
-        for key, widget in self.widgets:
+        for key, widget in self.widgets.items():
 
             settingId = key.split("::")
             group = settingId[0]
@@ -162,6 +170,12 @@ class BiSettingsComponent(BiComponent):
                     groups.set(group, settingKey, widget.text())
                 
         BiSettingsAccess.instance.write()
+        msgBox = QMessageBox()
+        msgBox.setText(self.widget.tr("Settings has been saved"))
+        msgBox.exec()
 
     def update(self, action: BiAction):
         pass
+
+    def get_widget(self):  
+        return self.widget    

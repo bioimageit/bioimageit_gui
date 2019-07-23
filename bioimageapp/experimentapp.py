@@ -21,7 +21,7 @@ from processbrowser import (BiProcessesBrowserContainer, BiProcessesBrowserModel
 from processrunner import (BiProcessMultiEditorContainer, BiProcessMultiEditorModel, 
                             BiProcessMultiEditorComponent, BiProcessMultiEditorToolBarComponent,
                             BiProcessMultiEditorStates)
-from settings import BiSettingsAccess
+from settings import BiSettingsAccess, BiSettingsComponent
 from docviewer import BiDocViewerStates, BiDocViewerContainer, BiDocViewerModel, BiDocViewerComponent
 from framework import BiAction
 
@@ -158,7 +158,7 @@ class BiExperimentApp(BiComponent):
         self.experimentInfoEditorComponent = BiExperimentInfoEditorComponent(self.experimentContainer)
         self.experimentTagsComponent = BiExperimentTagsComponent(self.experimentContainer, self.experimentAddTagsContainer)
         self.experimentImportDataComponent = BiExperimentImportDataComponent(self.experimentContainer, self.experimentImportDataContainer)
-
+        self.settingsComponent = BiSettingsComponent()
         # toolbars
         self.experimentAppToolBarComponent = BiExperimentAppToolBarComponent(self.experimentAppContainer)
         self.experimentTitleToolBarComponent = BiExperimentTitleToolBarComponent(self.experimentContainer)
@@ -236,7 +236,8 @@ class BiExperimentApp(BiComponent):
         layout.addWidget(toolBar)
         layout.addWidget(centralArea)
         self.widget.setLayout(layout)
-        self.widget.setObjectName("BiWidget")    
+        self.widget.setObjectName("BiWidget")  
+        
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
@@ -322,7 +323,11 @@ class BiExperimentApp(BiComponent):
 
         if action.state == 'BiExperimentDoc::TagButtonClicked': 
             self.experimentTagsComponent.get_widget().show()
-            return       
+            return   
+
+        if action.state == BiExperimentStates.SettingsClicked:
+            self.settingsComponent.get_widget().setVisible(True)
+            return    
 
     def get_widget(self):
         return self.widget        
@@ -352,6 +357,7 @@ if __name__ == '__main__':
     component = BiExperimentApp(projectFileUrl)
     component.get_widget().show()
     # Run the main Qt loop
-    app.setStyleSheet("file:///" + "../bioimageapp/theme/default/stylesheet.css")
+    #app.setStyleSheet("file:///" + "../bioimageapp/theme/default/stylesheet.css")
+    app.setStyleSheet("file:///" + settings.value("General", "stylesheet"))
     app.setWindowIcon(QIcon("../bioimageapp/theme/default/icon.png"))
     sys.exit(app.exec_())

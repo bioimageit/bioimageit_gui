@@ -38,8 +38,8 @@ class BiToolButton(QToolButton):
 
 class BiFileSelectWidget(QWidget):
 
-    def __init__(self, isDir: str, parent: QWidget):
-        super(BiFileSelectWidget, self).__init__(isDir, parent)
+    def __init__(self, isDir: bool, parent: QWidget):
+        super().__init__(parent)
 
         self.isDir = isDir
 
@@ -71,7 +71,7 @@ class BiFileSelectWidget(QWidget):
         else:
             file = QFileDialog.getOpenFileName(self, "Open a file", '', "*.*")
             if file != "":
-                self.lineEdit.setText(file)
+                self.lineEdit.setText(file[0])
 
 class BiDragLabel(QLabel):
     def __init__(self, parent: QWidget):
