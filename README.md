@@ -59,6 +59,12 @@ Finally you shoud get the following directories architecture
   - bioimageapp
   - bioimagepy
   - toolshed
+  
+Run the application:
+
+```
+python3 bioimageapp/app.py
+```
 
 # Configuration 
 
