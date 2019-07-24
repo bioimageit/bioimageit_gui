@@ -55,7 +55,7 @@ class BiSettings():
 
         return found  
 
-    def value(self, group: str, key: str):
+    def value(self, group: str, key: str) -> str:
         data = self.data[group]
         for entry in data:
             if entry['key'] == key:

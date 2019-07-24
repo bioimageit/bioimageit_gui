@@ -10,17 +10,17 @@
         {
             "key": "home",
             "type": "file",
-            "value": "/Users/sprigent/Documents/code/bioimageit/data/explorer/project1"
+            "value": "../../../data"
         },
         {
             "key": "bookmarks",
             "type": "file",
-            "value": "/Users/sprigent/Documents/code/bioimageit/data/explorer/bookmarks.json"
+            "value": "../../../data/bookmarks.json"
         },
         {
             "key": "experiment editor",
             "type": "file",
-            "value": "python3 /Users/sprigent/Documents/code/bioimageapp/bioimageapp/experimentapp.py"
+            "value": "python3 bioimageapp/experimentapp.py"
         }
     ],
     "Experiment": [
@@ -32,19 +32,19 @@
         {
             "key": "thumbnail macro",
             "type": "file",
-            "value": "/Users/sprigent/Documents/code/bioimageit/data/make_thumbnail.ijm"
+            "value": "../../resources/make_thumbnail.ijm"
         }
     ],
     "Processes": [
         {
             "key": "Processes directory",
             "type": "dir",
-            "value": "/Users/sprigent/Documents/code/bioimageit/data/processes"
+            "value": "../../../toolshed"
         },
         {
             "key": "Categories json",
             "type": "dir",
-            "value": "/Users/sprigent/Documents/code/bioimageit/data/categories/categories.json"
+            "value": "../../../toolshed/categories.json"
         }
     ]
 }

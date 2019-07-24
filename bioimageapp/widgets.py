@@ -1,10 +1,10 @@
 import PySide2.QtCore
-from PySide2.QtCore import QMimeData, QSize, QRect, QPoint, QPropertyAnimation
+from PySide2.QtCore import QMimeData, QSize, QRect, QPoint, QPropertyAnimation, QEasingCurve
 from PySide2.QtGui import QMouseEvent, QDrag
 from PySide2.QtWebEngineWidgets import QWebEngineView
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton, 
                                QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout,
-                               QLayout, QLayoutItem, QSizePolicy, QStyle 
+                               QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget 
                                )
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
@@ -441,3 +441,161 @@ class BiHideableWidget(QWidget):
         else:
             self.layout.addWidget(widget)
         self.height = 500
+
+
+class BiSlidingStackedWidget(QStackedWidget):
+
+    LEFT2RIGHT = "LEFT2RIGHT"
+    RIGHT2LEFT = "RIGHT2LEFT"
+    TOP2BOTTOM = "TOP2BOTTOM"
+    BOTTOM2TOP = "BOTTOM2TOP"
+    AUTOMATIC = "AUTOMATIC"
+
+    def __init__(self, parent: QWidget):
+        super().__init__(parent)
+
+        if parent != None:
+            self.mainwindow=parent
+        else:
+            self.mainwindow=self
+            print("ATTENTION: untested mainwindow case !")
+
+        self.vertical=False
+        self.speed=500
+        self.animationtype = QEasingCurve.OutQuad
+        self.now=0
+        self.next=0
+        self.wrap=False
+        self.pnow=QPoint(0,0)
+        self.active=False
+
+    def setVerticalMode(self, vertical: bool ):
+        self.vertical=vertical
+
+    def setSpeed(self, speed: int):
+        self.speed = speed
+
+    def setAnimation(self, animationtype):
+        self.animationtype = animationtype
+
+    def setWrap(self, wrap: bool):
+            self.wrap = wrap
+
+    def slideInNext(self):
+        now = self.currentIndex()
+        if self.wrap or (now<self.count()-1):
+            self.slideInIdx(now+1)
+
+    def slideInPrev(self):
+        now = self.currentIndex()
+        if self.wrap or now > 0:
+            self.slideInIdx(now-1)
+
+    def slideInIdx(self, idx: int, direction: str):
+
+        if idx > count()-1:
+            if self.vertical:
+                direction = TOP2BOTTOM
+            else:
+                direction = RIGHT2LEFT
+            idx=(idx)%self.count()
+
+        elif idx<0:
+            if self.vertical:
+                direction = BOTTOM2TOP
+            else:
+                direction = LEFT2RIGHT       
+            idx=(idx+self.count())%self.count()
+        
+        self.slideInWgt(self.widget(idx), direction)
+
+
+    def slideInWgt(newwidget: QWidget, direction: str):
+
+        if self.active:
+                return
+        else:
+            self.active = True
+
+        directionhint = ""
+        now = self.currentIndex()
+        next=indexOf(newwidget)
+        if now == next:
+            self.active = False
+            return
+        elif now < next:
+            if self.vertical:
+                directionhint = TOP2BOTTOM
+            else:
+                directionhint = RIGHT2LEFT        
+        else:
+            if self.vertical:
+                directionhint = BOTTOM2TOP
+            else:
+                directionhint = LEFT2RIGHT   
+        
+        if direction.equals(AUTOMATIC):
+            direction = directionhint
+        
+
+        # calculate the shifts
+
+        offsetx = self.frameRect().width()
+        offsety = self.frameRect().height()
+
+        self.widget(next).setGeometry ( 0,  0, offsetx, offsety )
+
+        if direction.equals(BOTTOM2TOP):
+                offsetx = 0
+                offsety = -offsety
+        
+        elif direction.equals(TOP2BOTTOM):
+                offsetx = 0
+        
+        elif direction.equals(RIGHT2LEFT):
+                offsetx = -offsetx
+                offsety = 0
+        
+        elif direction.equals(LEFT2RIGHT):
+                offsety = 0
+        
+        pnext = self.widget(next).pos()
+        pnow = self.widget(now).pos()
+        self.pnow = pnow
+
+        self.widget(next).move(pnext.x()-offsetx,pnext.y()-offsety)
+        self.widget(next).show()
+        self.widget(next).raise()
+
+        animnow = QPropertyAnimation(self.widget(now), "pos")
+
+        animnow.setDuration(m_speed)
+        animnow.BackwardsetEasingCurve(m_animationtype)
+        animnow.setStartValue(QPoint(pnow.x(), pnow.y()))
+        animnow.setEndValue(QPoint(offsetx+pnow.x(), offsety+pnow.y()))
+        animnext = QPropertyAnimation(self.widget(next), "pos")
+        animnext.setDuration(self.speed)
+        animnext.setEasingCurve(m_animationtype)
+        animnext.setStartValue(QPoint(-offsetx+pnext.x(), offsety+pnext.y()))
+        animnext.setEndValue(QPoint(pnext.x(), pnext.y()))
+
+        animgroup = QParallelAnimationGroup()
+
+        animgroup.addAnimation(animnow)
+        animgroup.addAnimation(animnext)
+
+        animgroup.finished.connect(self.animationDoneSlot)
+
+        self.next = next
+        self.now = now
+        self.active = true
+        animgroup.start()
+
+
+    def animationDoneSlot():
+        self.setCurrentIndex(self.next);  
+        self.widget(self.now).hide()
+        self.widget(self.now).move(self.pnow)
+        self.active = False
+        self.animationFinished.emit()
+    
