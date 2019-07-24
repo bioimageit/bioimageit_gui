@@ -97,6 +97,7 @@ class BiSettingsComponent(BiComponent):
                 value = setting['value']
 
                 title = QLabel(key)
+                title.setObjectName("BiWidget")
                 layout.addWidget(title, line, 0)
 
                 settingId = titles[i] + "::" + key
