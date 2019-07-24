@@ -1,0 +1,50 @@
+{
+    "General": [
+        {
+            "key": "stylesheet",
+            "type": "file",
+            "value": "../../theme/dark/stylesheet.css"
+        }
+    ],
+    "Browser": [
+        {
+            "key": "home",
+            "type": "file",
+            "value": "/Users/sprigent/Documents/code/bioimageit/data/explorer/project1"
+        },
+        {
+            "key": "bookmarks",
+            "type": "file",
+            "value": "/Users/sprigent/Documents/code/bioimageit/data/explorer/bookmarks.json"
+        },
+        {
+            "key": "experiment editor",
+            "type": "file",
+            "value": "python3 /Users/sprigent/Documents/code/bioimageapp/bioimageapp/experimentapp.py"
+        }
+    ],
+    "Experiment": [
+        {
+            "key": "fiji",
+            "type": "file",
+            "value": "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx"
+        },
+        {
+            "key": "thumbnail macro",
+            "type": "file",
+            "value": "/Users/sprigent/Documents/code/bioimageit/data/make_thumbnail.ijm"
+        }
+    ],
+    "Processes": [
+        {
+            "key": "Processes directory",
+            "type": "dir",
+            "value": "/Users/sprigent/Documents/code/bioimageit/data/processes"
+        },
+        {
+            "key": "Categories json",
+            "type": "dir",
+            "value": "/Users/sprigent/Documents/code/bioimageit/data/categories/categories.json"
+        }
+    ]
+}
