@@ -705,9 +705,12 @@ class BiExperimentInfoEditorComponent(BiComponent):
         self.authorEdit = QLineEdit()
         self.createdEdit = QLineEdit()
 
-        nameLabel = QLabel(self.widget.tr("Project Name:"))
+        nameLabel = QLabel(self.widget.tr("Experiment Name:"))
+        nameLabel.setObjectName("BiWidget")
         authorLabel = QLabel(self.widget.tr("User:"))
+        authorLabel.setObjectName("BiWidget")
         createdLabel = QLabel(self.widget.tr("Created date:"))
+        createdLabel.setObjectName("BiWidget")
 
         layout.addWidget(title, 0, 0, 1, 2)
         layout.addWidget(nameLabel, 1, 0)
@@ -877,8 +880,11 @@ class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
         gridWidget.setLayout(self.gridLayout)
 
         tagLabel = QLabel(self.widget.tr("Tag"))
+        tagLabel.setObjectName("BiWidget")
         separatorLabel = QLabel(self.widget.tr("Separator"))
+        separatorLabel.setObjectName("BiWidget")
         positionLabel = QLabel(self.widget.tr("Position"))
+        positionLabel.setObjectName("BiWidget")
 
         tagsEdit = QLineEdit()
         self._tagsEdit.append(tagsEdit)
@@ -965,9 +971,11 @@ class BiExperimentTagsUsingNameComponent(BiComponent):
         title.setObjectName("BiLabelFormHeader1")
 
         tagLabel = QLabel(self.widget.tr("Tag:"))
+        tagLabel.setObjectName("BiWidget")
         self.tagEdit = QLineEdit()
 
         searchLabel = QLabel(self.widget.tr("Search names:"))
+        searchLabel.setObjectName("BiWidget")
         searchWidget = QWidget()
         self.searchLayout = QVBoxLayout()
         self.searchLayout.setContentsMargins(0,0,0,0)
@@ -1022,6 +1030,7 @@ class BiExperimentTagsComponent(BiComponent):
         self.addTagsContainer.register(self)    
 
         self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
         layout = QVBoxLayout()
         self.widget.setLayout(layout)
 
@@ -1062,18 +1071,22 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         title.setObjectName("BiLabelFormHeader1")
 
         dataLabel = QLabel(self.widget.tr("Data"))
+        dataLabel.setObjectName("BiWidget")
         self.dataPath = QLineEdit()
         browseDataButton = QPushButton(self.widget.tr("..."))
         browseDataButton.setObjectName("BiBrowseButton")
         browseDataButton.released.connect(self.browseDataButtonClicked)
 
         nameLabel = QLabel(self.widget.tr("Name"))
+        nameLabel.setObjectName("BiWidget")
         self.nameEdit = QLineEdit()
 
         authorLabel = QLabel(self.widget.tr("Author"))
+        authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
+        createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
 
         importButton = QPushButton(self.widget.tr("import"))
@@ -1155,16 +1168,19 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         title.setObjectName("BiLabelFormHeader1")
 
         dataLabel = QLabel(self.widget.tr("Folder"))
+        dataLabel.setObjectName("BiWidget")
         self.dataPath = QLineEdit()
         browseDataButton = QPushButton(self.widget.tr("..."))
         browseDataButton.setObjectName("BiBrowseButton")
         browseDataButton.released.connect(self.browseDataButtonClicked)
 
         recursiveLabel = QLabel(self.widget.tr("Recursive"))
+        recursiveLabel.setObjectName("BiWidget")
         self.recursiveBox = QCheckBox()
         self.recursiveBox.setChecked(True)
 
         filterLabel = QLabel(self.widget.tr("Filter"))
+        filterLabel.setObjectName("BiWidget")
         self.filterComboBox = QComboBox()
         self.filterComboBox.addItem(self.widget.tr('Ends With'))
         self.filterComboBox.addItem(self.widget.tr('Start With'))
@@ -1173,13 +1189,16 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         self.filterEdit.setText('.tif')
 
         copyDataLabel = QLabel(self.widget.tr("Copy data"))
+        copyDataLabel.setObjectName("BiWidget")
         self.copyDataBox = QCheckBox()
         self.copyDataBox.setChecked(True)
 
         authorLabel = QLabel(self.widget.tr("Author"))
+        authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
+        createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
 
         importButton = QPushButton(self.widget.tr("import"))
@@ -1344,11 +1363,11 @@ class BiExperimentToolBarComponent(BiComponent):
         layout.addWidget(self.dataCombo, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # refresh
-        refreshButton = QToolButton()
-        refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
-        refreshButton.setToolTip(self.widget.tr("Refresh"))
-        refreshButton.released.connect(self.refreshButtonClicked)
-        layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        #refreshButton = QToolButton()
+        #refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
+        #refreshButton.setToolTip(self.widget.tr("Refresh"))
+        #refreshButton.released.connect(self.refreshButtonClicked)
+        #layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         layout.addWidget(QWidget(), 1)
 
