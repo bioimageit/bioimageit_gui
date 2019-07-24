@@ -45,7 +45,7 @@ cd serpico-toolshed
 chmod u+x package.sh
 ./package.sh
 cd ..
-rm -r serpico-toolshed
+rm -rf serpico-toolshed
 ```
 
 ## Install BioImageApp
