@@ -121,7 +121,7 @@ class BiProcessesBrowserModel(BiModel):
                 if subfileinfo.isDir() and file !="." and file !="..":
                     self.loadProcessesDir(rootDir + QDir.separator() + file)
                 elif file.endswith(".xml"):
-                    print("load process xml :", rootDir + QDir.separator() + file)
+                    #print("load process xml :", rootDir + QDir.separator() + file)
                     parser = BiProcessParser(rootDir + QDir.separator() + file)
                     self.container.processes.append(parser.parse())
             return True

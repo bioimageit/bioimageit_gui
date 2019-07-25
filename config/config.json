@@ -38,19 +38,19 @@
         {
             "key": "thumbnail macro",
             "type": "file",
-            "value": "../../resources/make_thumbnail.ijm"
+            "value": "resources/make_thumbnail.ijm"
         }
     ],
     "Processes": [
         {
             "key": "Processes directory",
             "type": "dir",
-            "value": "../../../toolshed"
+            "value": "../toolshed/"
         },
         {
             "key": "Categories json",
             "type": "dir",
-            "value": "../../../toolshed/categories.json"
+            "value": "../toolshed/categories/categories.json"
         }
     ]
 }

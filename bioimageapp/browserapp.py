@@ -1,4 +1,8 @@
 import sys
+
+# add bioimagepy to path for dev
+sys.path.append("../../bioimagepy/")
+
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSplitter, QHBoxLayout
 from framework import (BiAction, BiComponent, BiContainer)
@@ -9,8 +13,8 @@ from experimentcreate import BiExperimentCreateStates, BiExperimentCreateContain
 
 
 class BiBrowserApp(BiComponent):
-    def __init__(self):
-        super(BiBrowserApp, self).__init__()
+    def __init__(self, useExperimentProcess = True):
+        super().__init__()
         self._object_name = 'BiBrowserApp'
 
         # container
@@ -19,7 +23,7 @@ class BiBrowserApp(BiComponent):
         self.experimentCreateContainer = BiExperimentCreateContainer()
         
         # model
-        self.browserModel = BiBrowserModel(self.browserContainer, True)
+        self.browserModel = BiBrowserModel(self.browserContainer, useExperimentProcess)
         self.metadataEditorModel = BiMetadataEditorModel(self.metadataEditorContainer)
         self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
 
@@ -39,7 +43,7 @@ class BiBrowserApp(BiComponent):
 
         # load settings
         settingsAccess = BiSettingsAccess().instance
-        homeDir = settingsAccess.value("Browser", "home")
+        homeDir = settingsAccess.value("Browser", "Home")
         self.browserContainer.currentPath = homeDir
         self.browserContainer.emit(BiBrowserStates.DirectoryModified)
 
@@ -66,11 +70,13 @@ class BiBrowserApp(BiComponent):
         splitterRight = QSplitter()
         splittersLayout.addWidget(splitterRight)
 
+        self.shortCutComponent.get_widget().setMaximumWidth(300)
         splitterLeft.addWidget(self.shortCutComponent.get_widget())
         splitterLeft.addWidget(self.tableComponent.get_widget())
 
         splitterRight.addWidget(splitterLeft)
         splitterRight.addWidget(self.previewComponent.get_widget())
+        self.previewComponent.get_widget().setVisible(False)
 
         splitterRight.setObjectName('BiBrowserAppSplitterRight')
         splitterLeft.setObjectName('BiBrowserAppSplitterLeft')
@@ -112,12 +118,11 @@ if __name__ == '__main__':
     # Create the Qt Application
     app = QApplication(sys.argv)
     
-    # load the settings
-    settingsFileUrl = ""
-    if len(sys.argv) > 1:
-        settingsFileUrl = sys.argv[1]
-    if settingsFileUrl == "":
-        settingsFileUrl = "../bioimageit/data/explorer/config.json"
+    settingsFileUrl = ''
+    if len(sys.argv) > 1 :
+        settingsFileUrl = sys.argv[2]
+    else:
+        settingsFileUrl = "config/config.json" 
 
     access = BiSettingsAccess()
     settings = access.instance

@@ -88,28 +88,30 @@ class bioImageApp(BiComponent):
             
 
     def update(self, action: BiAction):
+
+        #print("bioImageApp recived action: ", action.state)
+
         if action.state == BiTilesStates.OpenAppClicked:
             self.openApp(self.tilesContainer.openApp)
             return
 
-        if action.state == "BiBrowserStates.ItemDoubleClicked":
-    
-            print("open experiment signal clicked")
-            browserContainer = action.parent
+        if action.state == "BiBrowserStates.OpenExperiment":
+            browserContainer = action.parent_container
             if browserContainer:
-                row = browserContainer.doubleClickedRow()
-                dcFile = browserContainer.file(row)
+                self.openExperiment(browserContainer.openExperimentPath)
+            return    
 
-                experimentFilePath = os.path.join(dcFile.path(), dcFile.fileName())
-                from experimentapp import BiExperimentApp
-                experimentComponent = BiExperimentApp(experimentFilePath)
+        if action.state == "BiExperimentCreateStates.ExperimentCreated":
+            creationContainer = action.parent_container
+            if creationContainer:
+                self.openExperiment(creationContainer.experiment_dir)
+            return    
 
-                iconsDir = os.path.dirname(BiSettingsAccess().instance.value("General", "stylesheet"))
-                info = BiTile("BiExperimentApp", "experiment", "experiment", os.path.join(iconsDir, "folder-white-shape_negative.svg"))
+    def openExperiment(self, experimentFilePath: str):
 
-                self.tilesComponent.openApp(info, experimentComponent.get_widget())
-    
-            return
+        iconsDir = os.path.dirname(BiSettingsAccess().instance.value("General", "stylesheet"))
+        info = BiTile("BiExperimentApp " + experimentFilePath, "experiment", "experiment", os.path.join(iconsDir, "folder-white-shape_negative.svg"))
+        self.openApp(info)
 
 
     def openApp(self, info: BiTile):
@@ -122,33 +124,39 @@ class bioImageApp(BiComponent):
         elif info.action == "BiBrowserApp":
 
             from browserapp import BiBrowserApp
-            browserApp = BiBrowserApp()
+            browserApp = BiBrowserApp(False)
             browserApp.browserContainer.register(self)
             self.tilesComponent.openApp(info, browserApp.get_widget())
         
-        elif info.action().startsWith("BiExperimentApp"):
+        elif info.action.startswith("BiExperimentApp"):
         
             ShortCutPath = info.action.replace("BiExperimentApp ", "")
-            experimentFilePath = os.path.join(ShortCutPath, "experiment.md.json")
 
+            experimentFilePath = ShortCutPath
+            if not ShortCutPath.endswith(".md.json"):
+                experimentFilePath = os.path.join(ShortCutPath, "experiment.md.json")
+
+            print("open experiment ", experimentFilePath)
             file = QFile(experimentFilePath)
             if (file.exists()):
+                
                 from experimentapp import BiExperimentApp
                 experimentComponent = BiExperimentApp(experimentFilePath)
                 self.tilesComponent.openApp(info, experimentComponent.get_widget())
             else:
                 from browserapp import BiBrowserApp
                 browserApp = BiBrowserApp()
-                browserApp.browserContainer().register(self)
+                browserApp.browserContainer.register(self)
                 browserApp.setPath(ShortCutPath)
                 self.tilesComponent.openApp(info, browserApp.get_widget())
         
-        elif info.action() == "BiExperimentCreateGui":
+        elif info.action == "BiExperimentCreateGui":
             from experimentcreate import BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
             experimentCreateContainer = BiExperimentCreateContainer()
+            experimentCreateContainer.register(self)
             experimentCreateModel = BiExperimentCreateModel(experimentCreateContainer)
             experimentCreateModel.nowarning()
-            experimentCreateComponent = BiExperimentCreateComponent(experimentCreateContainer)
+            experimentCreateComponent = BiExperimentCreateComponent(experimentCreateContainer, BiSettingsAccess.instance.value("Browser", "Home"))
             self.tilesComponent.openApp(info, experimentCreateComponent.get_widget())
         
 

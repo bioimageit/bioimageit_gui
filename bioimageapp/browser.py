@@ -1,6 +1,3 @@
-#import sys
-#sys.path.append("../../bioimagepy/")
-
 import os
 import json
 import shlex
@@ -22,19 +19,20 @@ from bioimagepy.experiment import BiExperiment
 
 
 class BiBrowserStates(BiStates):
-    DirectoryModified = "BiBrowserContainer::DirectoryModified"
-    PreviousClicked = "BiBrowserContainer::PreviousClicked"
-    NextClicked = "BiBrowserContainer::NextClicked"
-    UpClicked = "BiBrowserContainer::UpClicked"
-    RefreshClicked = "BiBrowserContainer::RefreshClicked"
-    BookmarkClicked = "BiBrowserContainer::BookmarkClicked"
-    FilesInfoLoaded = "BiBrowserContainer::FilesInfoLoaded"
-    ItemDoubleClicked = "BiBrowserContainer::ItemDoubleClicked"
-    ItemClicked = "BiBrowserContainer::ItemClicked"
-    OpenJson = "BiBrowserContainer::OpenJson"
-    BookmarksLoaded = "BiBrowserContainer::BookmarksLoaded"
-    BookmarksModified = "BiBrowserContainer::BookmarksModified"
-    NewExperimentClicked = "BiBrowserContainer::NewExperimentClicked"
+    DirectoryModified = "BiBrowserStates.DirectoryModified"
+    PreviousClicked = "BiBrowserStates.PreviousClicked"
+    NextClicked = "BiBrowserStates.NextClicked"
+    UpClicked = "BiBrowserStates.UpClicked"
+    RefreshClicked = "BiBrowserStates.RefreshClicked"
+    BookmarkClicked = "BiBrowserStates.BookmarkClicked"
+    FilesInfoLoaded = "BiBrowserStates.FilesInfoLoaded"
+    ItemDoubleClicked = "BiBrowserStates.ItemDoubleClicked"
+    ItemClicked = "BiBrowserStates.ItemClicked"
+    OpenJson = "BiBrowserStates.OpenJson"
+    OpenExperiment = "BiBrowserStates.OpenExperiment"
+    BookmarksLoaded = "BiBrowserStates.BookmarksLoaded"
+    BookmarksModified = "BiBrowserStates.:BookmarksModified"
+    NewExperimentClicked = "BiBrowserStates.:NewExperimentClicked"
 
 
 class BiBrowserContainer(BiContainer):
@@ -54,6 +52,7 @@ class BiBrowserContainer(BiContainer):
         self.historyPaths = list()
         self.posHistory = 0
         self.bookmarks = BiBookmarks()
+        self.openExperimentPath = ""
 
     def clickedFileInfo(self):
         return self.files[self.clickedRow]  
@@ -128,15 +127,13 @@ class BiBrowserModel(BiModel):
                     program = BiSettingsAccess().instance.value("Browser", "experiment editor")
                     program += ' \'' + os.path.join(dcFile.path,dcFile.fileName) + '\''
                     print('open experiment: ', program)
-
                     args = shlex.split(program)
                     subprocess.Popen(args)    
 
-                    #QProcess *openProcess = new QProcess(this)
-                    #connect(openProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(errorOccurred(QProcess::ProcessError)))
-                    #QString program = biSettingsAccess::instance().settings().value("Browser", "experiment editor")
-                    #program += " " + dcFile.path() + QDir::separator() + dcFile.fileName()
-                    #openProcess.startDetached(program)
+                else:
+                    self.container.openExperimentPath = os.path.join(dcFile.path,dcFile.fileName)
+                    self.container.emit(BiBrowserStates.OpenExperiment)
+
             else:
                 self.container.emit(BiBrowserStates.OpenJson)
 

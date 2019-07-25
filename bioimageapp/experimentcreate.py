@@ -1,14 +1,15 @@
 from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
 import bioimagepy.experiment as experimentpy
 
+import PySide2.QtGui
 import PySide2.QtCore
-from PySide2.QtWidgets import QWidget, QLabel, QGridLayout, QLineEdit, QPushButton, QFileDialog
+from PySide2.QtWidgets import QWidget, QLabel, QGridLayout, QLineEdit, QPushButton, QFileDialog, QSizePolicy
 
 class BiExperimentCreateStates(BiStates):
-    CreateClicked = "BiExperimentCreateContainer::CreateClicked"
-    CancelClicked = "BiExperimentCreateContainer::CancelClicked"
-    ExperimentCreated = "BiExperimentCreateContainer::ExperimentCreated"
-    ExperimentCreationError = "BiExperimentCreateContainer::ExperimentCreationError"
+    CreateClicked = "BiExperimentCreateStates.CreateClicked"
+    CancelClicked = "BiExperimentCreateStates.CancelClicked"
+    ExperimentCreated = "BiExperimentCreateStates.ExperimentCreated"
+    ExperimentCreationError = "BiExperimentCreateStates.ExperimentCreationError"
 
 class BiExperimentCreateContainer(BiContainer):
 
@@ -25,6 +26,7 @@ class BiExperimentCreateContainer(BiContainer):
         self.experiment_name = ''
         self.experiment_author = ''
         self.errorMessage = ''
+        self.experiment_dir = ""
 
 
 class BiExperimentCreateModel(BiModel):    
@@ -36,11 +38,14 @@ class BiExperimentCreateModel(BiModel):
         self.container.register(self)
 
     def update(self, action: BiAction):
+
         if action.state == BiExperimentCreateStates.CreateClicked:
             try:
-                experimentpy.create(name=self.container.experiment_name, 
-                                  author=self.container.experiment_author, 
-                                  path=self.container.experiment_destination_dir) 
+                experiment = experimentpy.create(name=self.container.experiment_name, 
+                                                          author=self.container.experiment_author, 
+                                                          path=self.container.experiment_destination_dir) 
+
+                self.container.experiment_dir = experiment.md_file_path()
                 self.container.emit(BiExperimentCreateStates.ExperimentCreated)                   
             except FileNotFoundError as err:
                 self.container.errorMessage = err
@@ -48,8 +53,8 @@ class BiExperimentCreateModel(BiModel):
 
 
 class BiExperimentCreateComponent(BiComponent):
-    def __init__(self, container: BiExperimentCreateContainer):
-        super(BiExperimentCreateComponent, self).__init__()
+    def __init__(self, container: BiExperimentCreateContainer, default_destination: str = ""):
+        super().__init__()
         self._object_name = 'BiExperimentCreateComponent'
         self.container = container
         self.container.register(self)
@@ -61,9 +66,11 @@ class BiExperimentCreateComponent(BiComponent):
         # title
         title = QLabel(self.widget.tr("Create experiment"))
         title.setObjectName("BiLabelFormHeader1")
+        title.setMaximumHeight(50)
 
         destinationLabel = QLabel(self.widget.tr("Destination"))
         self.destinationEdit = QLineEdit()
+        self.destinationEdit.setText(default_destination)
         browseButton = QPushButton(self.widget.tr("..."))
         browseButton.setObjectName("BiBrowseButton")
         browseButton.released.connect(self.browseButtonClicked)
@@ -87,6 +94,7 @@ class BiExperimentCreateComponent(BiComponent):
         layout.addWidget(authorLabel, 3, 0)
         layout.addWidget(self.authorEdit, 3, 1, 1, 2)
         layout.addWidget(createButton, 4, 2, 1, 1, PySide2.QtCore.Qt.AlignRight)
+        layout.addWidget(QWidget(), 5, 0, 1, 1, PySide2.QtCore.Qt.AlignTop)
 
     def browseButtonClicked(self):
         directory = QFileDialog.getExistingDirectory(self.widget, self.widget.tr("Select Directory"),
