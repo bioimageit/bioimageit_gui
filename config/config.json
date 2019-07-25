@@ -3,19 +3,25 @@
         {
             "key": "stylesheet",
             "type": "file",
-            "value": "../../theme/dark/stylesheet.css"
+            "value": "theme/default/stylesheet.css"
+        },
+        {
+            "key": "BioImagePy",
+            "type": "file",
+            "value": "../../bioimagepy"
+            
         }
     ],
     "Browser": [
         {
-            "key": "home",
+            "key": "Home",
             "type": "file",
-            "value": "../../../data"
+            "value": "../data"
         },
         {
             "key": "bookmarks",
             "type": "file",
-            "value": "../../../data/bookmarks.json"
+            "value": "../data/bookmarks.json"
         },
         {
             "key": "experiment editor",

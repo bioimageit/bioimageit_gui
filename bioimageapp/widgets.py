@@ -1,5 +1,6 @@
 import PySide2.QtCore
-from PySide2.QtCore import QMimeData, QSize, QRect, QPoint, QPropertyAnimation, QEasingCurve
+from PySide2.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
+                            QEasingCurve, QParallelAnimationGroup)
 from PySide2.QtGui import QMouseEvent, QDrag
 from PySide2.QtWebEngineWidgets import QWebEngineView
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton, 
@@ -379,10 +380,10 @@ class BiHideableWidget(QWidget):
         titleLabel.setObjectName("BiHideableWidgetTitleText" + "Level" + str(level))
         self.button = QPushButton(self)
         self.button.setCheckable(True)
-        self.button.setObjectName("biHideableWidgetTitleButton" + "Level" + str(level))
+        self.button.setObjectName("BiHideableWidgetTitleButton" + "Level" + str(level))
 
         titleArea = QWidget(self)
-        titleArea.setObjectName("biHideableWidgetTitle" + "Level" + str(level))
+        titleArea.setObjectName("BiHideableWidgetTitle" + "Level" + str(level))
         titleLayout = QHBoxLayout()
         titleLayout.setContentsMargins(0,0,0,0)
         titleArea.setLayout(titleLayout)
@@ -395,8 +396,8 @@ class BiHideableWidget(QWidget):
         self.hideableWidget = QWidget(self)
         self.hideableWidget.setObjectName("BiHideableWidget" + "Level" + str(level))
         self.isVisible = True
-        self.animation = QPropertyAnimation()
-        self.useAnimation = True
+        self.animation = QPropertyAnimation(self.hideableWidget, b"maximumHeight")
+        self.useAnimation = True 
 
         if useFlowLayout:
             self.flowLayout = BiFlowLayout()
@@ -443,7 +444,80 @@ class BiHideableWidget(QWidget):
         self.height = 500
 
 
+class BiClosableButton(QPushButton):
+    clicked = Signal(int)
+    closed = Signal(int)
+
+    def __init__(self, closable: bool = True,  parent: QWidget = None):
+        super().__init__(parent)
+
+        self._id = -1
+
+        if closable:
+            layout = QVBoxLayout()
+            layout.setContentsMargins(0,0,0,0)
+            closeButton = QPushButton()
+            closeButton.setObjectName("BiCloseButton")
+            closeButton.setFixedSize(12,12)
+            layout.addWidget(closeButton, 1, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignRight)
+            self.setLayout(layout)
+            closeButton.pressed.connect(self.emitClosed)
+
+        self.pressed.connect(self.emitClicked)    
+
+    def id(self) -> int:
+        return self._id
+
+    def setId(self, id: int):
+        self._id = id
+
+    def emitClicked(self):
+        self.clicked.emit(self._id)
+
+    def emitClosed(self):
+        self.closed.emit(self._id)
+
+
+class BiStaticStackedWidget(QWidget):
+    def __init__(self, parent: QWidget):
+        super().__init__(parent)
+
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+        self._currentIndex = -1
+        self.widgets = []
+
+    def remove(self, idx: int):
+        self.widgets.pop(idx)
+        self.layout.itemAt(idx).widget().deleteLater()
+
+    def currentIndex(self):
+        return self._currentIndex
+
+    def setCurrentIndex(self, idx: int):
+        self._currentIndex = idx
+
+    def addWidget(self, widget: QWidget):
+        self.layout.addWidget(widget)
+        self.widgets.append(widget)
+
+    def count(self) -> int:
+        return self.layout.count()
+
+    def slideInIdx(self, idx: int):
+
+        self._currentIndex = idx
+        for i in range(len(self.widgets)):
+            if i == idx:
+                self.widgets[i].setVisible(True)
+            else:
+                self.widgets[i].setVisible(False)
+
+
 class BiSlidingStackedWidget(QStackedWidget):
+
+    animationFinished = Signal()
 
     LEFT2RIGHT = "LEFT2RIGHT"
     RIGHT2LEFT = "RIGHT2LEFT"
@@ -470,7 +544,7 @@ class BiSlidingStackedWidget(QStackedWidget):
         self.active=False
 
     def setVerticalMode(self, vertical: bool ):
-        self.vertical=vertical
+        self.vertical = vertical
 
     def setSpeed(self, speed: int):
         self.speed = speed
@@ -491,91 +565,91 @@ class BiSlidingStackedWidget(QStackedWidget):
         if self.wrap or now > 0:
             self.slideInIdx(now-1)
 
-    def slideInIdx(self, idx: int, direction: str):
+    def slideInIdx(self, idx: int, direction: str = "AUTOMATIC"):
 
-        if idx > count()-1:
+        if idx > self.count()-1:
             if self.vertical:
-                direction = TOP2BOTTOM
+                direction = BiSlidingStackedWidget.TOP2BOTTOM
             else:
-                direction = RIGHT2LEFT
+                direction = BiSlidingStackedWidget.RIGHT2LEFT
             idx=(idx)%self.count()
 
         elif idx<0:
             if self.vertical:
-                direction = BOTTOM2TOP
+                direction = BiSlidingStackedWidget.BOTTOM2TOP
             else:
-                direction = LEFT2RIGHT       
+                direction = BiSlidingStackedWidget.LEFT2RIGHT       
             idx=(idx+self.count())%self.count()
         
         self.slideInWgt(self.widget(idx), direction)
 
 
-    def slideInWgt(newwidget: QWidget, direction: str):
+    def slideInWgt(self, newwidget: QWidget, direction: str):
 
         if self.active:
-                return
+            return
         else:
             self.active = True
 
         directionhint = ""
         now = self.currentIndex()
-        next=indexOf(newwidget)
-        if now == next:
+        next_=self.indexOf(newwidget)
+        if now == next_:
             self.active = False
             return
-        elif now < next:
+        elif now < next_:
             if self.vertical:
-                directionhint = TOP2BOTTOM
+                directionhint = BiSlidingStackedWidget.TOP2BOTTOM
             else:
-                directionhint = RIGHT2LEFT        
+                directionhint = BiSlidingStackedWidget.RIGHT2LEFT        
         else:
             if self.vertical:
-                directionhint = BOTTOM2TOP
+                directionhint = BiSlidingStackedWidget.BOTTOM2TOP
             else:
-                directionhint = LEFT2RIGHT   
+                directionhint = BiSlidingStackedWidget.LEFT2RIGHT   
         
-        if direction.equals(AUTOMATIC):
+        if direction == BiSlidingStackedWidget.AUTOMATIC:
             direction = directionhint
         
-
+        print("sliding direction: ", direction)
         # calculate the shifts
 
         offsetx = self.frameRect().width()
         offsety = self.frameRect().height()
 
-        self.widget(next).setGeometry ( 0,  0, offsetx, offsety )
+        self.widget(next_).setGeometry ( 0,  0, offsetx, offsety )
 
-        if direction.equals(BOTTOM2TOP):
+        if direction == BiSlidingStackedWidget.BOTTOM2TOP:
                 offsetx = 0
                 offsety = -offsety
         
-        elif direction.equals(TOP2BOTTOM):
+        elif direction == BiSlidingStackedWidget.TOP2BOTTOM:
                 offsetx = 0
         
-        elif direction.equals(RIGHT2LEFT):
+        elif direction == BiSlidingStackedWidget.RIGHT2LEFT:
                 offsetx = -offsetx
                 offsety = 0
         
-        elif direction.equals(LEFT2RIGHT):
+        elif direction == BiSlidingStackedWidget.LEFT2RIGHT:
                 offsety = 0
         
-        pnext = self.widget(next).pos()
+        pnext = self.widget(next_).pos()
         pnow = self.widget(now).pos()
         self.pnow = pnow
 
-        self.widget(next).move(pnext.x()-offsetx,pnext.y()-offsety)
-        self.widget(next).show()
-        self.widget(next).raise()
+        self.widget(next_).move(pnext.x()-offsetx,pnext.y()-offsety)
+        self.widget(next_).show()
+        self.widget(next_).raise_()
 
-        animnow = QPropertyAnimation(self.widget(now), "pos")
+        animnow = QPropertyAnimation(self.widget(now), b"pos")
 
-        animnow.setDuration(m_speed)
-        animnow.BackwardsetEasingCurve(m_animationtype)
+        animnow.setDuration(self.speed)
+        animnow.setEasingCurve(self.animationtype)
         animnow.setStartValue(QPoint(pnow.x(), pnow.y()))
         animnow.setEndValue(QPoint(offsetx+pnow.x(), offsety+pnow.y()))
-        animnext = QPropertyAnimation(self.widget(next), "pos")
+        animnext = QPropertyAnimation(self.widget(next_), b"pos")
         animnext.setDuration(self.speed)
-        animnext.setEasingCurve(m_animationtype)
+        animnext.setEasingCurve(self.animationtype)
         animnext.setStartValue(QPoint(-offsetx+pnext.x(), offsety+pnext.y()))
         animnext.setEndValue(QPoint(pnext.x(), pnext.y()))
 
@@ -586,14 +660,14 @@ class BiSlidingStackedWidget(QStackedWidget):
 
         animgroup.finished.connect(self.animationDoneSlot)
 
-        self.next = next
+        self.next = next_
         self.now = now
-        self.active = true
+        self.active = True
         animgroup.start()
 
 
-    def animationDoneSlot():
-        self.setCurrentIndex(self.next);  
+    def animationDoneSlot(self):
+        self.setCurrentIndex(self.next)  
         self.widget(self.now).hide()
         self.widget(self.now).move(self.pnow)
         self.active = False

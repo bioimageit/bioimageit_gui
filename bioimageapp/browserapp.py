@@ -1,11 +1,11 @@
 import sys
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSplitter, QHBoxLayout
-from framework import (BiComponent, BiContainer)
+from framework import (BiAction, BiComponent, BiContainer)
 from browser import (BiBrowserStates, BiBrowserContainer, BiBrowserModel, BiBrowserToolBarComponent, BiBrowserShortCutsComponent, BiBrowserTableComponent, BiBrowserPreviewComponent)
-from metadataeditor import BiMetadataEditorComponent, BiMetadataEditorContainer, BiMetadataEditorModel                   
+from metadataeditor import BiMetadataEditorStates, BiMetadataEditorComponent, BiMetadataEditorContainer, BiMetadataEditorModel                   
 from settings import BiSettingsAccess
-from experimentcreate import BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
+from experimentcreate import BiExperimentCreateStates, BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
 
 
 class BiBrowserApp(BiComponent):

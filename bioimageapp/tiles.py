@@ -4,14 +4,14 @@ from PySide2.QtCore import QFileInfo, QDir, Signal, Slot
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel)
 
 from framework import BiStates, BiAction, BiContainer, BiComponent
-from widgets import BiClosableButton, BiHideableWidget, BiSlidingStackedWidget
+from widgets import BiClosableButton, BiHideableWidget, BiStaticStackedWidget
 
 class BiTile():
-    def __init__(self):
-        self.action = ""
-        self.name = ""
-        self.tooltip = ""
-        self.iconeUrl = ""
+    def __init__(self, action = "", name = "", tooltip = "", iconeUrl = ""):
+        self.action = action
+        self.name = name
+        self.tooltip = tooltip
+        self.iconeUrl = iconeUrl
 
 class BiTileWidget(QWidget):
     clicked = Signal()
@@ -24,7 +24,7 @@ class BiTileWidget(QWidget):
         self.buildButton()
         self.setText(self.info.name)
         self.setIcon(self.info.iconeUrl)
-        self.etToolTip(self.info.tooltip)
+        self.setToolTip(self.info.tooltip)
 
 
     def buildButton(self):
@@ -71,6 +71,9 @@ class BiTileWidget(QWidget):
 
 
 class BiTilesBarWidget(QWidget):
+    open = Signal(int)
+    close = Signal(int)
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
@@ -112,9 +115,9 @@ class BiTilesBarWidget(QWidget):
         for i in reversed(range(self.layout.count())):
             item = self.layout.itemAt(i)
             button = item.widget()
-            if button:
+            if type(button) == BiClosableButton:
                 if button.id() == id:
-                    del button
+                    button.deleteLater()
                     return
                     
                 # decrease here the id if button after
@@ -126,7 +129,7 @@ class BiTilesBarWidget(QWidget):
         for i in range(self.layout.count()):
             item = self.layout.itemAt(i)
             button = item.widget()
-            if button:
+            if type(button) == BiClosableButton:
                 if button.id() == id:
                     #qDebug() << "set checked id = " << id;
                     if clicked == False:
@@ -137,13 +140,17 @@ class BiTilesBarWidget(QWidget):
 
 
 class BiTilesBoardWidget(QWidget):
+    action = Signal(BiTile)
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
         self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0,0,0,0)
+        #self.layout.setContentsMargins(0,0,0,0)
         self.layout.addWidget(QWidget(self), 1, PySide2.QtCore.Qt.AlignTop)
         self.setLayout(self.layout)
+        self.sectionsNames = []
+        self.sectionsWidgets = []
 
 
     def addSection(self, name: str, strech: int = 0, useFlowLayout: bool = True):
@@ -154,16 +161,16 @@ class BiTilesBoardWidget(QWidget):
 
 
     def addTile(self, section: str, info: BiTile):
-        for i in range(self.sectionsNames.count()):
+        for i in range(len(self.sectionsNames)):
             if self.sectionsNames[i] == section:
                 tile = BiTileWidget(info, self)
                 self.sectionsWidgets[i].addWidget(tile)
-                tile.clicked.connect(self.action)
+                tile.clickedInfo.connect(self.action)
                 break
             
         
     def addWidget(self, section: str, widget: QWidget):
-        for i in range(self.sectionsNames.count()):
+        for i in range(len(self.sectionsNames)):
             if self.sectionsNames[i] == section:
                 self.sectionsWidgets[i].addWidget(widget)
                 break
@@ -223,7 +230,7 @@ class BiTilesComponents(BiComponent):
         # bar
         self.bar = BiTilesBarWidget(self.widget)
         self.bar.setFixedWidth(44)
-        self.centralWidget = BiSlidingStackedWidget(self.widget)
+        self.centralWidget = BiStaticStackedWidget(self.widget)
 
         layout.addWidget(self.bar)
         layout.addWidget(self.centralWidget)
@@ -274,7 +281,7 @@ class BiTilesComponents(BiComponent):
 
 
     def showTab(self, id: int):
-        self.entralWidget.slideInIdx(id)
+        self.centralWidget.slideInIdx(id)
         self.bar.setButtonChecked(id)
 
 
@@ -291,4 +298,8 @@ class BiTilesComponents(BiComponent):
             self.projectsIndex = -1
 
         self.bar.removeButton(id)
+        self.centralWidget.remove(id)
+        self.centralWidget.slideInIdx(0)
     
+    def get_widget(self):
+        return self.widget

@@ -32,14 +32,17 @@ class BiContainer(BiObject):
     def add_child(self, child: BiObject):
         self._childs.append(child)
 
+
     def register(self, observer):
         self._observers.append(observer)
+
 
     def emit(self, state_name: str):
         self.current_state = state_name
         action = BiAction(state_name)
         action.parent_container = self
         self.emit_action(action)
+
 
     def emit_action(self, action: BiAction):
         for observer in self._observers:
@@ -71,6 +74,9 @@ class BiModel(BiActuator):
     def __init__(self):
         super(BiModel, self).__init__()
         self._object_name = 'BiModel'    
+
+    def nowarning(self):
+        pass    
 
     def update(self, action: BiAction):
         raise NotImplementedError("Please implement ", self._object_name, " update method")

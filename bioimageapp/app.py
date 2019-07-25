@@ -1,11 +1,15 @@
 import sys
 import os
+
+from shutil import copyfile
+
+from PySide2.QtGui import QIcon
+from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 
 from framework import BiComponent, BiContainer, BiStates, BiAction
-from settings import BiSettings, BiSettingsAccess
-from tiles import BiTilesContainer, BiTilesComponents
-from browser import BiBrowserBookmarks
+from settings import BiSettings, BiSettingsAccess, BiBookmarks, BiSettingsComponent
+from tiles import BiTile, BiTilesStates, BiTilesContainer, BiTilesComponents
 
 class bioImageApp(BiComponent):
     def __init__(self):
@@ -19,7 +23,7 @@ class bioImageApp(BiComponent):
         self.tilesContainer = BiTilesContainer()
 
         # components
-        self.tilesCompomemt = BiTilesComponents(self.tilesContainer)
+        self.tilesComponent = BiTilesComponents(self.tilesContainer)
 
         # connections
         self.tilesContainer.register(self)
@@ -29,7 +33,6 @@ class bioImageApp(BiComponent):
         self.build_widget()
         self.build_tiles()
         
-
 
     def build_widget(self):
 
@@ -41,7 +44,8 @@ class bioImageApp(BiComponent):
         layout.setSpacing(0)
         self.widget.setLayout(layout)
 
-        layout.addWidget(self.tilesCompomemt.get_widget())
+        layout.addWidget(self.tilesComponent.get_widget())
+
 
     def build_tiles(self):
 
@@ -52,7 +56,7 @@ class bioImageApp(BiComponent):
         self.tilesComponent.addSection("Applications")
 
         newExpTileInfo = BiTile("BiExperimentCreateGui", "New Experiment", "Create a new experiment", os.path.join(iconsDir, "plus-white-symbol.svg"))
-        self.tilesComponent.addTile("Applications", newExpTileInfo)
+        self.tilesComponent.addTile("Applications", newExpTileInfo) 
 
         browserTileInfo = BiTile("BiBrowserApp", "Browser", "File browser", os.path.join(iconsDir, "open-folder_negative.svg"))
         self.tilesComponent.addTile("Applications", browserTileInfo)
@@ -63,41 +67,50 @@ class bioImageApp(BiComponent):
         # tiles Shortcuts
         self.tilesComponent.addSection("Bookmarks")
         bookmarksFile = BiSettingsAccess.instance.value("Browser", "bookmarks")
-        bookmarks = BiBrowserBookmarks(bookmarksFile)
+        bookmarks = BiBookmarks(bookmarksFile)
         bookmarks.read()
-        for bookmark in bookmarks.bookmarks:
-            expTileInfo = BiTile("BiExperimentApp " + bookmark["url"], bookmark["name"], bookmark["name"], os.path.join(iconsDir, "folder-white-shape_negative.svg"))
-            self.tilesComponent.addTile("Bookmarks", expTileInfo)
+
+        if "bookmarks" in bookmarks.bookmarks:
+            for bookmark in bookmarks.bookmarks["bookmarks"]:
+                expTileInfo = BiTile("BiExperimentApp " + bookmark["url"], bookmark["name"], bookmark["name"], os.path.join(iconsDir, "folder-white-shape_negative.svg"))
+                self.tilesComponent.addTile("Bookmarks", expTileInfo)
 
 
     def init_settings(self):
-        data_dir = BiSettingsAccess.instance.value("Browser", "Home")  
-        directory = os.path.dirname(data_dir)
-        if not os.path.exists(directory):
-            os.makedirs(directory)  
+        data_dir = BiSettingsAccess.instance.value("Browser", "Home")
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)  
+
+        # create bookmarks if not exists
+        copyfile("config/bookmarks.json.sample", os.path.join(data_dir, "bookmarks.json"))
+
+        sys.path.append(BiSettingsAccess.instance.value("General", "BioImagePy"))
+            
 
     def update(self, action: BiAction):
         if action.state == BiTilesStates.OpenAppClicked:
-            self.openApp(self.tilesContainer.openApp())
+            self.openApp(self.tilesContainer.openApp)
             return
 
-        if action.state == BiBrowserStates.ItemDoubleClicked:
+        if action.state == "BiBrowserStates.ItemDoubleClicked":
     
             print("open experiment signal clicked")
             browserContainer = action.parent
             if browserContainer:
                 row = browserContainer.doubleClickedRow()
-                dcFile = bcontainer.file(row)
+                dcFile = browserContainer.file(row)
 
                 experimentFilePath = os.path.join(dcFile.path(), dcFile.fileName())
-                experimentComponent = BiExperimentAppComponent(experimentFilePath)
+                from experimentapp import BiExperimentApp
+                experimentComponent = BiExperimentApp(experimentFilePath)
 
                 iconsDir = os.path.dirname(BiSettingsAccess().instance.value("General", "stylesheet"))
                 info = BiTile("BiExperimentApp", "experiment", "experiment", os.path.join(iconsDir, "folder-white-shape_negative.svg"))
 
                 self.tilesComponent.openApp(info, experimentComponent.get_widget())
     
-            return; 
+            return
+
 
     def openApp(self, info: BiTile):
 
@@ -108,8 +121,9 @@ class bioImageApp(BiComponent):
     
         elif info.action == "BiBrowserApp":
 
-            browserApp = BiBrowserAppComponent()
-            browserApp.browserContainer().register(self)
+            from browserapp import BiBrowserApp
+            browserApp = BiBrowserApp()
+            browserApp.browserContainer.register(self)
             self.tilesComponent.openApp(info, browserApp.get_widget())
         
         elif info.action().startsWith("BiExperimentApp"):
@@ -119,17 +133,21 @@ class bioImageApp(BiComponent):
 
             file = QFile(experimentFilePath)
             if (file.exists()):
-                experimentComponent = BiExperimentAppComponent(experimentFilePath)
+                from experimentapp import BiExperimentApp
+                experimentComponent = BiExperimentApp(experimentFilePath)
                 self.tilesComponent.openApp(info, experimentComponent.get_widget())
             else:
-                browserApp = BiBrowserAppComponent()
+                from browserapp import BiBrowserApp
+                browserApp = BiBrowserApp()
                 browserApp.browserContainer().register(self)
                 browserApp.setPath(ShortCutPath)
                 self.tilesComponent.openApp(info, browserApp.get_widget())
         
         elif info.action() == "BiExperimentCreateGui":
+            from experimentcreate import BiExperimentCreateContainer, BiExperimentCreateModel, BiExperimentCreateComponent
             experimentCreateContainer = BiExperimentCreateContainer()
             experimentCreateModel = BiExperimentCreateModel(experimentCreateContainer)
+            experimentCreateModel.nowarning()
             experimentCreateComponent = BiExperimentCreateComponent(experimentCreateContainer)
             self.tilesComponent.openApp(info, experimentCreateComponent.get_widget())
         
@@ -148,7 +166,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1 :
         settingsFileUrl = sys.argv[1]
     else:
-        settingsFileUrl = "../config/config.json"    
+        settingsFileUrl = "config/config.json"    
 
     access = BiSettingsAccess()
     settings = access.instance
@@ -159,5 +177,6 @@ if __name__ == '__main__':
     form = bioImageApp()
     form.get_widget().show()
     # Run the main Qt loop
-    app.setStyleSheet("file:///" + "bioimageapp/theme/default/stylesheet.css")
+    app.setStyleSheet("file:///" + BiSettingsAccess.instance.value("General", "stylesheet"))
+    app.setWindowIcon(QIcon("theme/default/icon.png"))
     sys.exit(app.exec_())

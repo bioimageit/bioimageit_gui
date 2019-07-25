@@ -1,7 +1,11 @@
+#import sys
+#sys.path.append("../../bioimagepy/")
+
 import os
 import json
 import shlex
 import subprocess
+
 import PySide2.QtCore
 from PySide2.QtCore import QObject, QDir
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, 
@@ -11,38 +15,11 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton,
                             QAbstractItemView)
 from framework import BiObject, BiStates, BiContainer, BiModel, BiComponent, BiAction
 from widgets import BiButton
-from settings import BiSettingsAccess
+from settings import BiBookmarks, BiSettingsAccess
+
 from bioimagepy.metadata import BiData, BiRawDataSet, BiProcessedDataSet, BiRun
 from bioimagepy.experiment import BiExperiment
 
-class BiBrowserBookmarks(BiObject):
-    def __init__(self, filename = ''):
-        super(BiBrowserBookmarks, self).__init__()
-        self._object_name = 'BiBrowserBookmarks'
-        self.filename = filename
-        self.bookmarks = dict()
-        if filename != '':
-            self.read() 
-
-    def read(self):
-        """Read the bookmarks to the file in json format"""
-        if os.path.getsize(self.filename) > 0:
-            with open(self.filename) as json_file:  
-                self.bookmarks = json.load(json_file)
-
-    def write(self):
-        """Write the bookmarks to the json file at filename"""
-        with open(self.filename, 'w') as outfile:
-            json.dump(self.bookmarks, outfile, indent=4)  
-
-    def clear(self):
-        self.bookmarks = dict()
-
-    def set(self, name: str, url: str):
-        data = dict()
-        data['name'] = name
-        data['url'] = url
-        self.bookmarks['bookmarks'].append(data)
 
 class BiBrowserStates(BiStates):
     DirectoryModified = "BiBrowserContainer::DirectoryModified"
@@ -58,6 +35,7 @@ class BiBrowserStates(BiStates):
     BookmarksLoaded = "BiBrowserContainer::BookmarksLoaded"
     BookmarksModified = "BiBrowserContainer::BookmarksModified"
     NewExperimentClicked = "BiBrowserContainer::NewExperimentClicked"
+
 
 class BiBrowserContainer(BiContainer):
 
@@ -75,7 +53,7 @@ class BiBrowserContainer(BiContainer):
         self.clickedRow = -1
         self.historyPaths = list()
         self.posHistory = 0
-        self.bookmarks = BiBrowserBookmarks()
+        self.bookmarks = BiBookmarks()
 
     def clickedFileInfo(self):
         return self.files[self.clickedRow]  
@@ -130,7 +108,7 @@ class BiBrowserModel(BiModel):
         self.files = list
 
     def update(self, action: BiAction):
-        if action.state == BiBrowserContainer.DirectoryModified or action.state == BiBrowserStates.RefreshClicked:
+        if action.state == BiBrowserStates.DirectoryModified or action.state == BiBrowserStates.RefreshClicked:
             self.loadFiles()
             return
     
@@ -262,7 +240,7 @@ class BiBrowserModel(BiModel):
 
 
     def loadBookmarks(self, file: str):
-        self.container.bookmarks = BiBrowserBookmarks(file)
+        self.container.bookmarks = BiBookmarks(file)
 
 
 class BiBrowserPreviewComponent(BiComponent):

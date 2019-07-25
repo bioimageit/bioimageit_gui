@@ -2,7 +2,7 @@ import sys
 import os
 
 # add bioimagepy to path for dev
-sys.path.append("/Users/sprigent/Documents/code/bioimagepy")
+
 
 import PySide2.QtCore
 from PySide2.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
