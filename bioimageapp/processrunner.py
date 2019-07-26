@@ -169,7 +169,6 @@ class BiProcessRunThread(QThread):
 
         # set inputs
         for data in self.selectedDataList:
-            print("add input:", data)
             _id = data['id']
             
             _dataset_name = ''
@@ -187,7 +186,6 @@ class BiProcessRunThread(QThread):
             for _filter in data['filters']:
                 _query += _filter['name'] + _filter['operator'] + _filter['value']
             
-            print("add input details:", _id, ", ", _dataset_name, ", ",  _query, ", ", _data_name)
             runner.add_input(_id, _dataset_name, _query, _data_name)
 
         #run
@@ -548,7 +546,6 @@ class BiProcessDataSelectorWidget(QWidget):
                 nameLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
                 dataComboBox = QComboBox()
                 for data in datalist:
-                    print("data for combo = ", data)
                     dataComboBox.addItem(data["name"], data["data"])
                 filterWidget = BiProcessDataFilterWidget(inp.name, inp.description, tags)
                 filterWidget.setObjectName("btnDefault")
