@@ -66,13 +66,13 @@ class bioImageApp(BiComponent):
 
         # tiles Shortcuts
         self.tilesComponent.addSection("Bookmarks")
-        bookmarksFile = BiSettingsAccess.instance.value("Browser", "bookmarks")
+        bookmarksFile = BiSettingsAccess.instance.value("Browser", "Bookmarks")
         bookmarks = BiBookmarks(bookmarksFile)
         bookmarks.read()
 
         if "bookmarks" in bookmarks.bookmarks:
             for bookmark in bookmarks.bookmarks["bookmarks"]:
-                expTileInfo = BiTile("BiExperimentApp " + bookmark["url"], bookmark["name"], bookmark["name"], os.path.join(iconsDir, "folder-white-shape_negative.svg"))
+                expTileInfo = BiTile("BiBookmark " + bookmark["url"], bookmark["name"], bookmark["name"], os.path.join(iconsDir, "folder-white-shape_negative.svg"))
                 self.tilesComponent.addTile("Bookmarks", expTileInfo)
 
 
@@ -82,7 +82,9 @@ class bioImageApp(BiComponent):
             os.makedirs(data_dir)  
 
         # create bookmarks if not exists
-        copyfile("config/bookmarks.json.sample", os.path.join(data_dir, "bookmarks.json"))
+        bookmarks_dir = os.path.join(data_dir, "bookmarks.json")
+        if not os.path.exists(bookmarks_dir):
+            copyfile("config/bookmarks.json.sample", bookmarks_dir)
 
         sys.path.append(BiSettingsAccess.instance.value("General", "BioImagePy"))
             
@@ -136,7 +138,6 @@ class bioImageApp(BiComponent):
             if not ShortCutPath.endswith(".md.json"):
                 experimentFilePath = os.path.join(ShortCutPath, "experiment.md.json")
 
-            print("open experiment ", experimentFilePath)
             file = QFile(experimentFilePath)
             if (file.exists()):
                 
@@ -159,6 +160,23 @@ class bioImageApp(BiComponent):
             experimentCreateComponent = BiExperimentCreateComponent(experimentCreateContainer, BiSettingsAccess.instance.value("Browser", "Home"))
             self.tilesComponent.openApp(info, experimentCreateComponent.get_widget())
         
+        elif info.action.startswith("BiBookmark"):
+
+            shortCutPath = info.action.replace("BiBookmark ", "")
+
+            experimentInPath = os.path.join(shortCutPath, "experiment.md.json")
+
+            if os.path.exists(experimentInPath):
+                from experimentapp import BiExperimentApp
+                experimentComponent = BiExperimentApp(experimentInPath)
+                self.tilesComponent.openApp(info, experimentComponent.get_widget())
+            else:
+                from browserapp import BiBrowserApp
+                browserApp = BiBrowserApp()
+                browserApp.browserContainer.register(self)
+                browserApp.setPath(shortCutPath)
+                self.tilesComponent.openApp(info, browserApp.get_widget())    
+
 
     def get_widget(self):
         return self.widget 
@@ -187,4 +205,5 @@ if __name__ == '__main__':
     # Run the main Qt loop
     app.setStyleSheet("file:///" + BiSettingsAccess.instance.value("General", "stylesheet"))
     app.setWindowIcon(QIcon("theme/default/icon.png"))
+    app.setApplicationName("BioImageApp")
     sys.exit(app.exec_())

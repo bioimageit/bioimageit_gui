@@ -135,7 +135,6 @@ class BiExperimentModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.OriginModified:
-            print('change origin to :',  self.container.projectFile)
             self.container.experiment = BiExperiment(self.container.projectFile)
             self.container.emit(BiExperimentStates.Loaded)
             return
@@ -261,7 +260,7 @@ class BiExperimentImportDataModel(BiModel):
             filter_regexp = '^' + self.importContainer.dir_filter_value  
 
         importObj = experimentpy.BiExperimentImport()   
-        importObj.register(self)  
+        importObj.addObserver(self)  
         importObj.import_dir(experiment=self.experimentContainer.experiment, 
                       dir_path=self.importContainer.dir_data_path, 
                       filter=filter_regexp, 
@@ -1315,7 +1314,7 @@ class BiExperimentTitleToolBarComponent(BiComponent):
 
 
 class BiExperimentToolBarComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, container: BiExperimentContainer, useSettings: bool = False):
         super(BiExperimentToolBarComponent, self).__init__()
         self._object_name = 'BiExperimentToolBarComponent'
         self.container = container
@@ -1329,11 +1328,12 @@ class BiExperimentToolBarComponent(BiComponent):
         self.widget.setLayout(layout)
 
         # settings
-        settingsButton = QToolButton()
-        settingsButton.setObjectName("BiExperimentToolBarSettingsButton")
-        settingsButton.setToolTip(self.widget.tr("Application settings"))
-        settingsButton.released.connect(self.settingsButtonClicked)
-        layout.addWidget(settingsButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        if useSettings:
+            settingsButton = QToolButton()
+            settingsButton.setObjectName("BiExperimentToolBarSettingsButton")
+            settingsButton.setToolTip(self.widget.tr("Application settings"))
+            settingsButton.released.connect(self.settingsButtonClicked)
+            layout.addWidget(settingsButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # info
         openInfoButton = QToolButton()

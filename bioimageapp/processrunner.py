@@ -1,3 +1,5 @@
+import os
+
 from bioimagepy.process import BiProcess, BiProcessInfo
 import bioimagepy.process as processpy
 import bioimagepy.runner as runnerpy
@@ -244,7 +246,21 @@ class BiProcessEditorComponent(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiProcessEditorStates.ProcessInfoLoaded:
-            self.docWidget.setHomePage(self.editorContainer.processInfo.help, True)
+
+            helpUrl = self.editorContainer.processInfo.help
+
+            isWeb = False
+            if helpUrl.startswith("http") or helpUrl.startswith("www"):
+                isWeb = True
+            else:    
+                helpUrl = helpUrl
+                if not os.path.isfile(helpUrl):
+                    xmlDir = os.path.realpath(os.path.dirname(self.editorContainer.processInfo.xml_file_url))
+                    helpFile = os.path.join(xmlDir, helpUrl)
+                    if os.path.isfile(helpFile): 
+                        helpUrl = os.path.realpath(helpFile)
+
+            self.docWidget.setHomePage(helpUrl, isWeb)
             self.buildExecWidget()
 
         if action.state == BiProcessEditorStates.ProgressChanged:

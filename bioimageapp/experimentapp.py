@@ -126,7 +126,7 @@ class BiExperimentAppToolBarComponent(BiComponent):
         return self.widget
 
 class BiExperimentApp(BiComponent):
-    def __init__(self, projectFile: str):
+    def __init__(self, projectFile: str, useSettings: str = False):
         super(BiExperimentApp, self).__init__()
         self._object_name = 'BiExperimentApp'
 
@@ -162,7 +162,7 @@ class BiExperimentApp(BiComponent):
         # toolbars
         self.experimentAppToolBarComponent = BiExperimentAppToolBarComponent(self.experimentAppContainer)
         self.experimentTitleToolBarComponent = BiExperimentTitleToolBarComponent(self.experimentContainer)
-        self.experimentToolBarComponent = BiExperimentToolBarComponent(self.experimentContainer)
+        self.experimentToolBarComponent = BiExperimentToolBarComponent(self.experimentContainer, useSettings)
         self.processesToolBarComponent = BiProcessesBrowserToolBarComponent(self.processesContainer)
         self.processMultiEditorToolBarComponent = BiProcessMultiEditorToolBarComponent(self.processMultiEditorContainer)
 
@@ -354,7 +354,7 @@ if __name__ == '__main__':
     settings.read()
     
     # Create and show the component
-    component = BiExperimentApp(projectFileUrl)
+    component = BiExperimentApp(projectFileUrl, True)
     component.get_widget().show()
     # Run the main Qt loop
     #app.setStyleSheet("file:///" + "../bioimageapp/theme/default/stylesheet.css")

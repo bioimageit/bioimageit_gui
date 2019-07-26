@@ -60,6 +60,7 @@ class BiExperimentCreateComponent(BiComponent):
         self.container.register(self)
 
         self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
         layout = QGridLayout()
         self.widget.setLayout(layout)
 

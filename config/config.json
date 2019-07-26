@@ -19,7 +19,7 @@
             "value": "../data"
         },
         {
-            "key": "bookmarks",
+            "key": "Bookmarks",
             "type": "file",
             "value": "../data/bookmarks.json"
         },

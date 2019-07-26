@@ -184,7 +184,7 @@ class BiSettingsComponent(BiComponent):
 
 class BiBookmarks():
     def __init__(self, filename = ''):
-        super(BiBookmarks, self).__init__()
+        super().__init__()
         self._object_name = 'BiBookmarks'
         self.filename = filename
         self.bookmarks = dict()
@@ -210,3 +210,4 @@ class BiBookmarks():
         data['name'] = name
         data['url'] = url
         self.bookmarks['bookmarks'].append(data)
+        

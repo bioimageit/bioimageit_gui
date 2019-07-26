@@ -47,7 +47,7 @@ class BiBrowserApp(BiComponent):
         self.browserContainer.currentPath = homeDir
         self.browserContainer.emit(BiBrowserStates.DirectoryModified)
 
-        self.browserModel.loadBookmarks(settingsAccess.value("Browser", "bookmarks"))
+        self.browserModel.loadBookmarks(settingsAccess.value("Browser", "Bookmarks"))
         self.shortCutComponent.reloadBookmarks()
 
         # create the widget
@@ -81,6 +81,11 @@ class BiBrowserApp(BiComponent):
         splitterRight.setObjectName('BiBrowserAppSplitterRight')
         splitterLeft.setObjectName('BiBrowserAppSplitterLeft')
         
+
+    def setPath(self, path: str):
+        self.browserContainer.currentPath = path
+        self.browserContainer.emit(BiBrowserStates.DirectoryModified)
+
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.OpenJson:
             self.metadataEditorContainer.file = self.browserContainer.doubleClickedFile()
@@ -101,16 +106,7 @@ class BiBrowserApp(BiComponent):
         if action.state == BiExperimentCreateStates.ExperimentCreated:
             self.experimentCreateComponent.get_widget().setVisible(False)
 
-        
-        #    QProcess *openProcess = new QProcess(this);
-        #    connect(openProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(errorOccurred(QProcess::ProcessError)));
-        #    QString program = biSettingsAccess::instance()->settings()->value("Browser", "experiment editor");
-
-        #    QString mdfileUrl = m_experimentCreateContainer->experiment()->mdFileUrl();
-        #    program += " " + mdfileUrl;
-        #    openProcess->startDetached(program);
-        #    return
-   
+          
     def get_widget(self):
         return self.widget 
 

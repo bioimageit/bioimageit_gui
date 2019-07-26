@@ -126,7 +126,6 @@ class BiBrowserModel(BiModel):
                     #Open the experiment as exernal process
                     program = BiSettingsAccess().instance.value("Browser", "experiment editor")
                     program += ' \'' + os.path.join(dcFile.path,dcFile.fileName) + '\''
-                    print('open experiment: ', program)
                     args = shlex.split(program)
                     subprocess.Popen(args)    
 
@@ -158,7 +157,6 @@ class BiBrowserModel(BiModel):
         if action.state == BiBrowserStates.BookmarkClicked:
             dir = QDir(self.container.currentPath)
             self.container.bookmarks.set(dir.dirName(), self.container.currentPath)
-            print('bookmarks:', self.container.bookmarks.bookmarks)
             self.container.bookmarks.write()
             self.container.emit(BiBrowserStates.BookmarksModified)
             return
@@ -355,6 +353,7 @@ class BiBrowserShortCutsComponent(BiComponent):
 
         # load
         for entry in self.container.bookmarks.bookmarks["bookmarks"]:
+
             button = BiButton(entry['name'], self.widget)
             button.setObjectName("BiBrowserShortCutsButton")
             button.content = entry['url']
