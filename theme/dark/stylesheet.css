@@ -1062,6 +1062,10 @@ QToolButton#BiExperimentToolBarTagsButton{
   image: url(tags.svg);
 }
 
+QToolButton#BiExperimentToolBarRunInfoButton{
+  image: url(certificate-shape.svg);
+}
+
 QLabel#BiExperimentTitleToolBarTitle{
   color: #f1f1f1;
 	font-weight: bold; 

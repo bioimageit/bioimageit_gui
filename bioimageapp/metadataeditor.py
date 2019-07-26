@@ -9,10 +9,10 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton,
 from framework import BiObject, BiStates, BiAction, BiContainer, BiModel, BiComponent
 
 class BiMetadataEditorStates(BiStates):
-    FileModified = "BiMetadataEditorContainer::FileModified"
-    JsonRead = "BiMetadataEditorContainer::JsonRead"
-    JsonWrote = "BiMetadataEditorContainer::JsonWrote"
-    JsonModified = "BiMetadataEditorContainer::JsonModified"
+    FileModified = "BiMetadataEditorStates.FileModified"
+    JsonRead = "BiMetadataEditorStates.JsonRead"
+    JsonWrote = "BiMetadataEditorStates.JsonWrote"
+    JsonModified = "BiMetadataEditorStates.JsonModified"
 
 
 class BiMetadataEditorContainer(BiContainer):
@@ -114,8 +114,8 @@ class BiMetadataEditorModel(BiModel):
 
 
 class BiMetadataEditorComponent(BiComponent):
-    def __init__(self, container: BiComponent):
-        super(BiMetadataEditorComponent, self).__init__()
+    def __init__(self, container: BiComponent, readOnly :bool = False):
+        super().__init__()
         self._object_name = 'BiMetadataEditorComponent'
         self.container = container
         self.container.register(self)
@@ -129,27 +129,31 @@ class BiMetadataEditorComponent(BiComponent):
         layout.addWidget(self.fileNameLabel)
 
         self.textEdit = QTextEdit()
+        if readOnly:
+            self.textEdit.setEnabled(False)
         #self.highlighter = BiHighlighterJson(self.textEdit.document())
         layout.addWidget(self.textEdit)
 
-        buttonWidget = QWidget()
+        if not readOnly:
+            buttonWidget = QWidget()
 
-        saveButton = QPushButton(self.widget.tr("Save"))
-        saveButton.setObjectName("btnPrimary")
-        cancelButton = QPushButton(self.widget.tr("Cancel"))
-        cancelButton.setObjectName("btnDefault")
-        buttonLayout = QHBoxLayout()
-        buttonLayout.addWidget(cancelButton, 1, PySide2.QtCore.Qt.AlignRight)
-        buttonLayout.addWidget(saveButton, 0, PySide2.QtCore.Qt.AlignRight)
-        buttonWidget.setLayout(buttonLayout)
+            saveButton = QPushButton(self.widget.tr("Save"))
+            saveButton.setObjectName("btnPrimary")
+            cancelButton = QPushButton(self.widget.tr("Cancel"))
+            cancelButton.setObjectName("btnDefault")
+            buttonLayout = QHBoxLayout()
+            buttonLayout.addWidget(cancelButton, 1, PySide2.QtCore.Qt.AlignRight)
+            buttonLayout.addWidget(saveButton, 0, PySide2.QtCore.Qt.AlignRight)
+            buttonWidget.setLayout(buttonLayout)
 
-        layout.addWidget(buttonWidget)
+            layout.addWidget(buttonWidget)
+
+            saveButton.released.connect(self.save)
+            cancelButton.released.connect(self.cancel)
 
         self.widget.setLayout(layout)
 
-        saveButton.released.connect(self.save)
-        cancelButton.released.connect(self.cancel)
-
+        
     def update(self, action: BiAction):
         if action.state == BiMetadataEditorStates.JsonRead:
             print('fill editor with file=', self.container.file)

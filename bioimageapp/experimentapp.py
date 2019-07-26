@@ -23,6 +23,7 @@ from processrunner import (BiProcessMultiEditorContainer, BiProcessMultiEditorMo
                             BiProcessMultiEditorStates)
 from settings import BiSettingsAccess, BiSettingsComponent
 from docviewer import BiDocViewerStates, BiDocViewerContainer, BiDocViewerModel, BiDocViewerComponent
+from metadataeditor import BiMetadataEditorStates, BiMetadataEditorContainer, BiMetadataEditorComponent, BiMetadataEditorModel
 from framework import BiAction
 
 class BiExperimentAppStates(BiStates):
@@ -138,6 +139,7 @@ class BiExperimentApp(BiComponent):
         self.experimentImportDataContainer = BiExperimentImportDataContainer()
         self.experimentAddTagsContainer = BiExperimentAddTagsContainer()
         self.docViewerContainer = BiDocViewerContainer()
+        self.runMetadataEditorContainer = BiMetadataEditorContainer()
  
         # Models
         self.experimentModel = BiExperimentModel(self.experimentContainer)
@@ -146,6 +148,7 @@ class BiExperimentApp(BiComponent):
         self.experimentImportDataModel = BiExperimentImportDataModel(self.experimentContainer, self.experimentImportDataContainer)
         self.experimentAddTagsModel = BiExperimentAddTagsModel(self.experimentContainer, self.experimentAddTagsContainer)
         self.docViewerModel = BiDocViewerModel(self.docViewerContainer)
+        self.runMetadataEditorModel = BiMetadataEditorModel(self.runMetadataEditorContainer)
 
         # Components
         # main components
@@ -159,6 +162,8 @@ class BiExperimentApp(BiComponent):
         self.experimentTagsComponent = BiExperimentTagsComponent(self.experimentContainer, self.experimentAddTagsContainer)
         self.experimentImportDataComponent = BiExperimentImportDataComponent(self.experimentContainer, self.experimentImportDataContainer)
         self.settingsComponent = BiSettingsComponent()
+        self.runMetadataEditorComponent = BiMetadataEditorComponent(self.runMetadataEditorContainer, True)
+
         # toolbars
         self.experimentAppToolBarComponent = BiExperimentAppToolBarComponent(self.experimentAppContainer)
         self.experimentTitleToolBarComponent = BiExperimentTitleToolBarComponent(self.experimentContainer)
@@ -328,6 +333,15 @@ class BiExperimentApp(BiComponent):
         if action.state == BiExperimentStates.SettingsClicked:
             self.settingsComponent.get_widget().setVisible(True)
             return    
+
+        if action.state == BiExperimentStates.RunInfoClicked:
+            dataset = self.experimentContainer.experiment.processeddataset_by_name(self.experimentContainer.changed_combo_txt)
+            jsonfile = os.path.join(dataset.md_file_dir(), "run.md.json")
+
+            self.runMetadataEditorContainer.file = jsonfile
+            self.runMetadataEditorContainer.emit(BiMetadataEditorStates.FileModified)
+            self.runMetadataEditorComponent.get_widget().setVisible(True)
+            print("add here code to open file", jsonfile)    
 
     def get_widget(self):
         return self.widget        

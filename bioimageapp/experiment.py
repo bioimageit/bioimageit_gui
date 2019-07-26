@@ -28,6 +28,7 @@ class BiExperimentStates(BiStates):
     InfoClicked = "BiExperimentContainer.InfoClicked"
     ImportClicked = "BiExperimentContainer.ImportClicked"
     TagsClicked = "BiExperimentContainer.TagsClicked"
+    RunInfoClicked = "BiExperimentStates.RunInfoClicked"
     InfoModified = "BiExperimentContainer.InfoModified"
     RefreshClicked = "BiExperimentContainer.RefreshClicked"
     RawDataImported = "BiExperimentContainer.RawDataImported"
@@ -1362,6 +1363,14 @@ class BiExperimentToolBarComponent(BiComponent):
         self.dataCombo.currentTextChanged.connect(self.dataComboChanged)
         layout.addWidget(self.dataCombo, 0, PySide2.QtCore.Qt.AlignLeft)
 
+        # Run info
+        self.runInfoButton = QToolButton()
+        self.runInfoButton.setObjectName("BiExperimentToolBarRunInfoButton")
+        self.runInfoButton.setToolTip(self.widget.tr("Run information"))
+        self.runInfoButton.released.connect(self.runInfoButtonClicked)
+        layout.addWidget(self.runInfoButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        self.runInfoButton.setVisible(False)
+
         # refresh
         #refreshButton = QToolButton()
         #refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
@@ -1391,6 +1400,10 @@ class BiExperimentToolBarComponent(BiComponent):
         self.container.emit(BiExperimentStates.InfoClicked)
 
     def dataComboChanged(self, text: str):
+        if (text == "Data"):
+            self.runInfoButton.setVisible(False)
+        else:
+            self.runInfoButton.setVisible(True)    
         self.container.changed_combo_txt = text
         self.container.emit(BiExperimentStates.DataSetComboChanged)
 
@@ -1402,6 +1415,9 @@ class BiExperimentToolBarComponent(BiComponent):
 
     def tagsButtonClicked(self):    
         self.container.emit(BiExperimentStates.TagsClicked)
+
+    def runInfoButtonClicked(self):
+        self.container.emit(BiExperimentStates.RunInfoClicked)
 
     def get_widget(self):
         return self.widget      
