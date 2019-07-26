@@ -8,7 +8,7 @@
         {
             "key": "BioImagePy",
             "type": "file",
-            "value": "../../bioimagepy"
+            "value": "../bioimagepy"
             
         }
     ],

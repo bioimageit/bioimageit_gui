@@ -3,7 +3,7 @@ import os
 from bioimagepy.process import BiProcess, BiProcessInfo
 import bioimagepy.process as processpy
 import bioimagepy.runner as runnerpy
-from bioimagepy.core import BiProgressObserver
+from bioimagepy.core import BiProgressObserver, BiConfig
 
 import PySide2.QtCore
 from PySide2.QtCore import Signal, QThread, QObject
@@ -15,6 +15,7 @@ from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter,
 from framework import BiStates, BiAction, BiContainer, BiModel, BiComponent
 from experiment import BiExperimentStates, BiExperimentContainer
 from widgets import BiWebBrowser, BiHideableWidget
+from settings import BiSettingsAccess
 
 class BiProcessMultiEditorStates(BiStates):
     ProcessAdded = "BiProcessMultiEditorContainer::ProcessAdded"
@@ -155,6 +156,8 @@ class BiProcessRunThread(QThread):
     def run(self): 
         # instanciate runner
         runner = runnerpy.BiRunnerExperiment(self.experiment) 
+        configFile = os.path.join(BiSettingsAccess.instance.value("Processes", "Processes directory"), "config.json")
+        runner.set_config(BiConfig(configFile))
         runner.add_observer(self.runObserver)
 
         # set process and parameters
@@ -166,6 +169,7 @@ class BiProcessRunThread(QThread):
 
         # set inputs
         for data in self.selectedDataList:
+            print("add input:", data)
             _id = data['id']
             
             _dataset_name = ''
@@ -174,14 +178,16 @@ class BiProcessRunThread(QThread):
             _names = data['name'].split(':')
             if len(_names) == 2:
                 _dataset_name = _names[0]  
-                _data_name = _names[1] 
             else:
-                _dataset_name = data['name']    
+                _dataset_name = data['name']   
+
+            _data_name = data["originname"]    
 
             _query = ''
             for _filter in data['filters']:
                 _query += _filter['name'] + _filter['operator'] + _filter['value']
             
+            print("add input details:", _id, ", ", _dataset_name, ", ",  _query, ", ", _data_name)
             runner.add_input(_id, _dataset_name, _query, _data_name)
 
         #run
@@ -271,14 +277,15 @@ class BiProcessEditorComponent(BiComponent):
 
     def get_experiment_data_list(self):
 
-        data_list = ['data:data']  
+        data_list = [] 
+        data_list.append({'name': 'data:data', 'data': 'data'}) 
         experiment = self.experimentContainer.experiment
         for i in range(experiment.processeddatasets_size()):
             processeddataset = experiment.processeddataset(i)
             parser = processpy.BiProcessParser(processeddataset.process_url())
             process_info = parser.parse()
             for output in process_info.outputs:
-                data_list.append(processeddataset.name() + ':' + output.description)
+                data_list.append({'name': processeddataset.name() + ':' + output.description, 'data': output.name})
 
         return data_list       
                 
@@ -541,7 +548,8 @@ class BiProcessDataSelectorWidget(QWidget):
                 nameLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
                 dataComboBox = QComboBox()
                 for data in datalist:
-                    dataComboBox.addItem(data)
+                    print("data for combo = ", data)
+                    dataComboBox.addItem(data["name"], data["data"])
                 filterWidget = BiProcessDataFilterWidget(inp.name, inp.description, tags)
                 filterWidget.setObjectName("btnDefault")
                 self.layout.addWidget(nameLabel, row, 0)
@@ -554,7 +562,9 @@ class BiProcessDataSelectorWidget(QWidget):
         selectedData = []
         for row in range(self.layout.rowCount()):
             d = dict()
-            d['name'] =  self.layout.itemAtPosition(row, 1).widget().currentText()
+            boxWidget = self.layout.itemAtPosition(row, 1).widget()
+            d['name'] =  boxWidget.currentText()
+            d['originname'] = str(boxWidget.currentData())
             filterWidget = self.layout.itemAtPosition(row, 2).widget()
             d['id'] =  filterWidget.get_input_id()
             d['filters'] = filterWidget.get_filters()
