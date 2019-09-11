@@ -335,8 +335,12 @@ class BiExperimentApp(BiComponent):
             return    
 
         if action.state == BiExperimentStates.RunInfoClicked:
-            dataset = self.experimentContainer.experiment.processeddataset_by_name(self.experimentContainer.changed_combo_txt)
-            jsonfile = os.path.join(dataset.md_file_dir(), "run.md.json")
+
+            if self.experimentContainer.run_file_url != "":
+                jsonfile = self.experimentContainer.run_file_url
+            else:
+                dataset = self.experimentContainer.experiment.processeddataset_by_name(self.experimentContainer.changed_combo_txt)
+                jsonfile = os.path.join(dataset.md_file_dir(), "run.md.json")
 
             self.runMetadataEditorContainer.file = jsonfile
             self.runMetadataEditorContainer.emit(BiMetadataEditorStates.FileModified)

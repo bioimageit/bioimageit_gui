@@ -12,7 +12,7 @@ from shutil import copyfile
 import subprocess
 
 from framework import BiComponent, BiContainer, BiModel, BiStates, BiAction
-from widgets import BiDragLabel, BiTagWidget
+from widgets import BiDragLabel, BiTagWidget, BiToolButton
 from settings import BiSettingsAccess
 
 from bioimagepy.experiment import BiExperiment 
@@ -62,6 +62,7 @@ class BiExperimentContainer(BiContainer):
         self.changed_combo_txt = ''
         self.changed_data_thumbnail_id = -1
         self.changed_data_thumbnail_url = "" 
+        self.run_file_url = ""
 
     def projectRootDir(self):
         return os.path.dirname(self.projectFile)
@@ -461,17 +462,30 @@ class BiExperimentProcessedDataComponent(BiComponent):
 
     def load_sequential(self, processeddataset: BiProcessedDataSet, process_info: BiProcessInfo):
 
+        # check if multiple run files
+        dataset_dir = processeddataset.md_file_path()
+        use_run_column = False
+        use_run_offset = 0
+        for fname in os.listdir(dataset_dir):
+            if fname.startswith('run_'):
+                use_run_column = True
+                use_run_offset = 1
+                break
+
         # headers
         processed_data_column_offset = 2 + self.container.experiment.tags_size()
-        self.tableWidget.setColumnCount(2 + self.container.experiment.tags_size() + len(process_info.outputs))
-        labels = ["", "Name"]
+        self.tableWidget.setColumnCount(use_run_offset + 2 + self.container.experiment.tags_size() + len(process_info.outputs))
+        if use_run_column:
+            labels = ["settings", "", "Name"]
+        else:
+            labels = ["", "Name"]
         for tag in self.container.experiment.tags():
             labels.append(tag)
         for output in process_info.outputs:
             labels.append(output.description)
         self.tableWidget.setHorizontalHeaderLabels(labels)
 
-        exp_size = self.container.experiment.rawdataset().size()
+        exp_size = processeddataset.size()
         if exp_size < 10:
             self.tableWidget.verticalHeader().setFixedWidth(20)
         elif exp_size >= 10 and exp_size < 100  :
@@ -481,54 +495,63 @@ class BiExperimentProcessedDataComponent(BiComponent):
 
         # data
         self.tableWidget.setRowCount(0)
-        self.tableWidget.setRowCount(self.container.experiment.rawdataset().size())
+        self.tableWidget.setRowCount(processeddataset.size())
 
         self.tableWidget.setColumnWidth(0, 64)
-        for i in range(self.container.experiment.rawdataset().size()):
+        for i in range(processeddataset.size()):
                
-            info = self.container.experiment.rawdataset().raw_data(i)
+            processed_info = processeddataset.processed_data(i)
+            raw_info = processed_info.origin_raw_data()
+
+            if use_run_column:
+                runInfoButton = BiToolButton()
+                runInfoButton.content = os.path.join(processeddataset.md_file_dir(), processed_info.run_url())
+                runInfoButton.setObjectName("BiExperimentToolBarRunInfoButton")
+                runInfoButton.setToolTip(self.tableWidget.tr("Run information"))
+                runInfoButton.clickedContent.connect(self.runInfoButtonClicked)
+                self.tableWidget.setCellWidget(i, 0, runInfoButton)
 
             # thumbnail
-            self.set_thumbnail(i, 0, info, info.thumbnail())
+            self.set_thumbnail(i, use_run_offset, raw_info, raw_info.thumbnail())
     
             # name
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name()))
+            self.tableWidget.setItem(i, use_run_offset+1, QTableWidgetItem(raw_info.name()))
 
             # tags
             for t in range(self.container.experiment.tags_size()):
-                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+                self.tableWidget.setItem(i, use_run_offset+2+t, QTableWidgetItem(raw_info.tag(self.container.experiment.tag(t))))
 
             for t in range(self.container.experiment.tags_size()):
-                self.tableWidget.setItem(i, 2+t, QTableWidgetItem(info.tag(self.container.experiment.tag(t))))
+                self.tableWidget.setItem(i, use_run_offset+2+t, QTableWidgetItem(raw_info.tag(self.container.experiment.tag(t))))
 
             # processed data
-            for j in range(processeddataset.size()):
-                processed_data = processeddataset.processed_data(j)
-                origin_raw_data = processed_data.origin_raw_data()
-                if info.url() == origin_raw_data.url():
-                    oID = 0
-                    for output in process_info.outputs:
-                        oID += 1
-                        if processed_data.metadata['origin']['output']['label'] == output.description:
-                            if processed_data.datatype() == 'image':
-                                thumbInfo = dict()
-                                thumbInfo['row'] = i
-                                thumbInfo['column'] = oID + processed_data_column_offset-1
-                                thumbInfo['processeddata'] = processed_data
-                                self.thumbnailList.append(thumbInfo)
-                                self.set_thumbnail(i, oID + processed_data_column_offset-1, processed_data, processed_data.thumbnail())
-                            elif processed_data.datatype() == 'number':
-                                with open(processed_data.url(), 'r') as content_file:
-                                    p = content_file.read() 
-                                    self.tableWidget.setItem(i, oID + processed_data_column_offset-1, QTableWidgetItem(p)) 
-                            elif processed_data.datatype() == 'array':
-                                with open(processed_data.url(), 'r') as content_file:
-                                    p = content_file.read() 
-                                    self.tableWidget.setItem(i, oID + processed_data_column_offset-1, QTableWidgetItem(p))  
-                            elif processed_data.datatype() == 'table':
-                                    label = self.table_data_thumb(processed_data.url())
-                                    self.tableWidget.setCellWidget(i, oID + processed_data_column_offset-1, label)              
+            oID = 0
+            for output in process_info.outputs:
+                oID += 1
+                if processed_info.metadata['origin']['output']['label'] == output.description:
+                    if processed_info.datatype() == 'image':
+                        thumbInfo = dict()
+                        thumbInfo['row'] = i
+                        thumbInfo['column'] = oID + processed_data_column_offset-1
+                        thumbInfo['processeddata'] = processed_info
+                        self.thumbnailList.append(thumbInfo)
+                        self.set_thumbnail(i, use_run_offset+oID + processed_data_column_offset-1, processed_info, processed_info.thumbnail())
+                    elif processed_info.datatype() == 'number':
+                        with open(processed_info.url(), 'r') as content_file:
+                            p = content_file.read() 
+                            self.tableWidget.setItem(i, use_run_offset + oID + processed_data_column_offset-1, QTableWidgetItem(p)) 
+                    elif processed_info.datatype() == 'array':
+                        with open(processed_info.url(), 'r') as content_file:
+                            p = content_file.read() 
+                            self.tableWidget.setItem(i, use_run_offset + oID + processed_data_column_offset-1, QTableWidgetItem(p))  
+                    elif processed_info.datatype() == 'table':
+                        label = self.table_data_thumb(processed_info.url())
+                        self.tableWidget.setCellWidget(i, use_run_offset + oID + processed_data_column_offset-1, label)              
 
+    def runInfoButtonClicked(self, run_file_url: str):
+        self.container.run_file_url = run_file_url
+        self.container.emit(BiExperimentStates.RunInfoClicked)
+        print("open run file: ", run_file_url)
 
     def table_data_thumb(self, file: str) -> QLabel:
         with open(file, 'r') as content_file:
@@ -1417,6 +1440,7 @@ class BiExperimentToolBarComponent(BiComponent):
         self.container.emit(BiExperimentStates.TagsClicked)
 
     def runInfoButtonClicked(self):
+        self.container.run_file_url = ""
         self.container.emit(BiExperimentStates.RunInfoClicked)
 
     def get_widget(self):
