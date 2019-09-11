@@ -1,3 +1,34 @@
+# -*- coding: utf-8 -*-
+"""processrunner module.
+
+This module contains GUI classes to run processes on a BiExperiment
+
+Classes
+-------
+BiProcessMultiEditorStates
+BiProcessMultiEditorContainer
+BiProcessEditorStates
+BiProcessEditorContainer
+BiProcessMultiEditorModel
+BiProcessEditorModel
+BiProcessRunObserver
+BiProcessRunThread
+BiProcessMultiEditorToolBarComponent
+BiProcessEditorComponent
+BiProcessDataFilterWidget
+BiProcessRunWidget
+BiProcessStandardOutputViewer
+BiProcessDataSelectorWidget
+BiProcessedDataSetSelectorWidget
+BiProcessParameterSelectorWidget
+BiProcessMultiEditorComponent
+BiProcessInputWidget
+BiProcessInputValue
+BiProcessInputSelect
+BiProcessInputBrowser
+
+"""
+
 import os
 
 from bioimagepy.process import BiProcess, BiProcessInfo
@@ -69,12 +100,16 @@ class BiProcessEditorContainer(BiContainer):
         # data
         self.processInfo = None
         self.selectedDataList = None
+        self.outputDataSet = ''
         self.parametersList = []
         self.progress = 0
         self.progressMessage = ''
 
     def setProcessInfo(self, info: str):
         self.processInfo = info    
+
+    def setOutputDataSet(self, outputDataSet: str):
+        self.outputDataSet = outputDataSet
 
     def setParameters(self, parameters: list):
         self.parametersList = parameters  
@@ -117,6 +152,7 @@ class BiProcessEditorModel(BiModel):
         self.runThread.processInfo = self.container.processInfo
         self.runThread.parametersList = self.container.parametersList
         self.runThread.selectedDataList = self.container.selectedDataList
+        self.runThread.outputDataSet = self.container.outputDataSet
         self.runThread.start()
 
     def notifyProgress(self, progress: dict):
@@ -147,6 +183,7 @@ class BiProcessRunThread(QThread):
         self.processInfo = None
         self.parametersList = []
         self.selectedDataList = []
+        self.outputDataSet = ''
 
         self.runObserver = BiProcessRunObserver()
         self.runObserver.progressSignal.connect(self.emitProgress)
@@ -191,6 +228,10 @@ class BiProcessRunThread(QThread):
             for _filter in data['filters']:
                 _urls.append(os.path.join(self.experiment.md_file_dir(), _dataset_name, _filter['url']))
             runner.add_input_by_urls(_id, _urls)
+
+        # output dataset
+        if self.outputDataSet != "":
+            runner.setOutputDataSet(self.outputDataSet)
 
         #run
         runner.run()  
@@ -390,10 +431,13 @@ class BiProcessEditorComponent(BiComponent):
         # create the input datalist
         selectedDataList = self.dataSelectorWidget.selectedData()
         parameters = self.parametersSelectorWidget.parameters() 
+        outputDataSet = self.processedDataSetSelectorWidget.selectedDataSet()
 
         print('run clicked with data:')
         print('selectedDataList:', selectedDataList)
         print('parameters:', parameters)
+        print('outputDataSet:', outputDataSet)
+        self.editorContainer.setOutputDataSet(outputDataSet)
         self.editorContainer.setSelectedData(selectedDataList)
         self.editorContainer.setParameters(parameters)
         self.editorContainer.emit(BiProcessEditorStates.RunProcess)
@@ -734,10 +778,10 @@ class BiProcessedDataSetSelectorWidget(QWidget):
         self.setLayout(layout) 
 
     def selectedDataSet(self) -> str:
-        if self.datasetComboBox.selectedIndex() == 0:
+        if self.datasetComboBox.currentIndex() == 0:
             return ""
         else:
-            return self.datasetComboBox.selectedText()
+            return self.datasetComboBox.currentText()
 
 
 class BiProcessParameterSelectorWidget(QWidget):
