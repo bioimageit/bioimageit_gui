@@ -4,6 +4,7 @@ from bioimagepy.process import BiProcess, BiProcessInfo
 import bioimagepy.process as processpy
 import bioimagepy.runner as runnerpy
 from bioimagepy.core import BiProgressObserver, BiConfig
+from bioimagepy.experiment import BiExperiment
 
 import PySide2.QtCore
 from PySide2.QtCore import Signal, QThread, QObject
@@ -153,7 +154,55 @@ class BiProcessRunThread(QThread):
     def emitProgress(self, progress: dict):
         self.progressSignal.emit(progress)    
 
-    def run(self): 
+
+    def run(self):
+        if len(self.selectedDataList) > 0 and "url" in self.selectedDataList[0]["filters"][0]:
+            self.run_list()
+        else:
+            self.run_filter()    
+
+    def run_list(self):
+        # instanciate runner
+        runner = runnerpy.BiRunnerExperiment(self.experiment) 
+        configFile = os.path.join(BiSettingsAccess.instance.value("Processes", "Processes directory"), "config.json")
+        runner.set_config(BiConfig(configFile))
+        runner.add_observer(self.runObserver)
+
+        # set process and parameters
+        params = []
+        for p in self.parametersList:
+            params.append(p["name"])
+            params.append(p["value"])
+        runner.set_process(self.processInfo.xml_file_url, *params) 
+
+        # set inputs
+        for data in self.selectedDataList:
+            _id = data['id']
+
+            _dataset_name = ''
+
+            _names = data['name'].split(':')
+            if len(_names) == 2:
+                _dataset_name = _names[0]  
+            else:
+                _dataset_name = data['name']
+
+            _urls = []
+            for _filter in data['filters']:
+                _urls.append(os.path.join(self.experiment.md_file_dir(), _dataset_name, _filter['url']))
+            runner.add_input_by_urls(_id, _urls)
+
+        #run
+        runner.run()  
+
+        # final progress
+        progress = dict()
+        progress["progress"] = 100
+        progress["message"] = 'done'
+        self.progressSignal.emit(progress)  
+
+
+    def run_filter(self): 
         # instanciate runner
         runner = runnerpy.BiRunnerExperiment(self.experiment) 
         configFile = os.path.join(BiSettingsAccess.instance.value("Processes", "Processes directory"), "config.json")
@@ -296,10 +345,19 @@ class BiProcessEditorComponent(BiComponent):
         inputLabel = QLabel(self.widget.tr("Inputs"))
         inputLabel.setObjectName("BiLabelFormHeader1Negative")
 
-        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo, self.get_experiment_data_list(), self.experimentContainer.experiment.tags())
+        self.dataSelectorWidget = BiProcessDataSelectorWidget(processInfo, self.get_experiment_data_list(), self.experimentContainer.experiment.tags(), self.experimentContainer.experiment)
 
         self.execLayout.addWidget(inputLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.dataSelectorWidget, 0, PySide2.QtCore.Qt.AlignTop)
+
+        # output gui
+        outputLabel = QLabel(self.widget.tr("Output dataset"))
+        outputLabel.setObjectName("BiLabelFormHeader1Negative")
+
+        self.processedDataSetSelectorWidget = BiProcessedDataSetSelectorWidget(self.experimentContainer.experiment.processeddataset_names())
+
+        self.execLayout.addWidget(outputLabel, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.processedDataSetSelectorWidget, 0, PySide2.QtCore.Qt.AlignTop)
 
         # parameters gui
         parametersLabel = QLabel(self.widget.tr("Parameters"))
@@ -344,7 +402,7 @@ class BiProcessEditorComponent(BiComponent):
         return self.widget      
 
 class BiProcessDataFilterWidget(QWidget):
-    def __init__(self, inputId: str, inputName: str, tags: list, parent: QWidget = None):
+    def __init__(self, inputId: str, inputName: str, tags: list, experiment: BiExperiment, parent: QWidget = None):
         super().__init__(parent)
 
         layout = QHBoxLayout()
@@ -362,9 +420,34 @@ class BiProcessDataFilterWidget(QWidget):
         self.filtersTags = []
         self.filtersOperations = []
         self.filtersValues = []
+        self.experiment = experiment
+        self.dataSelectFiles = []
 
         filterButton.released.connect(self.showFilter)
 
+        self.tabWidget = QTabWidget()
+        self.tabWidget.setVisible(False)
+        self.tabWidget.addTab(self.createFilterWidget(inputName), self.tr("Filter"))
+        self.tabWidget.addTab(self.createDataSelectorWidget(inputName), self.tr("Select"))
+
+    def updateDataSelectDataset(self, dataset: str):
+
+        datasetList = dataset.split(":")
+
+        self.dataSelectFiles = [] 
+        if datasetList[0] == "data":
+            self.dataSelectFiles = self.experiment.rawdataset().files_list()  
+        else:
+            self.dataSelectFiles = self.experiment.processeddataset_by_name(datasetList[0]).files_list(datasetList[1])    
+
+        # free layout
+        for i in reversed(range(self.dataSelectAreaLayout.count())): 
+            self.dataSelectAreaLayout.itemAt(i).widget().deleteLater()
+
+        # add one select
+        self.addDataSelect()
+
+    def createFilterWidget(self, inputName: str):
         self.filterWidget = QWidget()
         self.filterWidget.setObjectName('BiWidget')
         self.filterWidget.setVisible(False)
@@ -398,6 +481,42 @@ class BiProcessDataFilterWidget(QWidget):
         filterLayout.addWidget(addFilterButton, 0, PySide2.QtCore.Qt.AlignLeft)
         filterLayout.addWidget(validateButton, 0, PySide2.QtCore.Qt.AlignRight)
 
+        return self.filterWidget
+
+
+    def createDataSelectorWidget(self, inputName: str):  
+
+        self.dataSelectWidget = QWidget()
+        self.dataSelectWidget.setObjectName('BiWidget')
+        self.dataSelectWidget.setVisible(False)
+        filterLayout = QVBoxLayout()
+        self.dataSelectWidget.setLayout(filterLayout)
+        titleLabel = QLabel(self.tr('Select: ') + inputName)
+        titleLabel.setObjectName("BiLabelFormHeader1")
+
+        dataSelectAreaWidget = QWidget()
+        self.dataSelectAreaLayout = QGridLayout()
+        dataSelectAreaWidget.setLayout(self.dataSelectAreaLayout)
+
+        dataLabel = QLabel(self.tr("Data name"))
+        self.dataSelectAreaLayout.addWidget(dataLabel, 0, 0)
+        self.addDataSelect()
+
+        addDataSelectButton = QPushButton(self.tr("Add data"))
+        addDataSelectButton.setObjectName('btnDefault')
+        validateButton = QPushButton(self.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+
+        addDataSelectButton.released.connect(self.addDataSelect)
+        validateButton.released.connect(self.hideFilter)
+
+        filterLayout.addWidget(titleLabel)
+        filterLayout.addWidget(dataSelectAreaWidget)
+        filterLayout.addWidget(addDataSelectButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        filterLayout.addWidget(validateButton, 0, PySide2.QtCore.Qt.AlignRight)
+
+        return self.dataSelectWidget
+
     def addFilter(self):
 
         comboBox = QComboBox(self)
@@ -422,8 +541,20 @@ class BiProcessDataFilterWidget(QWidget):
         self.filterAreaLayout.addWidget(operationComboBox, row, 1)
         self.filterAreaLayout.addWidget(valueEdit, row, 2)
 
+
+    def addDataSelect(self):
+
+        comboBox = QComboBox(self)
+        comboBox.addItem("")
+        for dataName in self.dataSelectFiles:
+            comboBox.addItem(dataName)
+
+        row = self.dataSelectAreaLayout.rowCount()
+        self.dataSelectAreaLayout.addWidget(comboBox, row, 0)    
+
+
     def showFilter(self):
-        self.filterWidget.setVisible(True)
+        self.tabWidget.setVisible(True)
 
     def hideFilter(self):  
         self.filterWidget.setVisible(False)
@@ -442,14 +573,27 @@ class BiProcessDataFilterWidget(QWidget):
 
     def get_filters(self):
         filters = []
-        for row in range(self.filterAreaLayout.rowCount()):
-            if row > 0:
-                f = dict()
-                f["name"] = self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText()
-                f["operator"] = self.filterAreaLayout.itemAtPosition(row, 1).widget().currentText()
-                f["value"] = self.filterAreaLayout.itemAtPosition(row, 2).widget().text()
-                if f['name'] != "No filter" and f["value"] != '':
-                    filters.append(f)
+
+        if self.tabWidget.currentIndex() == 0:
+            for row in range(self.filterAreaLayout.rowCount()):
+                if row > 0:
+                    f = dict()
+                    f["name"] = self.filterAreaLayout.itemAtPosition(row, 0).widget().currentText()
+                    f["operator"] = self.filterAreaLayout.itemAtPosition(row, 1).widget().currentText()
+                    f["value"] = self.filterAreaLayout.itemAtPosition(row, 2).widget().text()
+                    if f['name'] != "No filter" and f["value"] != '':
+                        filters.append(f)
+        else:
+            for row in range(self.dataSelectAreaLayout.rowCount()):
+                if row > 0:
+                    f = dict()
+                    print("row = ", row)
+                    item = self.dataSelectAreaLayout.itemAtPosition(row, 0)
+                    if item:
+                        url = item.widget().currentText() 
+                        if url != "":
+                            f["url"] = url  
+                            filters.append(f)                  
         return filters    
 
 
@@ -533,7 +677,7 @@ class BiProcessStandardOutputViewer(QWidget):
 
 
 class BiProcessDataSelectorWidget(QWidget):
-    def __init__(self, info: BiProcessInfo, datalist: list, tags: list, parent: QWidget = None):
+    def __init__(self, info: BiProcessInfo, datalist: list, tags: list, experiment: BiExperiment, parent: QWidget = None):
         super().__init__(parent)
         self.info = info
 
@@ -547,8 +691,11 @@ class BiProcessDataSelectorWidget(QWidget):
                 dataComboBox = QComboBox()
                 for data in datalist:
                     dataComboBox.addItem(data["name"], data["data"])
-                filterWidget = BiProcessDataFilterWidget(inp.name, inp.description, tags)
+                filterWidget = BiProcessDataFilterWidget(inp.name, inp.description, tags, experiment)
                 filterWidget.setObjectName("btnDefault")
+
+                dataComboBox.currentTextChanged.connect(filterWidget.updateDataSelectDataset)
+                filterWidget.updateDataSelectDataset(datalist[0]["name"])
                 self.layout.addWidget(nameLabel, row, 0)
                 self.layout.addWidget(dataComboBox, row, 1)
                 self.layout.addWidget(filterWidget, row, 2)
@@ -557,6 +704,7 @@ class BiProcessDataSelectorWidget(QWidget):
 
     def selectedData(self) -> list:
         selectedData = []
+
         for row in range(self.layout.rowCount()):
             d = dict()
             boxWidget = self.layout.itemAtPosition(row, 1).widget()
@@ -566,9 +714,32 @@ class BiProcessDataSelectorWidget(QWidget):
             d['id'] =  filterWidget.get_input_id()
             d['filters'] = filterWidget.get_filters()
             selectedData.append(d)
+
         return selectedData    
 
-            
+
+class BiProcessedDataSetSelectorWidget(QWidget):
+    def __init__(self, processeddatasetlist: list, parent: QWidget = None):
+        super().__init__(parent)
+        
+        layout = QHBoxLayout()
+        nameLabel = QLabel(self.tr("Dataset"))
+        nameLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
+        self.datasetComboBox = QComboBox()
+        self.datasetComboBox.addItem(self.tr("Create new dataset"))
+        for data in processeddatasetlist:
+            self.datasetComboBox.addItem(data)
+        layout.addWidget(nameLabel)
+        layout.addWidget(self.datasetComboBox)
+        self.setLayout(layout) 
+
+    def selectedDataSet(self) -> str:
+        if self.datasetComboBox.selectedIndex() == 0:
+            return ""
+        else:
+            return self.datasetComboBox.selectedText()
+
+
 class BiProcessParameterSelectorWidget(QWidget):
     def __init__(self, info: BiProcessInfo, parent: QWidget = None):
         super().__init__(parent)

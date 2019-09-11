@@ -2,7 +2,7 @@ import sys
 import os
 
 # add bioimagepy to path for dev
-sys.path.append("../../bioimagepy/")
+sys.path.append("../bioimagepy/")
 
 import PySide2.QtCore
 from PySide2.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton
@@ -351,7 +351,7 @@ if __name__ == '__main__':
     # Create the Qt Application
     app = QApplication(sys.argv)
     
-    projectFileUrl = '/Users/sprigent/Documents/code/bioimageit_old/data/explorer/myexperiment/experiment.md.json'
+    projectFileUrl = '../data/deconv/experiment.md.json'
     settingsFileUrl = ''
     processesDir = ''
     if len(sys.argv) > 1 :

@@ -1,7 +1,7 @@
 import sys
 
 # add bioimagepy to path for dev
-sys.path.append("../../bioimagepy/")
+sys.path.append("../bioimagepy/")
 
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSplitter, QHBoxLayout
