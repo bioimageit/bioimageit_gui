@@ -1056,6 +1056,11 @@ QToolButton#BiExperimentToolBarRunInfoButton{
   image: url(certificate-shape.svg);
 }
 
+QToolButton#BiExperimentToolBarHomeButton{
+  image: url(home.svg);
+}
+
+
 QLabel#BiExperimentTitleToolBarTitle{
   color: #222222;
 	font-weight: bold; 
@@ -1155,6 +1160,35 @@ color : #000;
 background-color: #e1e1e1;
 border: 1px solid #e1e1e1;
 }
+
+QPushButton#BiImporterSideBarNewButton{
+  qproperty-icon: url("plus-black-symbol.svg");
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #000;
+  background-color: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  text-align: left;
+}
+
+QPushButton#BiImporterSideBarNewButton:hover {
+  color: #000;
+  background-color: #f1f1f1;
+  border: 1px solid #e1e1e1;
+}
+
+QPushButton#BiImporterSideBarNewButton:pressed {
+border: 3px solid #f1f1f1;
+}
+
+QPushButton#BiImporterSideBarNewButton:disabled {
+color : #000;
+background-color: #e1e1e1;
+border: 1px solid #e1e1e1;
+}
+
 
 .QWidget#BiBrowserShortCutsBar{
   background-color: #7f7f7f;
