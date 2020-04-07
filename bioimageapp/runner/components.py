@@ -161,7 +161,7 @@ class BiRunnerComponent(BiComponent):
         elif self.container.mode == BiRunnerContainer.MODE_EXP:
             self.container.inputs = self.inputExperimentWidget.inputs() 
             self.container.output_uri = self.inputFolderWidget.output()   
- 
+    
         self.container.parameters = self.paramWidget.parameters()
 
         print('run clicked with data:')
@@ -169,7 +169,7 @@ class BiRunnerComponent(BiComponent):
         print('parameters:', self.container.parameters)
         print('output:', self.container.output_uri)
         
-        #self.container.emit(BiRunnerStates.RunProcess)
+        self.container.emit(BiRunnerStates.RunProcess)
 
     def get_widget(self):
         return self.widget      

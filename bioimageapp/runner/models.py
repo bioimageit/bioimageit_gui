@@ -22,9 +22,10 @@ class BiRunnerModel(BiModel):
             self.getProcess()    
 
     def runProcess(self):
-        print('run with:') 
-        print('selected data list:', self.container.selected_data_list)
+        print('in model, run with:') 
+        print('inputs:', self.container.inputs)
         print('parameters:', self.container.parameters)
+        print('output uri', self.container.output_uri)
         if self.container.mode == BiRunnerContainer.MODE_FILE:
             self.run_file()
         elif self.container.mode == BiRunnerContainer.MODE_REP:
@@ -34,7 +35,7 @@ class BiRunnerModel(BiModel):
         runner = Runner(self.container.process_info)
         for input in self.container.inputs:
             runner.add_input(input['name'], input['uri'])
-        runner.set_parameters(self.container.parameters)
+        runner.set_parameters(*self.container.parameters)
         # todo set to tmp/
         runner.set_output(self.container.output_uri)
         runner.exec() 
@@ -43,7 +44,7 @@ class BiRunnerModel(BiModel):
         runner = Runner(self.container.process_info)
         for input in self.container.inputs:
             runner.add_inputs(input['name'], input['uri'], input['filter'])
-        runner.set_parameters(self.container.parameters)
+        runner.set_parameters(*self.container.parameters)
         runner.set_output(self.container.output_uri)
         runner.exec()  
 

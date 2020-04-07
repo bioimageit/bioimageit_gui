@@ -19,10 +19,9 @@ class BiRunnerContainer(BiContainer):
         self.process_uri = ''
         self.mode = BiRunnerContainer.MODE_FILE # file, rep, exp 
         self.process_info = None
-        self.inputs_list = []
-        self.input_exp = None
+        self.inputs = []
         self.parameters = []
-        self.output_dataset = ''
+        self.output_uri = ''
         self.progress = 0
         self.progress_message = '' 
 
