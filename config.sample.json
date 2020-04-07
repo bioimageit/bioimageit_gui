@@ -1,0 +1,17 @@
+{
+    "metadata": {
+        "service": "LOCAL"
+    },
+    "process": {
+        "service": "LOCAL",
+        "xml_dirs": [
+            "tests/test_processes_local/"
+        ]
+    },
+    "runner": {
+        "service": "LOCAL"
+    },
+    "user":{
+        "name": "Sylvain Prigent"
+    }
+}
