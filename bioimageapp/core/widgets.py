@@ -133,11 +133,11 @@ class BiWebBrowser(QWidget):
         thisLayout.setContentsMargins(0,0,0,0)
         thisLayout.setSpacing(0)
 
-        toolBar = self.createToolBar()
-        toolBar.setMaximumHeight(48)
+        self.toolBar = self.createToolBar()
+        self.toolBar.setMaximumHeight(48)
         self.webView = QWebEngineView(self)
 
-        thisLayout.addWidget(toolBar)
+        thisLayout.addWidget(self.toolBar)
         thisLayout.addWidget(self.webView)
 
         totalWidget = QWidget()
@@ -147,6 +147,9 @@ class BiWebBrowser(QWidget):
         self.setLayout(totalLayout)
         totalLayout.addWidget(totalWidget)
         totalWidget.setObjectName("BiWebBrowser")
+
+    def setToolBarVisible(self, visible:bool):
+        self.toolBar.setVisible(visible)    
 
     def createToolBar(self) -> QWidget:
         toolbar = QWidget()
@@ -317,10 +320,17 @@ class BiNavigationBar(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
+        widget = QWidget(self)
+        globalLayout = QHBoxLayout()
+        globalLayout.setContentsMargins(0,0,0,0)
+        self.setLayout(globalLayout)
+        globalLayout.addWidget(widget)
+
         layout = QHBoxLayout()
         layout.setSpacing(2)
-        self.setLayout(layout)
-        self.setObjectName("BiToolBar")
+        widget.setLayout(layout)
+        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setObjectName("BiToolBar")
 
         # previous
         previousButton = QToolButton()

@@ -5,8 +5,9 @@
     "process": {
         "service": "LOCAL",
         "xml_dirs": [
-            "tests/test_processes_local/"
-        ]
+            "../galaxytools/tools/"
+        ],
+        "categories_file": "../galaxytools/shed/categories.json"
     },
     "runner": {
         "service": "LOCAL"

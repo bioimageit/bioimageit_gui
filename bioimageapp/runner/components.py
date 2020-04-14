@@ -36,11 +36,11 @@ class BiRunnerComponent(BiComponent):
         layout.setContentsMargins(0,0,0,0)
         self.widget.setLayout(layout)
         execWidget = QWidget()
-        execWidget.setObjectName("BiWidgetNegative")
-        self.widget.setObjectName("BiWidgetNegative")
+        execWidget.setObjectName("BiWidget")
+        self.widget.setObjectName("BiWidget")
         
         execScrollArea = QScrollArea()
-        execScrollArea.setObjectName("BiWidgetNegative")
+        execScrollArea.setObjectName("BiWidget") #BiWidgetNegative
         execScrollArea.setMinimumWidth(300)
         execScrollArea.setWidgetResizable(True)
         execScrollArea.setWidget(execWidget)
