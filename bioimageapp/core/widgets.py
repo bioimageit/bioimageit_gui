@@ -190,6 +190,9 @@ class BiWebBrowser(QWidget):
     def home(self):
         self.setHomePage(self.homeURL, self.isWebURL)
 
+    def setHomePageHtml(self, html:str):
+        self.webView.setHtml(html)
+
     def setHomePage(self, pageURL: str, isWebURL: bool):
         self.homeURL = pageURL
         self.isWebURL = isWebURL

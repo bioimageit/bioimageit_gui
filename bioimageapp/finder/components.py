@@ -1,3 +1,5 @@
+import markdown2
+
 import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtCore import QFileInfo, QDir, Signal
@@ -114,7 +116,7 @@ class BiFinderComponent(BiComponent):
 
             self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
             self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))  
-
+   
         self.tableWidget.setCurrentCell(0,1)   
         self.showClickedDoc(0, 1)
 
@@ -139,8 +141,26 @@ class BiFinderComponent(BiComponent):
         self.container.emit(BiFinderStates.OpenProcess)   
 
     def showClickedDoc(self, row, column):
+        if row >= len(self.container.tools):
+             self.docViewer.setHomePageHtml("No tool available")
+             return
         tool = self.container.tools[row]  
-        self.docViewer.setHomePage(tool.help, False)            
+        if tool.help.startswith('http') or tool.help.startswith('www'):
+            self.docViewer.setHomePage(tool.help, True)
+        elif tool.help.endswith('.html'):    
+            self.docViewer.setHomePage(tool.help, False)
+        elif tool.help.endswith('.md'):
+            self.showMarkdownDoc(tool.help)
+        else:
+            self.docViewer.setHomePageHtml("<span>This tool documentation is not available</span>")          
+
+
+    def showMarkdownDoc(self, file):
+        with open(file, 'r') as myfile:
+            data=myfile.read()
+        html = markdown2.markdown(data)  
+        self.docViewer.setHomePageHtml(html)  
+
 
     def update(self, action: BiAction):
         if (action.state == BiFinderStates.Reloaded):
