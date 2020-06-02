@@ -1,5 +1,3 @@
-import markdown2
-
 import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtCore import QFileInfo, QDir, Signal
@@ -149,17 +147,8 @@ class BiFinderComponent(BiComponent):
             self.docViewer.setHomePage(tool.help, True)
         elif tool.help.endswith('.html'):    
             self.docViewer.setHomePage(tool.help, False)
-        elif tool.help.endswith('.md'):
-            self.showMarkdownDoc(tool.help)
         else:
-            self.docViewer.setHomePageHtml("<span>This tool documentation is not available</span>")          
-
-
-    def showMarkdownDoc(self, file):
-        with open(file, 'r') as myfile:
-            data=myfile.read()
-        html = markdown2.markdown(data)  
-        self.docViewer.setHomePageHtml(html)  
+            self.docViewer.setHomePageHtml("<span>This tool documentation is not available</span>")           
 
 
     def update(self, action: BiAction):
