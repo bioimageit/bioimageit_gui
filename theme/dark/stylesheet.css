@@ -7,6 +7,10 @@ QWidget#BiWidgetNegative{
   background-color: #5A8E8E;/* #585858; #5A8E8E; #5d5a59; */
 }
 
+QLabel#BiLabel{
+  color: #f1f1f1;
+}
+
 QLabel#BiLabelNegative{
   background-color: #5A8E8E;
   color: #f1f1f1;
@@ -658,7 +662,7 @@ QTableView {
   gridline-color: #888888;
   color: #d1d1d1;
   background-color: #242425;
-  selection-background-color: #5A8E8E;
+  selection-background-color: #AAAAAA;
 }
 
 QHeaderView::section {
@@ -1109,6 +1113,18 @@ QToolButton#BiExperimentToolBarBookmarkButton{
   image: url(star.svg);
 }
 
+QToolButton#BiBrowserExperimentToolbarImportButton{
+  image: url(upload.svg);
+}
+
+QToolButton#BiBrowserExperimentToolbarTagButton{
+  image: url(tags.svg);
+}
+
+QToolButton#BiBrowserExperimentToolbarProcessButton{
+  image: url(cog-wheel-silhouette.svg);
+}
+
 QLabel#BiBrowserDirIcon{
   image: url(open-folder.svg);
 }
@@ -1136,6 +1152,7 @@ QLabel#BiBrowserRawDatIcon{
 QLabel#BiBrowserProcessedDataIcon{
   image: url(blank-file.svg);
 }
+
 
 
 /* // ///////////////////////////////////////////////
@@ -1169,7 +1186,7 @@ QPushButton#BiBrowserShortCutsNewButton:disabled {
 }
 
 .QWidget#BiBrowserShortCutsBar{
-  background-color: #7f7f7f;
+  background-color: #3a3a3a;
 }
 
 QSplitter#BiBrowserAppSplitterRight{
@@ -1187,8 +1204,8 @@ QPushButton#BiBrowserShortCutsButton {
   margin-bottom: 0;
   font-size: 14px;
   color: #f1f1f1;
-  background-color: #7f7f7f;
-  border: 1px solid #7f7f7f;
+  background-color: #3a3a3a;
+  border: 1px solid #3a3a3a;
 }
 
 QPushButton#BiBrowserShortCutsButton:hover {
@@ -1208,7 +1225,7 @@ QPushButton#BiBrowserShortCutsButton:disabled {
 }
 
 QLabel#BiBrowserShortCutsTitle{
-  background-color: #7f7f7f;
+  background-color: #3a3a3a;
   color: #f1f1f1;
   border-top: 1px solid #f1f1f1;
 }
