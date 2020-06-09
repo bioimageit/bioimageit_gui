@@ -14,8 +14,9 @@ class BiMetadataEditorModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiMetadataEditorStates.FileModified:
-            self.read(self.container.file)
-            self.container.emit(BiMetadataEditorStates.JsonRead)
+            if os.path.isfile(self.container.file):
+                self.read(self.container.file)
+                self.container.emit(BiMetadataEditorStates.JsonRead)
             return
 
         if action.state == BiMetadataEditorStates.JsonModified:

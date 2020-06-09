@@ -113,7 +113,6 @@ class BiMetadataJsonEditorComponent(BiComponent):
         
     def update(self, action: BiAction):
         if action.state == BiMetadataEditorStates.JsonRead:
-            print('fill editor with file=', self.container.file)
             self.fileNameLabel.setText(self.container.file)
             self.textEdit.setText(self.container.content)
 

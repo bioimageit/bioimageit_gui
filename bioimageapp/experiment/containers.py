@@ -6,7 +6,38 @@ class BiExperimentContainer(BiContainer):
         self._object_name = 'BiExperimentContainer'
 
         # data
+        self.experiment_uri = ''
         self.experiment = None
+        self.import_info = BiExperimentImportContainer()
+        self.tag_info = BiExperimentTagContainer()
+
+
+class BiExperimentImportContainer():
+    def __init__(self):
+        super().__init__()
+        self.dir_data_path = ''
+        self.dir_recursive = False
+        self.dir_filter = ''
+        self.dir_filter_value = ''
+        self.dir_copy_data = True
+        self.file_data_path = ''
+        self.file_copy_data = True
+        self.file_name = ''
+        self.format = ''
+        self.author = ''
+        self.createddate = ''    
+
+class BiExperimentTagContainer():
+    def __init__(self):
+        super().__init__()
+        self.tags = []
+        self.usingname_tag = ''
+        self.usingname_search = []
+        self.usingseparator_tags = []
+        self.usingseparator_separator = []
+        self.usingseparator_position = []    
+        self.usingname_tag = ''
+        self.usingname_search = []      
 
 class BiExperimentCreateContainer(BiContainer):
 
@@ -19,4 +50,4 @@ class BiExperimentCreateContainer(BiContainer):
         self.experiment_name = ''
         self.experiment_author = ''
         self.errorMessage = ''
-        self.experiment_dir = ""  
+        self.experiment_dir = ''

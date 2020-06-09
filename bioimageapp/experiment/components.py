@@ -1,3 +1,5 @@
+import ntpath
+
 import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtCore import QFileInfo, QDir, Signal
@@ -5,9 +7,11 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem, QAbstractItemView,
                                QGridLayout, QHBoxLayout, QToolButton, QSplitter, 
                                QLineEdit, QPushButton, QTextEdit, QMessageBox, 
-                               QFileDialog, QTabWidget)
+                               QFileDialog, QTabWidget, QSpinBox, QCheckBox, 
+                               QComboBox, QProgressBar)
 
 from bioimageapp.core.framework import BiComponent, BiAction
+from bioimageapp.core.widgets import BiTagWidget
 from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
 from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer                             
 
@@ -148,15 +152,19 @@ class BiExperimentImportComponent(BiComponent):
         self.container.register(self)
 
         self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
         layout = QVBoxLayout()
         layout.setContentsMargins(0,0,0,0)
         self.widget.setLayout(layout)
         tabWidget = QTabWidget()
         layout.addWidget(tabWidget)
 
-        tabWidget.addTab(QLabel("Import file"), 'Import file')
-        tabWidget.addTab(QLabel("Import dir"), 'Import directory')
+        importSingleComponent = BiExperimentImportSingleDataComponent(container)
+        tabWidget.addTab(importSingleComponent.get_widget(), self.widget.tr("Single Data"))
 
+        importDirectoryComponent = BiExperimentImportDirectoryDataComponent(container)
+        tabWidget.addTab(importDirectoryComponent.get_widget(), self.widget.tr("Multiple Data"))
 
     def update(self, action: BiAction):
         pass
@@ -164,6 +172,207 @@ class BiExperimentImportComponent(BiComponent):
     def get_widget(self):
         return self.widget
 
+
+class BiExperimentImportSingleDataComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentImportSingleDataComponent, self).__init__()
+        self._object_name = 'BiExperimentImportSingleDataComponent'
+        self.container = container
+        self.container.register(self)  
+
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Import single data"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        dataLabel = QLabel(self.widget.tr("Data"))
+        dataLabel.setObjectName("BiWidget")
+        self.dataPath = QLineEdit()
+        browseDataButton = QPushButton(self.widget.tr("..."))
+        browseDataButton.setObjectName("BiBrowseButton")
+        browseDataButton.released.connect(self.browseDataButtonClicked)
+
+        copyDataLabel = QLabel(self.widget.tr("Copy data"))
+        copyDataLabel.setObjectName("BiWidget")
+        self.copyDataBox = QCheckBox()
+        self.copyDataBox.setChecked(True)
+
+        nameLabel = QLabel(self.widget.tr("Name"))
+        nameLabel.setObjectName("BiWidget")
+        self.nameEdit = QLineEdit()
+
+        formatLabel = QLabel(self.widget.tr("Format"))
+        formatLabel.setObjectName("BiWidget")
+        self.formatEdit = QLineEdit()
+
+        authorLabel = QLabel(self.widget.tr("Author"))
+        authorLabel.setObjectName("BiWidget")
+        self.authorEdit = QLineEdit()
+
+        createddateLabel = QLabel(self.widget.tr("Created date"))
+        createddateLabel.setObjectName("BiWidget")
+        self.createddateEdit = QLineEdit()
+
+        importButton = QPushButton(self.widget.tr("import"))
+        importButton.setObjectName("btnPrimary")
+        importButton.released.connect(self.importButtonClicked)
+
+        layout.addWidget(title, 0, 0, 1, 3)
+        layout.addWidget(dataLabel, 1, 0)
+        layout.addWidget(self.dataPath, 1, 1)
+        layout.addWidget(browseDataButton, 1, 2)
+        layout.addWidget(copyDataLabel, 2, 0)
+        layout.addWidget(self.copyDataBox, 2, 1, 1, 2)
+        layout.addWidget(nameLabel, 3, 0)
+        layout.addWidget(self.nameEdit, 3, 1, 1, 2)
+        layout.addWidget(formatLabel, 4, 0)
+        layout.addWidget(self.formatEdit, 4, 1, 1, 2)
+        layout.addWidget(authorLabel, 5, 0)
+        layout.addWidget(self.authorEdit, 5, 1, 1, 2)
+        layout.addWidget(createddateLabel, 6, 0)
+        layout.addWidget(self.createddateEdit, 6, 1, 1, 2)
+        layout.addWidget(importButton, 7, 2, PySide2.QtCore.Qt.AlignRight)
+
+    def update(self, action: BiAction):
+        pass
+
+    def importButtonClicked(self):
+
+        self.container.import_info.file_data_path = self.dataPath.text()
+        self.container.import_info.file_copy_data = self.copyDataBox.isChecked()
+        self.container.import_info.file_name = self.nameEdit.text()
+        self.container.import_info.fotmat = self.formatEdit.text()
+        self.container.import_info.author = self.authorEdit.text()
+        self.container.import_info.createddate = self.createddateEdit.text()
+        self.container.emit(BiExperimentStates.NewImportFile)
+
+    def browseDataButtonClicked(self):
+        fileName = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), 'Data (*.*)')
+        self.dataPath.setText(fileName[0])
+
+    def get_widget(self):
+        return self.widget  
+
+
+class BiExperimentImportDirectoryDataComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super(BiExperimentImportDirectoryDataComponent, self).__init__()
+        self._object_name = 'BiExperimentImportDirectoryDataComponent'
+        self.container = container
+        self.container.register(self)  
+
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Import from folder"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        dataLabel = QLabel(self.widget.tr("Folder"))
+        dataLabel.setObjectName("BiWidget")
+        self.dataPath = QLineEdit()
+        browseDataButton = QPushButton(self.widget.tr("..."))
+        browseDataButton.setObjectName("BiBrowseButton")
+        browseDataButton.released.connect(self.browseDataButtonClicked)
+
+        recursiveLabel = QLabel(self.widget.tr("Recursive"))
+        recursiveLabel.setObjectName("BiWidget")
+        self.recursiveBox = QCheckBox()
+        self.recursiveBox.setChecked(True)
+
+        filterLabel = QLabel(self.widget.tr("Filter"))
+        filterLabel.setObjectName("BiWidget")
+        self.filterComboBox = QComboBox()
+        self.filterComboBox.addItem(self.widget.tr('Ends With'))
+        self.filterComboBox.addItem(self.widget.tr('Start With'))
+        self.filterComboBox.addItem(self.widget.tr('Contains'))
+        self.filterEdit = QLineEdit()
+        self.filterEdit.setText('.tif')
+
+        copyDataLabel = QLabel(self.widget.tr("Copy data"))
+        copyDataLabel.setObjectName("BiWidget")
+        self.copyDataBox = QCheckBox()
+        self.copyDataBox.setChecked(True)
+
+        formatLabel = QLabel(self.widget.tr("Format"))
+        formatLabel.setObjectName("BiWidget")
+        self.formatEdit = QLineEdit()
+
+        authorLabel = QLabel(self.widget.tr("Author"))
+        authorLabel.setObjectName("BiWidget")
+        self.authorEdit = QLineEdit()
+
+        createddateLabel = QLabel(self.widget.tr("Created date"))
+        createddateLabel.setObjectName("BiWidget")
+        self.createddateEdit = QLineEdit()
+
+        importButton = QPushButton(self.widget.tr("import"))
+        importButton.setObjectName("btnPrimary")
+        importButton.released.connect(self.importButtonClicked)
+
+        layout.addWidget(title, 0, 0, 1, 4)
+        layout.addWidget(dataLabel, 1, 0)
+        layout.addWidget(self.dataPath, 1, 1, 1, 2)
+        layout.addWidget(browseDataButton, 1, 3)
+        layout.addWidget(recursiveLabel, 2, 0)
+        layout.addWidget(self.recursiveBox, 2, 1, 1, 2)
+        layout.addWidget(filterLabel, 3, 0)
+        layout.addWidget(self.filterComboBox, 3, 1, 1, 1)
+        layout.addWidget(self.filterEdit, 3, 2, 1, 2)
+        layout.addWidget(copyDataLabel, 4, 0)
+        layout.addWidget(self.copyDataBox, 4, 1, 1, 2)
+        layout.addWidget(formatLabel, 5, 0)
+        layout.addWidget(self.formatEdit, 5, 1, 1, 2)
+        layout.addWidget(authorLabel, 6, 0)
+        layout.addWidget(self.authorEdit, 6, 1, 1, 2)
+        layout.addWidget(createddateLabel, 7, 0)
+        layout.addWidget(self.createddateEdit, 7, 1, 1, 2)
+        layout.addWidget(importButton, 8, 3, PySide2.QtCore.Qt.AlignRight)
+
+        self.progressBar = QProgressBar()
+        self.progressBar.setVisible(False)
+        layout.addWidget(self.progressBar, 8, 1, 1, 3)
+
+    def update(self, action: BiAction):
+        if action.state == BiExperimentStates.Progress:
+            if 'progress' in self.container.progress:
+                self.progressBar.setVisible(True)
+                self.progressBar.setValue(self.container.progress)
+                if self.container.progress == 100:
+                    self.progressBar.setVisible(False)
+                 
+
+    def importButtonClicked(self):
+
+        self.container.import_info.dir_data_path = self.dataPath.text()
+        self.container.import_info.dir_recursive = self.recursiveBox.isChecked()
+        self.container.import_info.dir_filter = self.filterComboBox.currentIndex()
+        self.container.import_info.dir_filter_value = self.filterEdit.text()
+        self.container.import_info.dir_copy_data = self.copyDataBox.isChecked()
+        self.container.import_info.author = self.authorEdit.text()
+        self.container.import_info.format = self.formatEdit.text()
+        self.container.import_info.createddate = self.createddateEdit.text()
+        self.container.emit(BiExperimentStates.NewImportDir)
+
+    def browseDataButtonClicked(self):
+        directory = QFileDialog.getExistingDirectory(self.widget, self.widget.tr("Select Directory"),
+                                       "",
+                                       QFileDialog.ShowDirsOnly
+                                       | QFileDialog.DontResolveSymlinks)
+        self.dataPath.setText(directory)
+
+    def get_widget(self):
+        return self.widget  
 
 class BiExperimentTagComponent(BiComponent):        
     def __init__(self, container: BiExperimentContainer):
@@ -173,19 +382,307 @@ class BiExperimentTagComponent(BiComponent):
         self.container.register(self)
 
         self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
         layout = QVBoxLayout()
         layout.setContentsMargins(0,0,0,0)
         self.widget.setLayout(layout)
         tabWidget = QTabWidget()
         layout.addWidget(tabWidget)
 
-        tabWidget.addTab(QLabel("add tag"), 'Manual tags')
-        tabWidget.addTab(QLabel("From name"), 'Tag extracting words from filename')
-        tabWidget.addTab(QLabel("From separators"), 'Tag using separator from filename')
+        tagsListComponent = BiExperimentTagsListComponent(self.container)
+        tagUsingSeparatorComponent = BiExperimentTagsUsingSeparatorsComponent(self.container)
+        tagUsingNameComponent = BiExperimentTagsUsingNameComponent(self.container)
 
+        tabWidget.addTab(tagsListComponent.get_widget(), self.widget.tr("Tags"))
+        tabWidget.addTab(tagUsingSeparatorComponent.get_widget(), self.widget.tr("Tag using separator"))
+        tabWidget.addTab(tagUsingNameComponent.get_widget(), self.widget.tr("Tag using name"))
 
     def update(self, action: BiAction):
         pass
 
     def get_widget(self):
         return self.widget    
+
+
+class BiExperimentTagsListComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiExperimentTagsListComponent'
+        self.container = container
+        self.container.register(self)  
+
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
+
+        layout = QVBoxLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Tags"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        # add widget
+        addWidget = QWidget()
+        addLayout = QHBoxLayout()
+        addWidget.setLayout(addLayout)
+
+        self.addEdit = QLineEdit(self.widget)
+        addButton = QPushButton(self.widget.tr("Add"))
+        addButton.setObjectName("btnDefault")
+        addLayout.addWidget(self.addEdit)
+        addLayout.addWidget(addButton)
+
+        self.tagListWidget = QWidget()
+        self.tagListWidget.setObjectName("BiWidget")
+        self.tagListLayout = QVBoxLayout()
+        self.tagListWidget.setLayout(self.tagListLayout)
+
+        scrollArea = QScrollArea()
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setObjectName("BiWidget")
+        scrollArea.setWidget(self.tagListWidget)
+
+        # button area
+        buttonsWidget = QWidget()
+        buttonsLayout = QHBoxLayout()
+        buttonsLayout.setContentsMargins(0,0,0,0)
+        buttonsLayout.setSpacing(2)
+        buttonsWidget.setLayout(buttonsLayout)
+        cancelButton = QPushButton(self.widget.tr("Cancel"))
+        cancelButton.setObjectName("btnDefault")
+        saveButton = QPushButton(self.widget.tr("Save"))
+        saveButton.setObjectName("btnPrimary")
+        buttonsLayout.addWidget(cancelButton, 1, PySide2.QtCore.Qt.AlignRight)
+        buttonsLayout.addWidget(saveButton, 0, PySide2.QtCore.Qt.AlignRight)
+
+        layout.addWidget(title)
+        layout.addWidget(addWidget)
+        layout.addWidget(scrollArea)
+        layout.addWidget(buttonsWidget)
+
+        addButton.released.connect(self.addButtonClicked)
+        cancelButton.released.connect(self.cancelButtonClicked)
+        saveButton.released.connect(self.saveButtonClicked)
+
+    def update(self, action: BiAction):
+        if action.state == BiExperimentStates.Loaded:
+            self.reload()
+            return
+
+    def reload(self):
+        # free layout
+        for i in reversed(range(self.tagListLayout.count())): 
+            self.tagListLayout.itemAt(i).widget().deleteLater()
+
+        # add tags
+        for tag in self.container.experiment.metadata.tags:
+            tagWidget = BiTagWidget() 
+            tagWidget.setContent(tag)
+            tagWidget.remove.connect(self.removeClicked)
+            self.tagListLayout.addWidget(tagWidget)
+        self.tagListWidget.adjustSize()
+
+    def addButtonClicked(self):
+        if self.addEdit.text() != "":
+            tagWidget = BiTagWidget()
+            tagWidget.setContent(self.addEdit.text())
+            tagWidget.remove.connect(self.removeClicked)
+            self.tagListLayout.addWidget(tagWidget)
+            self.addEdit.setText("")
+            self.tagListLayout.update()
+
+    def cancelButtonClicked(self):
+        self.reload()
+
+    def saveButtonClicked(self):
+        tags = []
+        for i in range(self.tagListLayout.count()):
+            item = self.tagListLayout.itemAt(i)
+            widget = item.widget()
+            if widget:
+                tags.append(widget.content())
+        self.container.tag_info.tags = tags        
+        self.container.emit(BiExperimentStates.TagsModified)
+
+    def removeClicked(self, tag: str):
+        for i in range(self.tagListLayout.count()):
+            item = self.tagListLayout.itemAt( i )
+            widget = item.widget()
+            if widget:
+                if widget.content() == tag:
+                    itemd = self.tagListLayout.takeAt( i )
+                    itemd.widget().deleteLater()
+        self.tagListWidget.adjustSize() 
+
+    def get_widget(self):
+        return self.widget    
+
+
+class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiExperimentTagsUsingSeparatorsComponent'
+        self.container = container
+        self.container.register(self)  
+        self._tagsEdit = []
+        self._separatorEdit = []
+        self._positionSpinBox = []
+
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Tag using separator"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        gridWidget = QWidget()
+        self.gridLayout = QGridLayout()
+        gridWidget.setLayout(self.gridLayout)
+
+        tagLabel = QLabel(self.widget.tr("Tag"))
+        tagLabel.setObjectName("BiWidget")
+        separatorLabel = QLabel(self.widget.tr("Separator"))
+        separatorLabel.setObjectName("BiWidget")
+        positionLabel = QLabel(self.widget.tr("Position"))
+        positionLabel.setObjectName("BiWidget")
+
+        tagsEdit = QLineEdit()
+        self._tagsEdit.append(tagsEdit)
+        separatorEdit = QLineEdit()
+        self._separatorEdit.append(separatorEdit)
+        positionSpinBox = QSpinBox()
+        self._positionSpinBox.append(positionSpinBox)
+
+        addLineButton = QPushButton(self.widget.tr("Add line"))
+        addLineButton.setObjectName('btnDefault')
+        addLineButton.released.connect(self.addLine)
+
+        validateButton = QPushButton(self.widget.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+        validateButton.released.connect(self.validated)
+
+        layout.addWidget(title, 0, 0, 1, 3)
+        
+        self.gridLayout.addWidget(tagLabel, 0, 0)
+        self.gridLayout.addWidget(separatorLabel, 0, 1)
+        self.gridLayout.addWidget(positionLabel, 0, 2)
+
+        self.gridLayout.addWidget(tagsEdit, 1, 0)
+        self.gridLayout.addWidget(separatorEdit, 1, 1)
+        self.gridLayout.addWidget(positionSpinBox, 1, 2)
+
+        layout.addWidget(gridWidget, 1, 0, 1, 3)
+        layout.addWidget(addLineButton, 2, 0)
+        layout.addWidget(validateButton, 3, 2)
+
+    def validated(self):
+        tags = []
+        separator = []
+        position = []
+        for tag in self._tagsEdit:
+            tags.append(tag.text())    
+        for sep in self._separatorEdit:
+            separator.append(sep.text())
+        for pos in self._positionSpinBox:
+            position.append(pos.value())    
+
+        self.container.tag_info.usingseparator_tags = tags
+        self.container.tag_info.usingseparator_separator = separator
+        self.container.tag_info.usingseparator_position = position
+        self.container.emit(BiExperimentStates.TagUsingSeparators)
+
+    def addLine(self):
+        tagsEdit = QLineEdit()
+        self._tagsEdit.append(tagsEdit)
+        separatorEdit = QLineEdit()
+        self._separatorEdit.append(separatorEdit)
+        positionSpinBox = QSpinBox()
+        self._positionSpinBox.append(positionSpinBox)
+
+        rowIdx = self.gridLayout.count()
+        self.gridLayout.addWidget(tagsEdit, rowIdx, 0)
+        self.gridLayout.addWidget(separatorEdit, rowIdx, 1)
+        self.gridLayout.addWidget(positionSpinBox, rowIdx, 2)
+
+    def update(self, action: BiAction):
+        pass    
+
+    def get_widget(self):
+        return self.widget  
+
+
+class BiExperimentTagsUsingNameComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiExperimentTagsUsingNameComponent'
+        self.container = container
+        self.container.register(self)  
+
+        self._namesEdit = []
+
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiWidget")
+
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+
+        # title
+        title = QLabel(self.widget.tr("Tag using name"))
+        title.setObjectName("BiLabelFormHeader1")
+
+        tagLabel = QLabel(self.widget.tr("Tag:"))
+        tagLabel.setObjectName("BiWidget")
+        self.tagEdit = QLineEdit()
+
+        searchLabel = QLabel(self.widget.tr("Search names:"))
+        searchLabel.setObjectName("BiWidget")
+        searchWidget = QWidget()
+        self.searchLayout = QVBoxLayout()
+        self.searchLayout.setContentsMargins(0,0,0,0)
+        searchWidget.setLayout(self.searchLayout)
+
+        nameEdit = QLineEdit()
+        self._namesEdit.append(nameEdit)
+        self.searchLayout.addWidget(nameEdit)
+
+        addLineButton = QPushButton(self.widget.tr("Add name"))
+        addLineButton.setObjectName('btnDefault')
+        addLineButton.released.connect(self.addLine)
+
+        validateButton = QPushButton(self.widget.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+        validateButton.released.connect(self.validated)
+
+        layout.addWidget(title, 0, 0)
+        layout.addWidget(tagLabel, 1, 0, 1, 1, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(self.tagEdit, 1, 1)
+        layout.addWidget(searchLabel, 2, 0, 1, 1, PySide2.QtCore.Qt.AlignTop )
+        layout.addWidget(searchWidget, 2, 1)
+        layout.addWidget(addLineButton, 3, 1)
+        layout.addWidget(validateButton, 4, 2)
+
+    def validated(self):
+        names = []
+        for name in self._namesEdit:
+            names.append(name.text())
+        self.container.tag_info.usingname_tag = self.tagEdit.text()
+        self.container.tag_info.usingname_search = names
+        self.container.emit(BiExperimentStates.TagUsingName)
+
+    def addLine(self):
+        nameEdit = QLineEdit()
+        self._namesEdit.append(nameEdit)
+        self.searchLayout.addWidget(nameEdit)
+
+    def update(self, action: BiAction):
+        pass    
+
+    def get_widget(self):
+        return self.widget                        

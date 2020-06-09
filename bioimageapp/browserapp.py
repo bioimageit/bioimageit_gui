@@ -18,7 +18,7 @@ from bioimageapp.browser.components import (BiBrowserToolBarComponent, BiBrowser
 
 from bioimageapp.experiment.states import BiExperimentCreateStates, BiExperimentStates
 from bioimageapp.experiment.containers import (BiExperimentCreateContainer, BiExperimentContainer)
-from bioimageapp.experiment.models import BiExperimentCreateModel
+from bioimageapp.experiment.models import BiExperimentCreateModel, BiExperimentModel
 from bioimageapp.experiment.components import (BiExperimentCreateComponent, BiExperimentToolbarComponent, 
                                                BiExperimentImportComponent, BiExperimentTagComponent)
 
@@ -43,6 +43,7 @@ class BiBrowserApp(BiComponent):
         self.browserModel = BiBrowserModel(self.browserContainer, True)
         self.metadataEditorModel = BiMetadataEditorModel(self.metadataEditorContainer)
         self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
+        self.experimentModel = BiExperimentModel(self.experimentContainer)
 
         # components
         self.toolBarComponent = BiBrowserToolBarComponent(self.browserContainer)
@@ -117,8 +118,9 @@ class BiBrowserApp(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.ItemDoubleClicked:
             self.metadataEditorContainer.file = self.browserContainer.doubleClickedFile()
-            self.metadataEditorContainer.emit( BiMetadataEditorStates.FileModified )
-            self.metadataEditorComponent.get_widget().show()
+            if (self.metadataEditorContainer.file.endswith('.md.json')):
+                self.metadataEditorContainer.emit( BiMetadataEditorStates.FileModified )
+                self.metadataEditorComponent.get_widget().show()
             return
 
         if action.state == BiMetadataEditorStates.JsonWrote:
@@ -154,8 +156,12 @@ class BiBrowserApp(BiComponent):
             return
 
         if action.state == BiBrowserStates.TableLoaded:
-            if self.isExperimentDir():
+            experiment_uri = self.isExperimentDir()
+            if experiment_uri != '':
                 self.experimentToolBarComponent.get_widget().setVisible(True)
+                if experiment_uri != self.experimentContainer.experiment_uri:
+                    self.experimentContainer.experiment_uri = experiment_uri
+                    self.experimentContainer.emit(BiExperimentStates.Load)
             else:
                 self.experimentToolBarComponent.get_widget().setVisible(False)
             return   
@@ -178,10 +184,10 @@ class BiBrowserApp(BiComponent):
 
     def isExperimentDir(self):
         if os.path.isfile( os.path.join(self.browserContainer.currentPath, 'experiment.md.json') ):
-            return True
+            return os.path.join(self.browserContainer.currentPath, 'experiment.md.json')
         parent_dir = os.path.abspath(os.path.join(self.browserContainer.currentPath, os.pardir))    
         if os.path.isfile( os.path.join(parent_dir, 'experiment.md.json') ):
-            return True
-        return False       
+            return os.path.join(parent_dir, 'experiment.md.json')
+        return ''       
 
 
