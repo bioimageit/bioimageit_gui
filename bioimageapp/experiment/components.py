@@ -16,10 +16,10 @@ from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreate
 from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
 from bioimageapp.experiment.models import BiExperimentModel
 
-from bioimageapp.metadata.states import BiRawDataStates
-from bioimageapp.metadata.containers import BiRawDataContainer
+from bioimageapp.metadata.states import BiRawDataStates, BiMetadataExperimentStates
+from bioimageapp.metadata.containers import BiRawDataContainer, BiMetadataExperimentContainer
 from bioimageapp.metadata.components import BiRawDataComponent, BiMetadataExperimentComponent
-from bioimageapp.metadata.models import BiRawDataModel
+from bioimageapp.metadata.models import BiRawDataModel, BiMetadataExperimentModel
 
 class BiExperimentComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -30,17 +30,20 @@ class BiExperimentComponent(BiComponent):
         self.container.register(self)
         self.rawDataContainer = BiRawDataContainer()
         self.rawDataContainer.register(self)
+        self.experimentContainer = BiMetadataExperimentContainer()
+        self.experimentContainer.register(self)
 
         # models
         self.experimentModel = BiExperimentModel(self.container)
         self.rawDataModel = BiRawDataModel(self.rawDataContainer)
+        self.metadataExperimentModel = BiMetadataExperimentModel(self.experimentContainer)
 
         # components
-        self.infoComponent = BiMetadataExperimentComponent(self.container)
         self.toolbarComponent = BiExperimentToolbarComponent(self.container)
         self.datasetListComponent = BiExperimentDataSetListComponent(self.container)
         self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
         self.rawDataComponent = BiRawDataComponent(self.rawDataContainer)
+        self.metadataExperimentComponent = BiMetadataExperimentComponent(self.experimentContainer)
 
         # widget
         self.widget = QWidget()
@@ -66,10 +69,8 @@ class BiExperimentComponent(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
             self.datasetListComponent.datasetClicked('data')
-            return
-
-        if action.state == BiExperimentStates.EditInfo:
-            self.infoComponent.get_widget().setVisible(True)   
+            self.experimentContainer.experiment = self.container.experiment
+            self.experimentContainer.emit(BiMetadataExperimentStates.Loaded)
             return
 
         if action.state == BiExperimentStates.RawDataClicked:
@@ -81,6 +82,16 @@ class BiExperimentComponent(BiComponent):
         if action.state == BiRawDataStates.Saved:
             self.datasetListComponent.datasetClicked('data')
             return
+
+        if action.state == BiExperimentStates.EditInfoClicked:
+            self.metadataExperimentComponent.get_widget().setVisible(True)    
+            return
+
+        if action.state == BiMetadataExperimentStates.Saved:
+            self.metadataExperimentComponent.get_widget().setVisible(False)   
+            self.toolbarComponent.updateTitle() 
+            return
+
 
     def get_widget(self): 
         return self.widget
@@ -136,8 +147,11 @@ class BiExperimentToolbarComponent(BiComponent):
         layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignRight)
         layout.addWidget(self.nameLabel, 0, PySide2.QtCore.Qt.AlignRight)
 
+    def updateTitle(self):
+        self.nameLabel.setText(self.container.experiment.metadata.name)
+
     def infoButtonClicked(self):
-        self.container.emit(BiExperimentStates.EditInfo)
+        self.container.emit(BiExperimentStates.EditInfoClicked)
 
     def importButtonClicked(self):
         self.container.emit(BiExperimentStates.ImportClicked)

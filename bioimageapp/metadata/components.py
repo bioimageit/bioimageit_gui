@@ -7,8 +7,8 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
 
 from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.metadata.states import BiRawDataStates
-from bioimageapp.metadata.containers import BiRawDataContainer                               
+from bioimageapp.metadata.states import BiRawDataStates, BiMetadataExperimentStates
+from bioimageapp.metadata.containers import BiRawDataContainer, BiMetadataExperimentContainer                               
 
 
 class BiRawDataComponent(BiComponent):
@@ -128,7 +128,7 @@ class BiProcessedDataComponent(BiComponent):
         return self.widget  
 
 class BiMetadataExperimentComponent(BiComponent):
-    def __init__(self, container: BiRawDataContainer):
+    def __init__(self, container: BiMetadataExperimentContainer):
         super().__init__()
         self._object_name = 'BiMetadataExperimentComponent'
         self.container = container
@@ -172,10 +172,21 @@ class BiMetadataExperimentComponent(BiComponent):
         layout.addWidget(QWidget(), 5, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
-        pass
+        self.container.experiment.metadata.name = self.nameEdit.text()
+        self.container.experiment.metadata.author = self.authorEdit.text()
+        self.container.experiment.metadata.date = self.createddateEdit.text()
+        self.container.emit(BiMetadataExperimentStates.SaveClicked)
 
     def update(self, action: BiAction):
-        pass
+        if action.state == BiMetadataExperimentStates.Loaded:
+            self.nameEdit.setText(self.container.experiment.metadata.name)
+            self.authorEdit.setText(self.container.experiment.metadata.author)
+            self.createddateEdit.setText(self.container.experiment.metadata.date)
+
+        if action.state == BiMetadataExperimentStates.Saved:
+            msgBox = QMessageBox()
+            msgBox.setText("Information have been saved")
+            msgBox.exec()  
 
     def get_widget(self): 
         return self.widget    

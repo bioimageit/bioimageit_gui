@@ -5,3 +5,8 @@ class BiRawDataStates(BiStates):
     Loaded = "BiRawDataStates.Loaded"
     SaveClicked = "BiRawDataStates.SaveClicked"
     Saved = "BiRawDataStates.Saved"
+
+class BiMetadataExperimentStates(BiStates):
+    Loaded = "BiMetadataExperimentStates.Loaded"
+    SaveClicked = "BiMetadataExperimentStates.SaveClicked"
+    Saved = "BiMetadataExperimentStates.Saved"    
