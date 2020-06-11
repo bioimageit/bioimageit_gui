@@ -17,6 +17,10 @@ class BiExperimentStates(BiStates):
     DataImported = "BiExperimentStates.DataImported"
     TagsSaved = "BiExperimentStates.TagsSaved"
     DataTagged = "BiExperimentStates.DataTagged"
+    EditInfo = "BiExperimentStates.EditInfo"
+    DataSetClicked = "BiExperimentStates.DataSetClicked"
+    DataSetLoaded = "BiExperimentStates.DataSetLoaded"
+    RawDataClicked = "BiExperimentStates.RawDataClicked"
 
 class BiExperimentCreateStates(BiStates):
     CreateClicked = "BiExperimentCreateStates.CreateClicked"

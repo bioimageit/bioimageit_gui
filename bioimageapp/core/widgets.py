@@ -1,12 +1,11 @@
 import PySide2.QtCore
 from PySide2.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
                             QEasingCurve, QParallelAnimationGroup)
-from PySide2.QtGui import QMouseEvent, QDrag
+from PySide2.QtGui import QMouseEvent, QDrag, QCursor
 from PySide2.QtWebEngineWidgets import QWebEngineView
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton, 
                                QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout,
-                               QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget 
-                               )
+                               QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget)
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
 class BiButton(QPushButton):
@@ -15,6 +14,7 @@ class BiButton(QPushButton):
 
     def __init__(self, title: str, parent: QWidget = None):
         super(BiButton, self).__init__(title, parent)
+        self.setCursor(QCursor(PySide2.QtCore.Qt.PointingHandCursor))
         self.pressed.connect(self.emitClicked)
         self.id = 0
         self.content = ''

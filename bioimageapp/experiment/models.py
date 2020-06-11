@@ -14,8 +14,13 @@ class BiExperimentModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Load:
+            print("load experiment from ", self.container.experiment_uri)
             self.container.experiment = Experiment(self.container.experiment_uri)
-            self.container.emit(BiExperimentStates.Loaded)                
+            self.container.emit(BiExperimentStates.Loaded)  
+
+        if action.state == BiExperimentStates.DataSetClicked:
+            self.container.current_dataset = self.container.experiment.get_dataset(self.container.current_dataset_name)
+            self.container.emit(BiExperimentStates.DataSetLoaded)                  
 
         if action.state == BiExperimentStates.NewImportFile:
             self.container.experiment.import_data(

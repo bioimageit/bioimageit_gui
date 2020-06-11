@@ -7,121 +7,191 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
 
 from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.metadata.states import BiMetadataStates, BiMetadataEditorStates
-from bioimageapp.metadata.containers import BiMetadataContainer, BiMetadataEditorContainer                               
+from bioimageapp.metadata.states import BiRawDataStates
+from bioimageapp.metadata.containers import BiRawDataContainer                               
 
-class BiMetadataPreviewComponent(BiComponent):
-    def __init__(self, container: BiMetadataContainer):
+
+class BiRawDataComponent(BiComponent):
+    def __init__(self, container: BiRawDataContainer):
         super().__init__()
-        self._object_name = 'BiBrowserPreviewComponent'
+        self._object_name = 'BiMetadataRawDataComponent'
         self.container = container
         self.container.register(self)
 
-        self.buildWidget()
+        self.widget = QWidget()
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setObjectName("BiSideBar")
+        layout = QGridLayout()
+        self.widget.setLayout(layout)
+        self.tagWidgets = {}
 
-    def buildWidget(self):
+        uriLabel = QLabel('URI')
+        self.uriEdit = QLineEdit()
+        self.uriEdit.setEnabled(False)
+
+        nameLabel = QLabel('Name')
+        self.nameEdit = QLineEdit()
+
+        formatLabel = QLabel('Format')
+        self.formatEdit = QLineEdit()
+
+        dateLabel = QLabel('Date')
+        self.dateEdit = QLineEdit()
+
+        authorLabel = QLabel('Author')
+        self.authorEdit = QLineEdit()
+
+        tagsWidget = QWidget()
+        self.tagsLayout = QGridLayout()
+        self.tagsLayout.setContentsMargins(0,0,0,0)
+        tagsWidget.setLayout(self.tagsLayout)
+
+        saveButton = QPushButton(self.widget.tr("Save"))
+        saveButton.setObjectName("btnPrimary")
+        saveButton.released.connect(self.saveButtonClicked)
+
+        descLabel = QLabel('Description')
+        descLabel.setObjectName('BiMetadataTitle')
+        tagsLabel = QLabel('Tags')
+        tagsLabel.setObjectName('BiMetadataTitle')
+
+        layout.addWidget(descLabel, 0, 0, 1, 2)
+        layout.addWidget(uriLabel, 1, 0)
+        layout.addWidget(self.uriEdit, 1, 1)
+        layout.addWidget(nameLabel, 2, 0)
+        layout.addWidget(self.nameEdit, 2, 1)
+        layout.addWidget(formatLabel, 3, 0)
+        layout.addWidget(self.formatEdit, 3, 1)
+        layout.addWidget(dateLabel, 4, 0)
+        layout.addWidget(self.dateEdit, 4, 1)
+        layout.addWidget(authorLabel, 5, 0)
+        layout.addWidget(self.authorEdit, 5, 1)
+        layout.addWidget(tagsLabel, 6, 0, 1, 2)
+        layout.addWidget(tagsWidget, 7, 0, 1, 2)
+        layout.addWidget(saveButton, 8, 0, 1, 2)
+        layout.addWidget(QWidget(), 9, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+
+        
+    def saveButtonClicked(self):
+        self.container.rawdata.metadata.name = self.nameEdit.text()
+        self.container.rawdata.metadata.format = self.formatEdit.text()
+        self.container.rawdata.metadata.date = self.dateEdit.text()
+        self.container.rawdata.metadata.author = self.authorEdit.text()
+
+        for key in self.tagWidgets:
+            self.container.rawdata.metadata.tags[key] = self.tagWidgets[key].text()
+
+        self.container.emit(BiRawDataStates.SaveClicked)
+
+    def update(self, action: BiAction):
+        if action.state == BiRawDataStates.Loaded:
+            self.nameEdit.setText(self.container.rawdata.metadata.name)
+            self.formatEdit.setText(self.container.rawdata.metadata.format)
+            self.dateEdit.setText(self.container.rawdata.metadata.date)
+            self.authorEdit.setText(self.container.rawdata.metadata.author)
+            self.uriEdit.setText(self.container.rawdata.metadata.uri)
+
+            # tags
+            for i in reversed(range(self.tagsLayout.count())): 
+                self.tagsLayout.itemAt(i).widget().deleteLater()
+            self.tagWidgets = {}
+            row_idx = -1    
+            for key in self.container.rawdata.metadata.tags:
+                label = QLabel(key)
+                edit = QLineEdit(self.container.rawdata.metadata.tags[key])
+                row_idx += 1
+                self.tagsLayout.addWidget(label, row_idx, 0) 
+                self.tagsLayout.addWidget(edit, row_idx, 1)
+                self.tagWidgets[key] = edit
+
+        if action.state == BiRawDataStates.Saved:
+            msgBox = QMessageBox()
+            msgBox.setText("Metadata have been saved")
+            msgBox.exec()            
+
+    def get_widget(self): 
+        return self.widget  
+
+class BiProcessedDataComponent(BiComponent):
+    def __init__(self, container: BiRawDataContainer):
+        super().__init__()
+        self._object_name = 'BiMetadataProcessedDataComponent'
+        self.container = container
+        self.container.register(self)
 
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
+
+    def update(self, action: BiAction):
+        pass
+
+    def get_widget(self): 
+        return self.widget  
+
+class BiMetadataExperimentComponent(BiComponent):
+    def __init__(self, container: BiRawDataContainer):
+        super().__init__()
+        self._object_name = 'BiMetadataExperimentComponent'
+        self.container = container
+        self.container.register(self)
+
+        self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QGridLayout()
         self.widget.setLayout(layout)
 
-        self.textEdit = QTextEdit(self.widget)
-        self.textEdit.setReadOnly(True)
-        layout.addWidget(self.textEdit, 0, 0, 1, 2)
+        title = QLabel(self.widget.tr("Experiment informations"))
+        title.setObjectName("BiLabelFormHeader1")
+        title.setMaximumHeight(50)
 
-        self.name = QLabel(self.widget)
-        layout.addWidget(QLabel(self.widget.tr("Name:")), 1, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.name, 1, 1, PySide2.QtCore.Qt.AlignTop)
+        nameLabel = QLabel('Name')
+        nameLabel.setObjectName('BiLabel')
+        self.nameEdit = QLineEdit()
 
-        self.type = QLabel(self.widget)
-        layout.addWidget(QLabel(self.widget.tr("Type:")), 2, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.type, 2, 1, PySide2.QtCore.Qt.AlignTop)
+        authorLabel = QLabel('Author')
+        authorLabel.setObjectName('BiLabel')
+        self.authorEdit = QLineEdit()
 
-        self.date = QLabel(self.widget)
-        layout.addWidget(QLabel(self.widget.tr("Date:")), 3, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.date, 3, 1, PySide2.QtCore.Qt.AlignTop)
+        createddateLabel = QLabel('Created date')
+        createddateLabel.setObjectName('BiLabel')
+        self.createddateEdit = QLineEdit()
 
-        openButton = QPushButton(self.widget.tr("Open"), self.widget)
-        openButton.setObjectName("btnDefault")
-        layout.addWidget(openButton, 4, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        openButton.released.connect(self.openButtonClicked)
+        saveButton = QPushButton(self.widget.tr("Save"))
+        saveButton.setObjectName("btnPrimary")
+        saveButton.released.connect(self.saveButtonClicked)
 
-        layout.addWidget(QWidget(self.widget), 5, 0, 1, 2)
+        layout.addWidget(title, 0, 0, 1, 2)
+        layout.addWidget(nameLabel, 1, 0)
+        layout.addWidget(self.nameEdit, 1, 1)
+        layout.addWidget(authorLabel, 2, 0)
+        layout.addWidget(self.authorEdit, 2, 1)
+        layout.addWidget(createddateLabel, 3, 0)
+        layout.addWidget(self.createddateEdit, 3, 1)
+        layout.addWidget(saveButton, 4, 0, 1, 2)
+        layout.addWidget(QWidget(), 5, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+
+    def saveButtonClicked(self):
+        pass
 
     def update(self, action: BiAction):
-        if action.state == BiMetadataStates.URIChanged:
-            fileInfo = QFileInfo(self.container.md_uri)
-            self.textEdit.setText(self.fileContentPreview(fileInfo.filePath()))
-            self.name.setText(fileInfo.fileName())
-            #self.type.setText(fileInfo.type)
-            self.date.setText(fileInfo.lastModified().toString("yyyy-MM-dd"))
-    
-    def fileContentPreview(self, filename: str) -> str:
-        with open(filename, 'r') as file:
-            data = file.read()
-        return data
-
-    def openButtonClicked(self):
-        self.container.emit(BiMetadataStates.OpenClicked)
+        pass
 
     def get_widget(self): 
-        return self.widget                 
+        return self.widget    
 
 
-class BiMetadataJsonEditorComponent(BiComponent):
-    def __init__(self, container: BiMetadataEditorContainer, readOnly :bool = False):
+class BiMetadataRunComponent(BiComponent):
+    def __init__(self, container: BiRawDataContainer):
         super().__init__()
-        self._object_name = 'BiMetadataEditorComponent'
+        self._object_name = 'BiMetadataRunComponent'
         self.container = container
         self.container.register(self)
 
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
 
-        layout = QVBoxLayout()
-
-        self.fileNameLabel = QLabel()
-        layout.addWidget(self.fileNameLabel)
-
-        self.textEdit = QTextEdit()
-        if readOnly:
-            self.textEdit.setEnabled(False)
-        #self.highlighter = BiHighlighterJson(self.textEdit.document())
-        layout.addWidget(self.textEdit)
-
-        if not readOnly:
-            buttonWidget = QWidget()
-
-            saveButton = QPushButton(self.widget.tr("Save"))
-            saveButton.setObjectName("btnPrimary")
-            cancelButton = QPushButton(self.widget.tr("Cancel"))
-            cancelButton.setObjectName("btnDefault")
-            buttonLayout = QHBoxLayout()
-            buttonLayout.addWidget(cancelButton, 1, PySide2.QtCore.Qt.AlignRight)
-            buttonLayout.addWidget(saveButton, 0, PySide2.QtCore.Qt.AlignRight)
-            buttonWidget.setLayout(buttonLayout)
-
-            layout.addWidget(buttonWidget)
-
-            saveButton.released.connect(self.save)
-            cancelButton.released.connect(self.cancel)
-
-        self.widget.setLayout(layout)
-
-        
     def update(self, action: BiAction):
-        if action.state == BiMetadataEditorStates.JsonRead:
-            self.fileNameLabel.setText(self.container.file)
-            self.textEdit.setText(self.container.content)
+        pass
 
-    def save(self):
-        self.container.content = self.textEdit.toPlainText()
-        self.container.emit(BiMetadataEditorStates.JsonModified)
-
-    def cancel(self):
-        self.textEdit.setText(self.container.content)
-
-    def get_widget(self):
-        return self.widget
+    def get_widget(self): 
+        return self.widget                        

@@ -9,12 +9,50 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
 from bioimageapp.core.framework import BiComponent, BiAction
 from bioimageapp.core.widgets import BiButton
 from bioimageapp.browser.states import BiBrowserStates
-from bioimageapp.browser.containers import (BiBrowserContainer) 
+from bioimageapp.browser.containers import BiBrowserContainer
+from bioimageapp.browser.models import BiBrowserModel
+
+class BiBrowserComponent(BiComponent):
+    def __init__(self, container: BiBrowserContainer):
+        super().__init__()
+        self._object_name = 'BiBrowserComponent'
+        self.container = container
+        self.container.register(self)  
+
+        self.browserModel = BiBrowserModel(self.container, True)
+        self.toolBarComponent = BiBrowserToolBarComponent(self.container)
+        self.shortCutComponent = BiBrowserShortCutsComponent(self.container)
+        self.tableComponent = BiBrowserTableComponent(self.container)
+
+        self.widget = QWidget()
+        self.widget.setObjectName("BiSideBar")
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        self.widget.setLayout(layout)
+
+        splitter = QSplitter()
+        splitter.addWidget(self.shortCutComponent.get_widget())
+        splitter.addWidget(self.tableComponent.get_widget())
+
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 3)
+
+        layout.addWidget(self.toolBarComponent.get_widget())
+        layout.addWidget(splitter)
+
+    def update(self, action: BiAction):
+        pass 
+
+    def get_widget(self): 
+        return self.widget  
 
 
 class BiBrowserToolBarComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
-        super(BiBrowserToolBarComponent, self).__init__()
+        super().__init__()
         self._object_name = 'BiBrowserToolBarComponent'
         self.container = container
         self.container.register(self)
@@ -117,7 +155,7 @@ class BiBrowserShortCutsComponent(BiComponent):
 
         self.wwidget = QWidget()
         mainLayout.addWidget(self.wwidget)
-        self.wwidget.setObjectName("BiBrowserShortCutsBar")
+        self.wwidget.setObjectName("BiLeftBar")
         self.wwidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
@@ -165,8 +203,8 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.container.emit(BiBrowserStates.NewExperimentClicked)
 
     def buttonClicked(self, path: str):
-        self.container.setCurrentPath(path)
-        self.container.emit(BiBrowserStates.DirectoryModified)
+        self.container.bookmarkPath = path
+        self.container.emit(BiBrowserStates.BookmarkOpenClicked)
 
     def get_widget(self): 
         return self.widget

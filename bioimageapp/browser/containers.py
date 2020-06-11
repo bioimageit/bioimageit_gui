@@ -29,7 +29,8 @@ class BiBrowserContainer(BiContainer):
         self.historyPaths = list()
         self.posHistory = 0
         self.bookmarks = BiBookmarks()
-        self.openExperimentPath = ""
+        self.openExperimentPath = ''
+        self.bookmarkPath = ''
 
     def clickedFileInfo(self):
         return self.files[self.clickedRow]  

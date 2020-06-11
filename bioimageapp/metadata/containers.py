@@ -1,20 +1,12 @@
 from bioimageapp.core.framework import BiContainer
 
-class BiMetadataContainer(BiContainer):
+class BiRawDataContainer(BiContainer):
 
     def __init__(self):
         super().__init__()
-        self._object_name = 'BiMetadataContainer'
+        self._object_name = 'BiRawDataContainer'
 
         # data
-        self.md_uri = ''
-
-class BiMetadataEditorContainer(BiContainer):
-
-    def __init__(self):
-        super().__init__()
-        self._object_name = 'BiMetadataEditorContainer'
-
-        # data
-        self.file = ''
-        self.content = ''  
+        self.md_uri = '' 
+        self.rawdata = None       
+        

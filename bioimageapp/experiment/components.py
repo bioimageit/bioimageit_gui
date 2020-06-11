@@ -11,9 +11,80 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QComboBox, QProgressBar)
 
 from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.core.widgets import BiTagWidget
+from bioimageapp.core.widgets import BiTagWidget, BiButton
 from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
-from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer                             
+from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
+from bioimageapp.experiment.models import BiExperimentModel
+
+from bioimageapp.metadata.states import BiRawDataStates
+from bioimageapp.metadata.containers import BiRawDataContainer
+from bioimageapp.metadata.components import BiRawDataComponent, BiMetadataExperimentComponent
+from bioimageapp.metadata.models import BiRawDataModel
+
+class BiExperimentComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiBrowserExperimentToolbar'
+        # containers
+        self.container = container
+        self.container.register(self)
+        self.rawDataContainer = BiRawDataContainer()
+        self.rawDataContainer.register(self)
+
+        # models
+        self.experimentModel = BiExperimentModel(self.container)
+        self.rawDataModel = BiRawDataModel(self.rawDataContainer)
+
+        # components
+        self.infoComponent = BiMetadataExperimentComponent(self.container)
+        self.toolbarComponent = BiExperimentToolbarComponent(self.container)
+        self.datasetListComponent = BiExperimentDataSetListComponent(self.container)
+        self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
+        self.rawDataComponent = BiRawDataComponent(self.rawDataContainer)
+
+        # widget
+        self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        self.widget.setLayout(layout)
+        splitter = QSplitter()
+
+        self.rawDataComponent.get_widget().setVisible(False)    
+
+        layout.addWidget(self.toolbarComponent.get_widget())
+        layout.addWidget(splitter)
+        splitter.addWidget(self.datasetListComponent.get_widget())
+        splitter.addWidget(self.datasetViewComponent.get_widget())
+        splitter.addWidget(self.rawDataComponent.get_widget())
+
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 3)
+
+    def update(self, action: BiAction):
+        if action.state == BiExperimentStates.Loaded:
+            self.datasetListComponent.datasetClicked('data')
+            return
+
+        if action.state == BiExperimentStates.EditInfo:
+            self.infoComponent.get_widget().setVisible(True)   
+            return
+
+        if action.state == BiExperimentStates.RawDataClicked:
+            self.rawDataContainer.md_uri = self.container.current_dataset.get(self.container.clickedRow).md_uri
+            self.rawDataContainer.emit(BiRawDataStates.URIChanged)
+            self.rawDataComponent.get_widget().setVisible(True)
+            return
+
+        if action.state == BiRawDataStates.Saved:
+            self.datasetListComponent.datasetClicked('data')
+            return
+
+    def get_widget(self): 
+        return self.widget
+
 
 class BiExperimentToolbarComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -29,6 +100,13 @@ class BiExperimentToolbarComponent(BiComponent):
         layout = QHBoxLayout()
         layout.setSpacing(1)
         self.widget.setLayout(layout)
+
+        # info
+        infoButton = QToolButton()
+        infoButton.setObjectName("BiBrowserExperimentToolbarInfoButton")
+        infoButton.setToolTip(self.widget.tr("Import data"))
+        infoButton.released.connect(self.infoButtonClicked)
+        layout.addWidget(infoButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # import
         importButton = QToolButton()
@@ -51,8 +129,15 @@ class BiExperimentToolbarComponent(BiComponent):
         processButton.released.connect(self.processButtonClicked)
         layout.addWidget(processButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
-        # fill widget
-        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignLeft)
+        # experiment name
+        self.nameLabel = QLabel()
+        self.nameLabel.setObjectName('BiLabel')
+        self.nameLabel.setAlignment(PySide2.QtCore.Qt.AlignRight | PySide2.QtCore.Qt.AlignVCenter)
+        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignRight)
+        layout.addWidget(self.nameLabel, 0, PySide2.QtCore.Qt.AlignRight)
+
+    def infoButtonClicked(self):
+        self.container.emit(BiExperimentStates.EditInfo)
 
     def importButtonClicked(self):
         self.container.emit(BiExperimentStates.ImportClicked)
@@ -64,10 +149,163 @@ class BiExperimentToolbarComponent(BiComponent):
         self.container.emit(BiExperimentStates.ProcessClicked)  
 
     def update(self, action: BiAction):
-        pass     
+        if action.state == BiExperimentStates.Loaded:
+            self.nameLabel.setText(self.container.experiment.metadata.name)     
 
     def get_widget(self): 
         return self.widget
+
+
+class BiExperimentDataSetListComponent(BiComponent):
+    def __init__(self, container: BiExperimentContainer):
+        super().__init__()
+        self._object_name = 'BiExperimentDataSetListComponent'
+        self.container = container
+        self.container.register(self)
+
+        self.widget = QWidget()
+        self.widget.setObjectName('BiLeftBar')
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+
+        self.buttons = []
+
+        layout = QVBoxLayout()
+        self.widget.setLayout(layout)
+
+        rawLabel = QLabel('Raw dataset')
+        rawLabel.setObjectName("BiBrowserShortCutsTitle")
+        rawLabel.setMaximumHeight(50)
+
+        ProcessedLabel = QLabel('Processed dataset')
+        ProcessedLabel.setObjectName("BiBrowserShortCutsTitle")
+        ProcessedLabel.setMaximumHeight(50)
+        
+
+        dataButton = BiButton('data')
+        dataButton.content = 'data'
+        dataButton.setObjectName('BiBrowserShortCutsButton')
+        dataButton.setCheckable(True)
+        dataButton.setChecked(True)
+        dataButton.clickedContent.connect(self.datasetClicked)
+        self.buttons.append(dataButton)
+
+        layout.addWidget(rawLabel, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(dataButton, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(ProcessedLabel, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
+
+    def datasetClicked(self, name: str):
+        for button in self.buttons:
+            if button.content != name:
+                button.setChecked(True)
+   
+        self.container.current_dataset_name = name
+        self.container.emit(BiExperimentStates.DataSetClicked)
+
+    def update(self, action: BiAction):
+        pass    
+
+    def updateList(self):
+        pass
+
+    def get_widget(self): 
+        return self.widget 
+
+class BiExperimentDataSetViewComponent(BiComponent):
+    def __init__(self, container: BiExperimentCreateContainer, default_destination: str = ""):
+        super().__init__()
+        self._object_name = 'BiExperimentDataSetComponent'
+        self.container = container
+        self.container.register(self)
+
+        self.widget = QWidget()
+        self.widget.setObjectName("BiWidget")
+        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(3,3,3,3)
+        self.widget.setLayout(layout)
+
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setColumnCount(4)
+
+        labels = ["", "Name", "Author", "Date"]
+        self.tableWidget.setHorizontalHeaderLabels(labels)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+        self.tableWidget.cellClicked.connect(self.cellClicked)
+
+        layout.addWidget(self.tableWidget) 
+
+    def update(self, action: BiAction):
+        if action.state == BiExperimentStates.DataSetLoaded:
+            if self.container.current_dataset_name == "data":
+                self.drawRawDataset()
+            else:
+                self.drawProcessedDataSet()        
+                 
+    def drawRawDataset(self):
+
+        # headers
+        tags = self.container.experiment.metadata.tags
+        self.tableWidget.setColumnCount(4 + len(tags))
+        labels = ["Name"]
+        for tag in tags:
+            labels.append(tag)
+        labels.append("Format")
+        labels.append("Author")
+        labels.append("Date")
+        self.tableWidget.setHorizontalHeaderLabels(labels)
+
+        exp_size = self.container.current_dataset.size()
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setRowCount(exp_size)
+        if exp_size < 10:
+            self.tableWidget.verticalHeader().setFixedWidth(20)
+        elif exp_size >= 10 and exp_size < 100  :
+            self.tableWidget.verticalHeader().setFixedWidth(40)  
+        elif exp_size >= 100 and exp_size < 1000  :    
+            self.tableWidget.verticalHeader().setFixedWidth(60) 
+
+        data_list = self.container.current_dataset.get_data_list()
+        
+        for i in range(len(data_list)):
+            raw_metadata = data_list[i].metadata
+
+            # name
+            col_idx  = 0
+            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.name))
+            # tags
+            for tag in tags:
+                col_idx += 1
+                if tag in raw_metadata.tags:
+                    self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.tags[tag])) 
+            # format
+            col_idx += 1
+            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.format))                
+            # author
+            col_idx += 1
+            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.author))
+            # created date
+            col_idx += 1
+            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.date))
+
+    def cellClicked(self, row : int, col : int):
+        self.container.clickedRow = row
+        self.container.emit(BiExperimentStates.RawDataClicked)
+        self.highlightLine(row)
+
+    def highlightLine(self, row: int):
+        for col in range(self.tableWidget.columnCount()):
+            if self.tableWidget.item(row, col):
+                self.tableWidget.item(row, col).setSelected(True) 
+
+    def drawProcessedDataSet(self):
+        pass             
+
+    def get_widget(self): 
+        return self.widget    
+
 
 class BiExperimentCreateComponent(BiComponent):
     def __init__(self, container: BiExperimentCreateContainer, default_destination: str = ""):

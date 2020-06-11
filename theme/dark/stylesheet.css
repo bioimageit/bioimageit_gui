@@ -3,11 +3,19 @@ QWidget#BiWidget{
   color: #f1f1f1;
 }
 
+QWidget#bioImageApp{
+  background-color: #000000;
+}
+
 QWidget#BiWidgetNegative{
   background-color: #5A8E8E;/* #585858; #5A8E8E; #5d5a59; */
 }
 
 QLabel#BiLabel{
+  color: #f1f1f1;
+}
+
+QLabel{
   color: #f1f1f1;
 }
 
@@ -18,13 +26,6 @@ QLabel#BiLabelNegative{
 
 QCheckBox#BiCheckBoxNegative{
   background-color: #242425;
-  color: #f1f1f1;
-}
-
-QWidget#BiToolBar{
-  background-color: #333333;
-  max-height: 60px;
-  min-height: 60px;
   color: #f1f1f1;
 }
 
@@ -540,11 +541,12 @@ QScrollArea{
 //////////////////////////////////////////////*/
 QLineEdit{
   color : #e1e1e1;
-  background-color: #242425;
+  background: #515153;
   border: 1px solid #888888;
   border-radius: 4px;
   padding: 6px 12px;
   margin-bottom: 0;
+  selection-background-color: #5A8E8E;
 }
 
 QLineEdit[readOnly="true"]{
@@ -650,6 +652,24 @@ QComboBox QAbstractItemView {
 	selection-color: #e1e1e1;
 }
 
+QMessageBox {
+  background-color: #333333;
+}
+
+QMessageBox QLabel {
+  color: #aaa;
+}
+
+QMessageBox QPushButton {
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #fff;
+  background-color: #5A8E8E;
+  border: 1px solid #5A8E8E;
+  border-radius: 4px;
+}
+
 /*////////////////////////////////////////////////////////////////////////////
 // QTableView
 ////////////////////////////////////////////////////////////////////////////*/
@@ -713,7 +733,7 @@ QSplitter{
 }
 
 QSplitter::handle {
-    background-color:#888888;
+    background-color:#000000;
 }
 
 QSplitter::handle:horizontal {
@@ -734,44 +754,58 @@ QSplitter::handle:pressed {
 
  QTabBar::tab {
   color: #d1d1d1;
-  padding: 2px;
+  padding: 7px;
   border-left: 1px solid #f1f1f1;
-  background-color: #585858;
+  background-color: #242424;
   border: none;
-  border-top-right-radius: 4px;
 }
 
-QTabBar::tab:selected, QTabBar::tab:hover {
-  background-color: #585858;
-  border-left: 1px solid #e1e1e1; 
+QTabBar::tab:selected{
+  background-color: #39393b;
+  border-left: 1px solid #000000; 
+  border-top: 2px solid #548888;
+  color: white;
+}
+
+QTabBar::tab:hover {
+  background-color: #39393b;
+  border-left: 1px solid #000000; 
   color: white;
 }
 
 QTabBar::tab:!selected {
-  background-color: #585858;
-  border-left: 1px solid #e1e1e1;
+  background-color: #242424;
+  border-left: 1px solid #555555;
 }
  
 QTabWidget::pane { /* The tab widget frame */
-  border-top: 1px solid #f1f1f1;
-  background-color: #f1f1f1;
+  border-top: 0px solid #000000;
+  background-color: #000000;
 }
 
 QTabWidget::tab-bar {
   left: 0px; /* move to the right by 5px */
-  background-color: #f1f1f1;
+  background-color: #000000;
 } 
 
 /* // ////////////////////////////////////////////////
 QToolBar
 // //////////////////////////////////////////////// */
+QWidget#BiToolBar{
+  background-color: #39393b;
+  max-height: 50px;
+  min-height: 50px;
+  color: #f1f1f1;
+  border-bottom: 1px solid #08080a;	
+}
+
 QToolBar {
-  background: #333333;
+  background-color: #39393b;
   spacing: 1px; /* spacing between items in the tool bar */
   height: 70px;
   padding-left: 12px;
   padding-right: 12px;
-  border-bottom: 1px solid #888888;	
+  border-bottom: 1px solid #08080a;	
 }
 
 QToolBar::handle {
@@ -783,26 +817,28 @@ QToolButton {
   margin-bottom: 0;
   font-size: 14px;
   color: #f1f1f1;
-  background-color: #333333;
-  border: 1px solid #888888;
+  /*background-color: #333333;*/
+  /*border: 1px solid #888888;*/
+  background-color: #39393b;
   border-radius: 4px;
 
 }
 
 QToolButton:hover {
   color: #d1d1d1;
-  background-color: #242425;
-  border: 1px solid #888888;
+  background-color: #717172;
+  border-top: 1px solid #818181;
 }
 
 QToolButton:pressed {
-  border: 3px solid #aaaaaa;
+  background-color: #717172;
+  border: 1px solid #818181;
 }
 
 QToolButton:disabled {
   color : #000;
-  background-color: #888888;
-  border: 1px solid #888888;
+  background-color: #717172;
+  border: 1px solid #717172;
 }
 
 /* // ///////////////////////////////////////////////
@@ -828,10 +864,10 @@ blForm
 }
 
 #BiLabelFormHeader2{
-    color: black;
+    color: #5A8E8E;
     font: italic;
     margin-left: 8px;
-    border-top : 1px solid #aaaaaa;
+    border-top : 1px solid #5A8E8E;
     text-transform: uppercase;
 }
  
@@ -1113,6 +1149,10 @@ QToolButton#BiExperimentToolBarBookmarkButton{
   image: url(star.svg);
 }
 
+QToolButton#BiBrowserExperimentToolbarInfoButton{
+  image: url(exclamation-sign.svg);
+}
+
 QToolButton#BiBrowserExperimentToolbarImportButton{
   image: url(upload.svg);
 }
@@ -1185,8 +1225,12 @@ QPushButton#BiBrowserShortCutsNewButton:disabled {
  border: 1px solid #888888;
 }
 
-.QWidget#BiBrowserShortCutsBar{
-  background-color: #3a3a3a;
+.QWidget#BiLeftBar{
+  background-color: #333333;
+}
+
+.QWidget#BiSideBar{
+  background-color: #333333;
 }
 
 QSplitter#BiBrowserAppSplitterRight{
@@ -1204,11 +1248,18 @@ QPushButton#BiBrowserShortCutsButton {
   margin-bottom: 0;
   font-size: 14px;
   color: #f1f1f1;
+  border-radius: 4px;
   background-color: #3a3a3a;
-  border: 1px solid #3a3a3a;
+  border: 1px solid #333333;
 }
 
 QPushButton#BiBrowserShortCutsButton:hover {
+  color: #f1f1f1;
+  background-color: #548888;
+  border: 1px solid #548888;
+}
+
+QPushButton#BiBrowserShortCutsButton:checked {
   color: #f1f1f1;
   background-color: #548888;
   border: 1px solid #548888;
@@ -1225,7 +1276,13 @@ QPushButton#BiBrowserShortCutsButton:disabled {
 }
 
 QLabel#BiBrowserShortCutsTitle{
-  background-color: #3a3a3a;
+  background-color: #333333;
+  color: #f1f1f1;
+  border-top: 1px solid #f1f1f1;
+}
+
+QLabel#BiMetadataTitle{
+  background-color: #333333;
   color: #f1f1f1;
   border-top: 1px solid #f1f1f1;
 }
