@@ -14,7 +14,6 @@ class BiExperimentModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Load:
-            print("load experiment from ", self.container.experiment_uri)
             self.container.experiment = Experiment(self.container.experiment_uri)
             self.container.emit(BiExperimentStates.Loaded)  
 

@@ -61,7 +61,7 @@ class BiBrowserApp(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.OpenExperiment:
-            print("open experiment", self.browserContainer.openExperimentPath)
+            #print("open experiment", self.browserContainer.openExperimentPath)
             exp_path = self.browserContainer.openExperimentPath
             if not self.browserContainer.openExperimentPath.endswith("experiment.md.json"):
                 exp_path = os.path.join(exp_path, "experiment.md.json")

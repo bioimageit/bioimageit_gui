@@ -1,4 +1,5 @@
 import ntpath
+import subprocess
 
 import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage
@@ -24,26 +25,28 @@ from bioimageapp.metadata.models import BiRawDataModel, BiMetadataExperimentMode
 class BiExperimentComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
         super().__init__()
-        self._object_name = 'BiBrowserExperimentToolbar'
+        self._object_name = 'BiExperimentComponent'
         # containers
         self.container = container
         self.container.register(self)
         self.rawDataContainer = BiRawDataContainer()
         self.rawDataContainer.register(self)
-        self.experimentContainer = BiMetadataExperimentContainer()
-        self.experimentContainer.register(self)
+        self.metadataExperimentContainer = BiMetadataExperimentContainer()
+        self.metadataExperimentContainer.register(self)
 
         # models
         self.experimentModel = BiExperimentModel(self.container)
         self.rawDataModel = BiRawDataModel(self.rawDataContainer)
-        self.metadataExperimentModel = BiMetadataExperimentModel(self.experimentContainer)
+        self.metadataExperimentModel = BiMetadataExperimentModel(self.metadataExperimentContainer)
 
         # components
         self.toolbarComponent = BiExperimentToolbarComponent(self.container)
         self.datasetListComponent = BiExperimentDataSetListComponent(self.container)
         self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
         self.rawDataComponent = BiRawDataComponent(self.rawDataContainer)
-        self.metadataExperimentComponent = BiMetadataExperimentComponent(self.experimentContainer)
+        self.metadataExperimentComponent = BiMetadataExperimentComponent(self.metadataExperimentContainer)
+        self.importComponent = BiExperimentImportComponent(self.container)
+        self.tagComponent = BiExperimentTagComponent(self.container)
 
         # widget
         self.widget = QWidget()
@@ -69,8 +72,8 @@ class BiExperimentComponent(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
             self.datasetListComponent.datasetClicked('data')
-            self.experimentContainer.experiment = self.container.experiment
-            self.experimentContainer.emit(BiMetadataExperimentStates.Loaded)
+            self.metadataExperimentContainer.experiment = self.container.experiment
+            self.metadataExperimentContainer.emit(BiMetadataExperimentStates.Loaded)
             return
 
         if action.state == BiExperimentStates.RawDataClicked:
@@ -91,6 +94,33 @@ class BiExperimentComponent(BiComponent):
             self.metadataExperimentComponent.get_widget().setVisible(False)   
             self.toolbarComponent.updateTitle() 
             return
+
+        if action.state == BiExperimentStates.ImportClicked:
+            self.importComponent.get_widget().setVisible(True) 
+            return
+
+        if action.state == BiExperimentStates.DataImported:
+            self.importComponent.get_widget().setVisible(False)
+            msgBox = QMessageBox()
+            msgBox.setText("Data imported")
+            msgBox.exec() 
+            self.datasetListComponent.datasetClicked('data')
+            return
+
+        if action.state == BiExperimentStates.TagClicked:
+            self.tagComponent.get_widget().setVisible(True)
+            return
+
+        if action.state == BiExperimentStates.TagsSaved or action.state == BiExperimentStates.DataTagged:
+            self.tagComponent.get_widget().setVisible(False)
+            msgBox = QMessageBox()
+            msgBox.setText("Tags saved")
+            msgBox.exec() 
+            self.datasetListComponent.datasetClicked('data')
+            return    
+
+        if action.state == BiExperimentStates.ProcessClicked:
+            subprocess.call(['python3', 'finderapp.py']) 
 
 
     def get_widget(self): 
@@ -164,7 +194,7 @@ class BiExperimentToolbarComponent(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
-            self.nameLabel.setText(self.container.experiment.metadata.name)     
+            self.nameLabel.setText(self.container.experiment.metadata.name)            
 
     def get_widget(self): 
         return self.widget
