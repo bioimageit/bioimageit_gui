@@ -8,7 +8,18 @@ class BiRawDataContainer(BiContainer):
 
         # data
         self.md_uri = '' 
-        self.rawdata = None       
+        self.rawdata = None     
+
+
+class BiProcessedDataContainer(BiContainer):
+
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiProcessedDataContainer'
+
+        # data
+        self.md_uri = '' 
+        self.processeddata = None          
 
 
 class BiMetadataExperimentContainer(BiContainer):

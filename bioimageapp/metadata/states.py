@@ -6,6 +6,10 @@ class BiRawDataStates(BiStates):
     SaveClicked = "BiRawDataStates.SaveClicked"
     Saved = "BiRawDataStates.Saved"
 
+class BiProcessedDataStates(BiStates):
+    URIChanged = "BiProcessedDataStates.URIChanged"
+    Loaded = "BiProcessedDataStates.Loaded"  
+
 class BiMetadataExperimentStates(BiStates):
     Loaded = "BiMetadataExperimentStates.Loaded"
     SaveClicked = "BiMetadataExperimentStates.SaveClicked"

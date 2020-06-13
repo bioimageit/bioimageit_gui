@@ -7,8 +7,8 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
 
 from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.metadata.states import BiRawDataStates, BiMetadataExperimentStates
-from bioimageapp.metadata.containers import BiRawDataContainer, BiMetadataExperimentContainer                               
+from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiMetadataExperimentStates
+from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiMetadataExperimentContainer                               
 
 
 class BiRawDataComponent(BiComponent):
@@ -113,16 +113,37 @@ class BiRawDataComponent(BiComponent):
         return self.widget  
 
 class BiProcessedDataComponent(BiComponent):
-    def __init__(self, container: BiRawDataContainer):
+    def __init__(self, container: BiProcessedDataContainer):
         super().__init__()
         self._object_name = 'BiMetadataProcessedDataComponent'
         self.container = container
         self.container.register(self)
 
-        self.widget = QWidget()
+        self.widget = QLabel("Processed data widget")
 
     def update(self, action: BiAction):
-        pass
+        if action.state == BiProcessedDataStates.Loaded:
+            metadata = self.container.processeddata.metadata
+            content = '<table style="width:100%; border: 1px solid black; border-collapse: collapse;">'
+            #content += '<tr><td>URI</td><td>:</td><td>'+ metadata.uri +'</td></tr>'
+            content += '<tr><td>Name</td><td>:</td><td>'+ metadata.name +'</td></tr>'
+            content += '<tr><td>Author</td><td>:</td><td>'+ metadata.author +'</td></tr>'
+            content += '<tr><td>Date</td><td>:</td><td>'+ metadata.date +'</td></tr>'
+            content += '<tr><td>Format</td><td>:</td><td>'+ metadata.format +'</td></tr>'
+
+            content += '<tr><td>Label</td><td>:</td><td>'+ metadata.output['label'] +'</td></tr>'
+            origin = self.container.processeddata.get_origin().metadata
+            for tag in origin.tags:
+                content += '<tr><td>'+ tag +'</td><td>:</td><td>'+ origin.tags[tag] +'</td></tr>'
+            content += '</table>'
+            content += '<br/>Process inputs:<br/>'
+            content += '<table style="width:100%">'
+            content += '<tr><th>Name</th><th>Format</th></tr>'
+            for input in metadata.inputs:
+                content += '<tr><td>'+ input.name+'</td><td>'+ input.type +'</td></tr>'
+            content += '</table>'
+
+            self.widget.setText(content)
 
     def get_widget(self): 
         return self.widget  
