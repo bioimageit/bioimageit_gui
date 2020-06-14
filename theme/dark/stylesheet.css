@@ -551,8 +551,8 @@ QLineEdit{
 
 QLineEdit[readOnly="true"]{
   color : #d1d1d1;
-  background-color: #242425;
-  border: 1px solid #888888;
+  background-color: #383838;
+  border: 1px solid #444444;
   border-radius: 4px;
   padding: 6px 12px;
   margin-bottom: 0;
@@ -1233,6 +1233,12 @@ QPushButton#BiBrowserShortCutsNewButton:disabled {
   background-color: #333333;
 }
 
+.QLabel#BiSideBarTitle{
+  background-color: #383838;
+  color: #f1f1f1;
+  border-top: 1px solid #f1f1f1;
+}
+
 QSplitter#BiBrowserAppSplitterRight{
   background-color: #242425;
 }
@@ -1281,8 +1287,8 @@ QLabel#BiBrowserShortCutsTitle{
   border-top: 1px solid #f1f1f1;
 }
 
-QLabel#BiMetadataTitle{
-  background-color: #333333;
+.QLabel#BiMetadataTitle{
+  background-color: #383838;
   color: #f1f1f1;
   border-top: 1px solid #f1f1f1;
 }

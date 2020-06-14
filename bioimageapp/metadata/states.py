@@ -9,6 +9,7 @@ class BiRawDataStates(BiStates):
 class BiProcessedDataStates(BiStates):
     URIChanged = "BiProcessedDataStates.URIChanged"
     Loaded = "BiProcessedDataStates.Loaded"  
+    RunOpenClicked = "BiProcessedDataStates.RunOpenClicked"
 
 class BiMetadataExperimentStates(BiStates):
     Loaded = "BiMetadataExperimentStates.Loaded"

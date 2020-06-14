@@ -2,7 +2,7 @@ import ntpath
 import subprocess
 
 import PySide2.QtCore
-from PySide2.QtGui import QPixmap, QImage
+from PySide2.QtGui import QPixmap, QImage, QPalette
 from PySide2.QtCore import QFileInfo, QDir, Signal
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem, QAbstractItemView,
@@ -229,14 +229,21 @@ class BiExperimentDataSetListComponent(BiComponent):
         self.container = container
         self.container.register(self)
 
-        self.widget = QWidget()
-        self.widget.setObjectName('BiLeftBar')
-        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget = QScrollArea()
+        self.widget.setObjectName('BiWidget')
+        #self.widget.setBackgroundRole(QPalette.Dark)
+        self.widget.setWidgetResizable(True)
+        self.widget.setMinimumWidth(150)
+
+        widget = QWidget()
+        widget.setObjectName('BiSideBar')
+        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setWidget(widget)
 
         self.buttons = []
 
         self.layout = QVBoxLayout()
-        self.widget.setLayout(self.layout)
+        widget.setLayout(self.layout)
 
     def datasetClicked(self, name: str):   
         self.container.current_dataset_name = name
@@ -248,11 +255,11 @@ class BiExperimentDataSetListComponent(BiComponent):
             
     def createDataSetsButton(self):
         rawLabel = QLabel('Raw dataset')
-        rawLabel.setObjectName("BiBrowserShortCutsTitle")
+        rawLabel.setObjectName("BiSideBarTitle")
         rawLabel.setMaximumHeight(50)
 
         ProcessedLabel = QLabel('Processed dataset')
-        ProcessedLabel.setObjectName("BiBrowserShortCutsTitle")
+        ProcessedLabel.setObjectName("BiSideBarTitle")
         ProcessedLabel.setMaximumHeight(50)
         
         dataButton = BiButton('data')
