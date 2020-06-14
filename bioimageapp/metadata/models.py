@@ -1,12 +1,13 @@
 import os
 
 from bioimagepy.data import RawData, ProcessedData
+from bioimagepy.metadata.run import Run
 
 from bioimageapp.core.framework import BiModel, BiAction
 from bioimageapp.metadata.states import (BiRawDataStates, BiProcessedDataStates, 
-                                         BiMetadataExperimentStates)
+                                         BiMetadataExperimentStates, BiRunStates)
 from bioimageapp.metadata.containers import (BiRawDataContainer, BiProcessedDataContainer, 
-                                            BiMetadataExperimentContainer)
+                                            BiMetadataExperimentContainer, BiRunContainer)
 
 
 class BiRawDataModel(BiModel):  
@@ -39,6 +40,20 @@ class BiProcessedDataModel(BiModel):
             self.container.processeddata = ProcessedData(self.container.md_uri)
             self.container.emit(BiProcessedDataStates.Loaded)
             return    
+
+class BiRunModel(BiModel):  
+    def __init__(self, container: BiRunContainer):
+        super().__init__()
+        self._object_name = 'BiRunModel'
+        self.container = container
+        self.container.register(self)
+
+    def update(self, action: BiAction):
+        if action.state == BiRunStates.URIChanged:
+            self.container.run = Run(self.container.md_uri)
+            self.container.emit(BiRunStates.Loaded)
+            return  
+
 
 class BiMetadataExperimentModel(BiModel):  
     def __init__(self, container: BiMetadataExperimentContainer):

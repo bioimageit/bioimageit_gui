@@ -7,7 +7,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
 
 from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiMetadataExperimentStates
+from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiMetadataExperimentStates, BiRunStates
 from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiMetadataExperimentContainer                               
 
 
@@ -321,10 +321,80 @@ class BiMetadataRunComponent(BiComponent):
         self.container = container
         self.container.register(self)
 
-        self.widget = QWidget()
+        self.widget = QScrollArea()
+        self.widget.setObjectName('BiWidget')
+        self.widget.setWidgetResizable(True)
+        self.widget.setMinimumWidth(150)
+
+        widget = QWidget()
+        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setObjectName("BiSideBar")
+        layout = QGridLayout()
+        widget.setLayout(layout)
+        self.widget.setWidget(widget)
+
+        toolLabel = QLabel('Tool')
+        self.toolEdit = QLineEdit()
+        self.toolEdit.setEnabled(False)
+
+        tooluriLabel = QLabel('Name')
+        self.tooluriEdit = QLineEdit()
+        self.tooluriEdit.setEnabled(False)
+
+        parametersLabel = QLabel('Parameters')
+        parametersLabel.setObjectName('BiMetadataTitle')
+
+        self.parametersTable = QTableWidget()
+
+        inputsLabel = QLabel('Inputs')
+        inputsLabel.setObjectName('BiMetadataTitle')
+
+        self.inputsTable = QTableWidget()
+
+        tagsWidget = QWidget()
+        self.tagsLayout = QGridLayout()
+        self.tagsLayout.setContentsMargins(0,0,0,0)
+        tagsWidget.setLayout(self.tagsLayout)
+
+        layout.addWidget(toolLabel, 0, 0)
+        layout.addWidget(self.toolEdit, 0, 1)
+        layout.addWidget(tooluriLabel, 1, 0)
+        layout.addWidget(self.tooluriEdit, 1, 1)
+        layout.addWidget(parametersLabel, 2, 0, 1, 2)
+        layout.addWidget(self.parametersTable, 3, 0, 1, 2)
+        layout.addWidget(inputsLabel, 4, 0, 1, 2)
+        layout.addWidget(self.inputsTable, 5, 0, 1, 2)
+        layout.addWidget(QWidget(), 6, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
 
     def update(self, action: BiAction):
-        pass
+        if action.state == BiRunStates.Loaded:
+            metadata = self.container.run.metadata
+
+            self.toolEdit.setText(metadata.process_name)
+            self.tooluriEdit.setText(metadata.process_uri)
+
+            # parameters
+            self.parametersTable.setColumnCount(2)
+            self.parametersTable.setHorizontalHeaderLabels(["Name", "Value"])
+            self.parametersTable.setRowCount(0)
+            self.parametersTable.setRowCount(len(metadata.parameters))
+            row_idx = 0
+            for param in metadata.parameters:
+                self.parametersTable.setItem(row_idx, 0, QTableWidgetItem(param.name))
+                self.parametersTable.setItem(row_idx, 1, QTableWidgetItem(str(param.value)))
+                row_idx += 1
+
+            # inputs
+            self.inputsTable.setColumnCount(3)
+            self.inputsTable.setHorizontalHeaderLabels(["Name", "Dataset", "Query"])
+            self.inputsTable.setRowCount(0)
+            self.inputsTable.setRowCount(len(metadata.inputs))
+            row_idx = 0
+            for input in metadata.inputs:
+                self.inputsTable.setItem(row_idx, 0, QTableWidgetItem(input.name))
+                self.inputsTable.setItem(row_idx, 1, QTableWidgetItem(input.dataset))  
+                self.inputsTable.setItem(row_idx, 2, QTableWidgetItem(input.query))  
+                row_idx += 1
 
     def get_widget(self): 
         return self.widget                        

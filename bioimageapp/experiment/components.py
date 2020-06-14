@@ -19,10 +19,10 @@ from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreate
 from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
 from bioimageapp.experiment.models import BiExperimentModel
 
-from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiMetadataExperimentStates
-from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiMetadataExperimentContainer
-from bioimageapp.metadata.components import BiRawDataComponent, BiProcessedDataComponent, BiMetadataExperimentComponent
-from bioimageapp.metadata.models import BiRawDataModel, BiProcessedDataModel, BiMetadataExperimentModel
+from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiRunStates, BiMetadataExperimentStates
+from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiRunContainer, BiMetadataExperimentContainer
+from bioimageapp.metadata.components import BiRawDataComponent, BiProcessedDataComponent, BiMetadataRunComponent, BiMetadataExperimentComponent
+from bioimageapp.metadata.models import BiRawDataModel, BiProcessedDataModel, BiRunModel, BiMetadataExperimentModel
 
 class BiExperimentComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -35,6 +35,8 @@ class BiExperimentComponent(BiComponent):
         self.rawDataContainer.register(self)
         self.processedDataContainer = BiProcessedDataContainer()
         self.processedDataContainer.register(self)
+        self.runContainer = BiRunContainer()
+        self.runContainer.register(self)
         self.metadataExperimentContainer = BiMetadataExperimentContainer()
         self.metadataExperimentContainer.register(self)
 
@@ -42,6 +44,7 @@ class BiExperimentComponent(BiComponent):
         self.experimentModel = BiExperimentModel(self.container)
         self.rawDataModel = BiRawDataModel(self.rawDataContainer)
         self.processedDataModel = BiProcessedDataModel(self.processedDataContainer)
+        self.runModel = BiRunModel(self.runContainer)
         self.metadataExperimentModel = BiMetadataExperimentModel(self.metadataExperimentContainer)
 
         # components
@@ -50,6 +53,7 @@ class BiExperimentComponent(BiComponent):
         self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
         self.rawDataComponent = BiRawDataComponent(self.rawDataContainer)
         self.processedDataComponent = BiProcessedDataComponent(self.processedDataContainer)
+        self.runComponent = BiMetadataRunComponent(self.runContainer)
         self.metadataExperimentComponent = BiMetadataExperimentComponent(self.metadataExperimentContainer)
         self.importComponent = BiExperimentImportComponent(self.container)
         self.tagComponent = BiExperimentTagComponent(self.container)
@@ -143,6 +147,13 @@ class BiExperimentComponent(BiComponent):
 
         if action.state == BiExperimentStates.DataSetClicked:
             self.hideDataComponents()     
+
+        if action.state == BiProcessedDataStates.RunOpenClicked:
+            self.runContainer.md_uri = self.processedDataContainer.processeddata.metadata.run_uri   
+            self.runContainer.emit(BiRunStates.URIChanged) 
+
+        if action.state == BiRunStates.Loaded:    
+            self.runComponent.get_widget().setVisible(True)    
 
 
     def get_widget(self): 
