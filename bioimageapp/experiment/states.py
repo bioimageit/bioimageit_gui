@@ -23,6 +23,7 @@ class BiExperimentStates(BiStates):
     RawDataClicked = "BiExperimentStates.RawDataClicked"
     ProcessedDataClicked = "BiExperimentStates.ProcessedDataClicked"
     RefreshClicked = "BiExperimentStates.RefreshClicked"
+    CloseClicked = "BiExperimentStates.CloseClicked"
 
 class BiExperimentCreateStates(BiStates):
     CreateClicked = "BiExperimentCreateStates.CreateClicked"

@@ -53,13 +53,11 @@ class BiBrowserApp(BiComponent):
         self.widget.setLayout(layout)
 
         self.tabWidget = QTabWidget()
-        self.tabWidget.setTabsClosable(True)
         layout.addWidget(self.tabWidget)
         self.tabWidget.addTab(self.browserComponent.get_widget(), "Browser")
 
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.OpenExperiment:
-            #print("open experiment", self.browserContainer.openExperimentPath)
             exp_path = self.browserContainer.openExperimentPath
             if not self.browserContainer.openExperimentPath.endswith("experiment.md.json"):
                 exp_path = os.path.join(exp_path, "experiment.md.json")
@@ -71,6 +69,10 @@ class BiBrowserApp(BiComponent):
             self.tabWidget.addTab(experimentComponent.get_widget(), "Experiment name")
             self.tabWidget.setCurrentIndex(self.tabWidget.count()-1)
             experimentContainer.emit(BiExperimentStates.Load)
+
+        if action.state == BiExperimentStates.CloseClicked:
+            self.tabWidget.removeTab(self.tabWidget.currentIndex())
+            self.tabWidget.setCurrentIndex(0)
 
         if action.state == BiExperimentStates.Loaded:
             self.tabWidget.setTabText(self.tabWidget.currentIndex(), action.parent_container.experiment.metadata.name)

@@ -217,6 +217,13 @@ class BiExperimentToolbarComponent(BiComponent):
         layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignRight)
         layout.addWidget(self.nameLabel, 0, PySide2.QtCore.Qt.AlignRight)
 
+        # close button
+        closeButton = QToolButton()
+        closeButton.setObjectName('BiBrowserExperimentToolbarCloseButton')
+        closeButton.released.connect(self.closeButtonClicked)
+        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignRight)
+        layout.addWidget(closeButton, 0, PySide2.QtCore.Qt.AlignRight)
+
     def updateTitle(self):
         self.nameLabel.setText(self.container.experiment.metadata.name)
 
@@ -233,7 +240,10 @@ class BiExperimentToolbarComponent(BiComponent):
         self.container.emit(BiExperimentStates.ProcessClicked) 
 
     def refreshButtonClicked(self):
-        self.container.emit(BiExperimentStates.RefreshClicked)     
+        self.container.emit(BiExperimentStates.RefreshClicked)  
+
+    def closeButtonClicked(self):
+        self.container.emit(BiExperimentStates.CloseClicked)  
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
