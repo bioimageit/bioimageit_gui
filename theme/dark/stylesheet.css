@@ -1165,6 +1165,10 @@ QToolButton#BiBrowserExperimentToolbarProcessButton{
   image: url(cog-wheel-silhouette.svg);
 }
 
+QToolButton#BiBrowserExperimentToolbarRefreshButton{
+  image: url(refresh-arrow.svg);
+}
+
 QLabel#BiBrowserDirIcon{
   image: url(open-folder.svg);
 }

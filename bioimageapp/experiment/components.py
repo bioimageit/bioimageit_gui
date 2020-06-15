@@ -18,6 +18,7 @@ from bioimageapp.core.widgets import BiTagWidget, BiButton
 from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
 from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
 from bioimageapp.experiment.models import BiExperimentModel
+from bioimageapp.experiment.dataview import BiDataView
 
 from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiRunStates, BiMetadataExperimentStates
 from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiRunContainer, BiMetadataExperimentContainer
@@ -143,7 +144,7 @@ class BiExperimentComponent(BiComponent):
             return    
 
         if action.state == BiExperimentStates.ProcessClicked:
-            subprocess.call(['python3', 'finderapp.py']) 
+            subprocess.Popen(['python3', 'finderapp.py']) 
 
         if action.state == BiExperimentStates.DataSetClicked:
             self.hideDataComponents()     
@@ -154,7 +155,6 @@ class BiExperimentComponent(BiComponent):
 
         if action.state == BiRunStates.Loaded:    
             self.runComponent.get_widget().setVisible(True)    
-
 
     def get_widget(self): 
         return self.widget
@@ -203,6 +203,13 @@ class BiExperimentToolbarComponent(BiComponent):
         processButton.released.connect(self.processButtonClicked)
         layout.addWidget(processButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
+        # refresh
+        refreshButton = QToolButton()
+        refreshButton.setObjectName("BiBrowserExperimentToolbarRefreshButton")
+        refreshButton.setToolTip(self.widget.tr("Refresh"))
+        refreshButton.released.connect(self.refreshButtonClicked)
+        layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
+
         # experiment name
         self.nameLabel = QLabel()
         self.nameLabel.setObjectName('BiLabel')
@@ -223,7 +230,10 @@ class BiExperimentToolbarComponent(BiComponent):
         self.container.emit(BiExperimentStates.TagClicked)    
 
     def processButtonClicked(self):
-        self.container.emit(BiExperimentStates.ProcessClicked)  
+        self.container.emit(BiExperimentStates.ProcessClicked) 
+
+    def refreshButtonClicked(self):
+        self.container.emit(BiExperimentStates.RefreshClicked)     
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Loaded:
@@ -242,7 +252,6 @@ class BiExperimentDataSetListComponent(BiComponent):
 
         self.widget = QScrollArea()
         self.widget.setObjectName('BiWidget')
-        #self.widget.setBackgroundRole(QPalette.Dark)
         self.widget.setWidgetResizable(True)
         self.widget.setMinimumWidth(150)
 
@@ -261,10 +270,14 @@ class BiExperimentDataSetListComponent(BiComponent):
         self.container.emit(BiExperimentStates.DataSetClicked)
 
     def update(self, action: BiAction):
-        if action.state == BiExperimentStates.Loaded:
+        if action.state == BiExperimentStates.Loaded or action.state == BiExperimentStates.RefreshClicked: 
             self.createDataSetsButton()
             
     def createDataSetsButton(self):
+        # free layout
+        for i in reversed(range(self.layout.count())): 
+            self.layout.itemAt(i).widget().deleteLater()
+
         rawLabel = QLabel('Raw dataset')
         rawLabel.setObjectName("BiSideBarTitle")
         rawLabel.setMaximumHeight(50)
@@ -278,7 +291,8 @@ class BiExperimentDataSetListComponent(BiComponent):
         dataButton.setObjectName('BiBrowserShortCutsButton')
         dataButton.setCheckable(True)
         dataButton.setAutoExclusive(True)
-        dataButton.setChecked(True)
+        if self.container.current_dataset_name == 'data':
+            dataButton.setChecked(True)
         dataButton.clickedContent.connect(self.datasetClicked)
         self.buttons.append(dataButton)
 
@@ -293,6 +307,8 @@ class BiExperimentDataSetListComponent(BiComponent):
             datasetButton.setObjectName('BiBrowserShortCutsButton')
             datasetButton.setCheckable(True)
             datasetButton.setAutoExclusive(True)
+            if self.container.current_dataset_name == pdataset.metadata.name:
+                datasetButton.setChecked(True)
             datasetButton.clickedContent.connect(self.datasetClicked)
             self.layout.addWidget(datasetButton, 0, PySide2.QtCore.Qt.AlignTop)
             self.buttons.append(datasetButton)
@@ -320,6 +336,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
         self.widget.setLayout(layout)
 
         self.tableWidget = QTableWidget()
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(4)
 
         labels = ["", "Name", "Author", "Date"]
@@ -327,11 +344,12 @@ class BiExperimentDataSetViewComponent(BiComponent):
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
         self.tableWidget.cellClicked.connect(self.cellClicked)
+        self.tableWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
 
         layout.addWidget(self.tableWidget) 
 
     def update(self, action: BiAction):
-        if action.state == BiExperimentStates.DataSetLoaded:
+        if action.state == BiExperimentStates.DataSetLoaded or action.state == BiExperimentStates.RefreshClicked:
             if self.container.current_dataset_name == "data":
                 self.drawRawDataset()
             else:
@@ -390,6 +408,12 @@ class BiExperimentDataSetViewComponent(BiComponent):
             self.container.emit(BiExperimentStates.RawDataClicked)
         else: 
             self.container.emit(BiExperimentStates.ProcessedDataClicked)
+
+    def cellDoubleClicked(self, row: int, col: int):
+        data = self.container.current_dataset.get(row)
+        viewer = BiDataView(data.metadata.uri, data.metadata.format)
+        viewer.show()
+               
 
     def highlightLine(self, row: int):
         for col in range(self.tableWidget.columnCount()):

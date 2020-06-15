@@ -1,8 +1,6 @@
 import sys
 import os
-import subprocess
 from pathlib import Path
-import subprocess
 
 import PySide2.QtCore
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QTabWidget, QHBoxLayout

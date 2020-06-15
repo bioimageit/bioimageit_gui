@@ -26,7 +26,7 @@ class BiFinderApp(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.OpenProcess:
-            subprocess.call(['python3', 'runnerapp.py', self.finderContainer.clicked_tool])
+            subprocess.Popen(['python3', 'runnerapp.py', self.finderContainer.clicked_tool])
 
     def get_widget(self):
         return self.finderComponent.get_widget()
