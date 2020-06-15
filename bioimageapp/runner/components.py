@@ -89,16 +89,25 @@ class BiRunnerComponent(BiComponent):
         self.inputFolderWidget = BiRunnerInputFolderWidget(process_info)
         self.inputExperimentWidget = BiRunnerInputExperimentWidget(process_info)
 
+        inputsLabel = QLabel('Inputs')
+        inputsLabel.setObjectName('BiSideBarTitle')    
+        self.execLayout.addWidget(inputsLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.inputSingleWidget, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.inputFolderWidget, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.inputExperimentWidget, 0, PySide2.QtCore.Qt.AlignTop)
 
         # parameters
+        parametersLabel = QLabel('Parameters')
+        parametersLabel.setObjectName('BiSideBarTitle')  
         self.paramWidget = BiRunnerParamWidget(process_info)
+        self.execLayout.addWidget(parametersLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.paramWidget, 0, PySide2.QtCore.Qt.AlignTop)
 
         # exec
+        execLabel = QLabel('Exec')
+        execLabel.setObjectName('BiSideBarTitle') 
         self.execWidget = BiRunnerExecWidget()
+        self.execLayout.addWidget(execLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.execWidget, 0, PySide2.QtCore.Qt.AlignTop)
         self.execWidget.runSignal.connect(self.run)
 

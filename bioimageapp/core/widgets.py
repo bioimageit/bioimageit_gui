@@ -38,6 +38,7 @@ class BiToolButton(QToolButton):
         self.clickedContent.emit(self.content)        
 
 class BiFileSelectWidget(QWidget):
+    TextChangedSignal = Signal()
 
     def __init__(self, isDir: bool, parent: QWidget):
         super().__init__(parent)
@@ -68,11 +69,12 @@ class BiFileSelectWidget(QWidget):
             dir = QFileDialog.getExistingDirectory(self, "Open a directory")
             if dir != "":
                 self.lineEdit.setText(dir)
-            
+                self.TextChangedSignal.emit()
         else:
             file = QFileDialog.getOpenFileName(self, "Open a file", '', "*.*")
             if file != "":
                 self.lineEdit.setText(file[0])
+                self.TextChangedSignal.emit()
 
 class BiDragLabel(QLabel):
     def __init__(self, parent: QWidget):

@@ -1,3 +1,4 @@
+import os
 import PySide2.QtCore
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox, 
@@ -6,6 +7,7 @@ from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
 from bioimageapp.core.widgets import BiFileSelectWidget
 
 from bioimagepy.process import Process 
+from bioimagepy.experiment import Experiment
 
 class BiRunnerInputSingleWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):
@@ -149,12 +151,155 @@ class BiRunnerInputFolderFilterWidget(QWidget):
         if self.selectWidget.currentText() == 'Ends with':
             return '\\'+self.lineEdit.text()+'$'   
 
+class BiRunnerInputDatasetFilterWidget(QWidget):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        filterButton = QPushButton(self.tr("Filter"))
+        filterButton.setObjectName('btnDefaultLeft')
+        self.statusLabel = QLabel('OFF')
+        self.statusLabel.setObjectName('BiProcessDataFilterWidgetStatus')
+        layout.addWidget(filterButton)
+        layout.addWidget(self.statusLabel)
+        self.setLayout(layout)
+        filterButton.released.connect(self.showFilter)
+
+        self.createFilterWidget()
+
+    def createFilterWidget(self):
+        self.filterWidget = QWidget()
+        self.filterWidget.setObjectName('BiWidget')
+        self.filterWidget.setVisible(False)
+        filterLayout = QGridLayout()
+        self.filterWidget.setLayout(filterLayout)
+        
+        tagLabel = QLabel(self.tr('Tag'))
+        operatorLabel = QLabel(self.tr('Operator'))
+        valueLabel = QLabel(self.tr('Value'))
+
+        self.tagWidget = QComboBox()    
+        self.operatorWidget = QComboBox()
+        self.operatorWidget.addItem("=")
+        self.operatorWidget.addItem("<")
+        self.operatorWidget.addItem(">")
+        self.lineEdit = QLineEdit()
+        
+        cancelButton = QPushButton(self.tr("Cancel"))
+        cancelButton.setObjectName('btnDefault')
+        validateButton = QPushButton(self.tr("Validate"))
+        validateButton.setObjectName('btnPrimary')
+
+        cancelButton.released.connect(self.cancel)
+        validateButton.released.connect(self.hideFilter)
+
+        filterLayout.addWidget(tagLabel, 0, 0)
+        filterLayout.addWidget(operatorLabel, 0, 1)
+        filterLayout.addWidget(valueLabel, 0, 2)
+        filterLayout.addWidget(self.tagWidget, 1, 0)
+        filterLayout.addWidget(self.operatorWidget, 1, 1)
+        filterLayout.addWidget(self.lineEdit, 1, 2)
+        filterLayout.addWidget(cancelButton, 2, 1)
+        filterLayout.addWidget(validateButton, 2, 2)
+
+    def cancel(self):
+        self.lineEdit.setText('')
+        self.hideFilter()
+
+    def hideFilter(self):
+        self.filterWidget.setVisible(False)  
+        if self.lineEdit.text() != '':
+            self.statusLabel.setText("ON")
+        else:
+            self.statusLabel.setText("OFF")   
+
+    def showFilter(self):
+        self.filterWidget.setVisible(True)
+
+    def filter(self):
+        if self.lineEdit.text() == '':
+            return ''
+        if self.selectWidget.currentText() == 'Starts with':
+            return '^' + self.lineEdit.text()
+        if self.selectWidget.currentText() == 'Contains':
+            return self.lineEdit.text() 
+        if self.selectWidget.currentText() == 'Ends with':
+            return '\\'+self.lineEdit.text()+'$'  
+
+    def setTags(self, tags: list):
+        for i in range(self.tagWidget.count()):
+            self.tagWidget.removeItem(0)
+        self.tagWidget.addItems(tags)
+
 
 class BiRunnerInputExperimentWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):
-        super().__init__(parent) 
-        self.info = process_info.metadata           
+        super().__init__(parent)
+        self.info = process_info.metadata
+        # create widget
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(0,0,0,0)
 
+        experimentLabel = QLabel("Experiment dir")
+        self.experimentEdit = BiFileSelectWidget(True, self)
+        self.experimentEdit.TextChangedSignal.connect(self.openExperiment)
+        self.layout.addWidget(experimentLabel, 0, 1)
+        self.layout.addWidget(self.experimentEdit, 0, 2, 1, 2)
+
+        row = 0
+        self.inputs_count = 0
+        for inp in self.info.inputs:
+            if inp.io == "input":
+                row += 1
+                self.inputs_count += 1
+                nameLabel = QLabel(inp.name)
+                descLabel = QLabel(inp.description)
+                descLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
+                selectorWidget = QComboBox()
+                filterWidget = BiRunnerInputDatasetFilterWidget()
+                filterWidget.setMaximumWidth(100)
+                self.layout.addWidget(nameLabel, row, 0)
+                self.layout.addWidget(descLabel, row, 1)
+                self.layout.addWidget(selectorWidget, row, 2)
+                self.layout.addWidget(filterWidget, row, 3)
+                nameLabel.setVisible(False)
+ 
+        self.setLayout(self.layout)    
+
+    def openExperiment(self):
+        experiment_uri = os.path.join(self.experimentEdit.text(), 'experiment.md.json')
+        datasets = ['data']
+        tags = []
+        if os.path.isfile(experiment_uri):
+            experiment = Experiment(experiment_uri)
+            tags = experiment.metadata.tags
+            for i in range(experiment.get_processed_datasets_size()):
+                pdataset = experiment.get_processed_dataset_at(i)
+                datasets.append(pdataset.metadata.name)
+
+        idx = 0
+        for inp in self.info.inputs:
+            idx += 1
+            if (self.layout.itemAtPosition(idx, 2)):
+                # add datasets list to combobox
+                widget = self.layout.itemAtPosition(idx, 2).widget()
+                for i in range(widget.count()):  
+                    widget.removeItem(0)
+                widget.addItems(datasets) 
+                # add tags to filter combobox
+                self.layout.itemAtPosition(idx, 3).widget().setTags(tags)       
+
+    def inputs(self) -> list:
+        inps = []
+        for row in range(self.inputs_count):
+            nameLabel = self.layout.itemAtPosition(row+1, 0).widget()
+            selectorWidget = self.layout.itemAtPosition(row+1, 2).widget()
+            filterWidget = self.layout.itemAtPosition(row+1, 3).widget()
+            inps.append({"name": nameLabel.text(), "uri": selectorWidget.text(), "filter": filterWidget.filter()})
+        return inps   
+    
 
 class BiRunnerParamWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):

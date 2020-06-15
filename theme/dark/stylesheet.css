@@ -595,7 +595,7 @@ QSpinBox::down-arrow {
 //////////////////////////////////////////////*/
 QComboBox {
   color : #e1e1e1;
-  background-color: #242425;
+  background-color: #515153;
 	border: 1px solid #888888;
   border-radius: 4px;
   padding: 6px 12px;
@@ -608,7 +608,7 @@ QComboBox:editable {
 }
 
 QComboBox:!editable, QComboBox::drop-down:editable {
-     background-color: #242425;
+     background-color: #515153;
 }
 
 /* QComboBox gets the "on" state when the popup is open */
