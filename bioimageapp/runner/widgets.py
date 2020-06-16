@@ -3,11 +3,13 @@ import PySide2.QtCore
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox, 
                                QPushButton, QVBoxLayout, QGridLayout, QLabel,
-                               QCheckBox, QFileDialog, QTabWidget)
+                               QCheckBox, QFileDialog, QTabWidget, QProgressBar,
+                               QTextEdit)
 from bioimageapp.core.widgets import BiFileSelectWidget
 
 from bioimagepy.process import Process 
 from bioimagepy.experiment import Experiment
+from bioimagepy.metadata.run import Run
 
 class BiRunnerInputSingleWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):
@@ -277,7 +279,13 @@ class BiRunnerInputExperimentWidget(QWidget):
             tags = experiment.metadata.tags
             for i in range(experiment.get_processed_datasets_size()):
                 pdataset = experiment.get_processed_dataset_at(i)
-                datasets.append(pdataset.metadata.name)
+                # get run
+                run_uri = os.path.join(os.path.dirname(pdataset.md_uri), 'run.md.json')
+                if os.path.isfile(run_uri):
+                    run = Run(run_uri)
+                    process = Process(run.metadata.process_uri)
+                    for output in process.metadata.outputs:
+                        datasets.append(pdataset.metadata.name + ":" + output.description)
 
         idx = 0
         for inp in self.info.inputs:
@@ -407,7 +415,24 @@ class BiRunnerExecWidget(QWidget):
 
 class BiRunnerProgressWidget(QWidget):
     def __init__(self, parent: QWidget = None):
-        super().__init__(parent)          
+        super().__init__(parent)  
+
+        self.setObjectName('BiWidget')
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.progressBar = QProgressBar() 
+        self.logWidget = QTextEdit()
+        self.logWidget.setReadOnly(True)
+
+        layout.addWidget(self.progressBar)
+        layout.addWidget(self.logWidget)
+
+    def setProgress(self, progress: int):
+        self.progressBar.setValue(progress)
+
+    def setMessage(self, message: str):
+        self.logWidget.append(message)           
 
 
 # ///////////////////////////////////////////////// //

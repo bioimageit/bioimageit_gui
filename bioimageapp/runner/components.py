@@ -49,6 +49,12 @@ class BiRunnerComponent(BiComponent):
         execWidget.setLayout(self.execLayout)
         #layout.addWidget(execWidget)
 
+    def progressValue(self, progress: int):
+        self.progressWidget.setProgress(progress)
+
+    def progressMessage(self, message: str):
+        self.progressWidget.setMessage(message)
+    
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.ProcessInfoLoaded:
             print("build exec widget") 
@@ -112,7 +118,10 @@ class BiRunnerComponent(BiComponent):
         self.execWidget.runSignal.connect(self.run)
 
         # progess
+        progressLabel = QLabel('Progress')
+        progressLabel.setObjectName('BiSideBarTitle') 
         self.progressWidget = BiRunnerProgressWidget()
+        self.execLayout.addWidget(progressLabel, 0, PySide2.QtCore.Qt.AlignTop)
         self.execLayout.addWidget(self.progressWidget, 0, PySide2.QtCore.Qt.AlignTop)
 
         # fill
@@ -169,7 +178,7 @@ class BiRunnerComponent(BiComponent):
             self.container.output_uri = self.inputFolderWidget.output()
         elif self.container.mode == BiRunnerContainer.MODE_EXP:
             self.container.inputs = self.inputExperimentWidget.inputs() 
-            self.container.output_uri = self.inputFolderWidget.output()   
+            self.container.output_uri = ''   
     
         self.container.parameters = self.paramWidget.parameters()
 

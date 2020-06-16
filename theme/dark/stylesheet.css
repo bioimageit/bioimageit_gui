@@ -1056,12 +1056,24 @@ QProgressBar {
     text-align: center;
     color: #d1d1d1;
     height: 6px;
-    background-color: 242425;
+    background-color: #515153;
 }
 
 QProgressBar::chunk {
     background-color: #5A8E8E;
     border-radius: 7px;
+}
+
+/* // ///////////////////////////////////////////////
+QTextEdit
+ // /////////////////////////////////////////////// */
+
+ QTextEdit{
+  color: #e1e1e1;
+  background-color: #333333;
+  selection-color: #f1f1f1; 
+  selection-background-color: #404040; 
+  border: 1px solid #242424;
 }
 
 /* // ///////////////////////////////////////////////
