@@ -93,7 +93,7 @@ class BiRunnerComponent(BiComponent):
         # inputs
         self.inputSingleWidget = BiRunnerInputSingleWidget(process_info)
         self.inputFolderWidget = BiRunnerInputFolderWidget(process_info)
-        self.inputExperimentWidget = BiRunnerInputExperimentWidget(process_info)
+        self.inputExperimentWidget = BiRunnerInputExperimentWidget(self.container)
 
         inputsLabel = QLabel('Inputs')
         inputsLabel.setObjectName('BiSideBarTitle')    
@@ -178,7 +178,7 @@ class BiRunnerComponent(BiComponent):
             self.container.output_uri = self.inputFolderWidget.output()
         elif self.container.mode == BiRunnerContainer.MODE_EXP:
             self.container.inputs = self.inputExperimentWidget.inputs() 
-            self.container.output_uri = ''   
+            self.container.output_uri = self.inputExperimentWidget.output() 
     
         self.container.parameters = self.paramWidget.parameters()
 

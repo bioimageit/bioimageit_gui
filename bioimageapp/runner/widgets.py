@@ -5,7 +5,9 @@ from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QPushButton, QVBoxLayout, QGridLayout, QLabel,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit)
+
 from bioimageapp.core.widgets import BiFileSelectWidget
+from bioimageapp.runner.containers import BiRunnerContainer
 
 from bioimagepy.process import Process 
 from bioimagepy.experiment import Experiment
@@ -151,7 +153,7 @@ class BiRunnerInputFolderFilterWidget(QWidget):
         if self.selectWidget.currentText() == 'Contains':
             return self.lineEdit.text() 
         if self.selectWidget.currentText() == 'Ends with':
-            return '\\'+self.lineEdit.text()+'$'   
+            return "\\"+self.lineEdit.text()+'$'   
 
 class BiRunnerInputDatasetFilterWidget(QWidget):
     def __init__(self, parent: QWidget = None):
@@ -223,13 +225,9 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
     def filter(self):
         if self.lineEdit.text() == '':
             return ''
-        if self.selectWidget.currentText() == 'Starts with':
-            return '^' + self.lineEdit.text()
-        if self.selectWidget.currentText() == 'Contains':
-            return self.lineEdit.text() 
-        if self.selectWidget.currentText() == 'Ends with':
-            return '\\'+self.lineEdit.text()+'$'  
-
+        else:    
+            return self.tagWidget.text() + self.operatorWidget.text() + self.lineEdit.text()
+ 
     def setTags(self, tags: list):
         for i in range(self.tagWidget.count()):
             self.tagWidget.removeItem(0)
@@ -237,9 +235,11 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
 
 
 class BiRunnerInputExperimentWidget(QWidget):
-    def __init__(self, process_info: Process, parent: QWidget = None):
+    def __init__(self, container: BiRunnerContainer, parent: QWidget = None):
         super().__init__(parent)
-        self.info = process_info.metadata
+        self.container = container
+        self.info = container.process_info.metadata
+
         # create widget
         self.layout = QGridLayout()
         self.layout.setContentsMargins(0,0,0,0)
@@ -250,7 +250,13 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.layout.addWidget(experimentLabel, 0, 1)
         self.layout.addWidget(self.experimentEdit, 0, 2, 1, 2)
 
-        row = 0
+        outputDatasetLabel = QLabel("Output dataset name")
+        self.outputDatasetNameEdit = QLineEdit()
+        self.outputDatasetNameEdit.setText(self.info.id)
+        self.layout.addWidget(outputDatasetLabel, 1, 1)
+        self.layout.addWidget(self.outputDatasetNameEdit, 1, 2, 1, 2)
+
+        row = 1
         self.inputs_count = 0
         for inp in self.info.inputs:
             if inp.io == "input":
@@ -272,10 +278,13 @@ class BiRunnerInputExperimentWidget(QWidget):
 
     def openExperiment(self):
         experiment_uri = os.path.join(self.experimentEdit.text(), 'experiment.md.json')
-        datasets = ['data']
+        datasets_text = ['data']
+        datasets_name = ['data']
+        datasets_origin = ['']
         tags = []
         if os.path.isfile(experiment_uri):
             experiment = Experiment(experiment_uri)
+            self.container.experiment = experiment
             tags = experiment.metadata.tags
             for i in range(experiment.get_processed_datasets_size()):
                 pdataset = experiment.get_processed_dataset_at(i)
@@ -285,9 +294,10 @@ class BiRunnerInputExperimentWidget(QWidget):
                     run = Run(run_uri)
                     process = Process(run.metadata.process_uri)
                     for output in process.metadata.outputs:
-                        datasets.append(pdataset.metadata.name + ":" + output.description)
-
-        idx = 0
+                        datasets_text.append(pdataset.metadata.name + ":" + output.description)
+                        datasets_name.append(pdataset.metadata.name)
+                        datasets_origin.append(output.name)
+        idx = 1
         for inp in self.info.inputs:
             idx += 1
             if (self.layout.itemAtPosition(idx, 2)):
@@ -295,17 +305,26 @@ class BiRunnerInputExperimentWidget(QWidget):
                 widget = self.layout.itemAtPosition(idx, 2).widget()
                 for i in range(widget.count()):  
                     widget.removeItem(0)
-                widget.addItems(datasets) 
+                for i in range(len(datasets_text)):    
+                    widget.addItem(datasets_text[i]) 
+                    widget.setItemData(i, [datasets_name[i], datasets_origin[i]])
                 # add tags to filter combobox
                 self.layout.itemAtPosition(idx, 3).widget().setTags(tags)       
 
+    def output(self) -> str:
+        return self.outputDatasetNameEdit.text()
+
     def inputs(self) -> list:
         inps = []
+        offset = 2
         for row in range(self.inputs_count):
-            nameLabel = self.layout.itemAtPosition(row+1, 0).widget()
-            selectorWidget = self.layout.itemAtPosition(row+1, 2).widget()
-            filterWidget = self.layout.itemAtPosition(row+1, 3).widget()
-            inps.append({"name": nameLabel.text(), "uri": selectorWidget.text(), "filter": filterWidget.filter()})
+            nameLabel = self.layout.itemAtPosition(row+offset, 0).widget()
+            selectorWidget = self.layout.itemAtPosition(row+offset, 2).widget()
+            filterWidget = self.layout.itemAtPosition(row+offset, 3).widget()
+            itemdata = selectorWidget.itemData(selectorWidget.currentIndex())
+            datasetname = itemdata[0]
+            dataset_origin = itemdata[1]
+            inps.append({"name": nameLabel.text(), "dataset": datasetname, "filter": filterWidget.filter(), "origin_output_name": dataset_origin})
         return inps   
     
 
