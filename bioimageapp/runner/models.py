@@ -102,6 +102,7 @@ class BiRunnerThread(QThread):
         elif self.mode == BiRunnerContainer.MODE_EXP:  
             process = PipelineRunner(self.experiment, self.process_info)
             process.addObserver(self.observer)
+            process.set_dataset_name(self.output_uri)
             process.set_parameters(*self.parameters)
             for input in self.inputs:
                 process.add_input(input['name'], input['dataset'], input['filter'], input['origin_output_name'])
