@@ -359,7 +359,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
         layout.addWidget(self.tableWidget) 
 
     def update(self, action: BiAction):
-        if action.state == BiExperimentStates.DataSetLoaded or action.state == BiExperimentStates.RefreshClicked:
+        if action.state == BiExperimentStates.DataSetLoaded:
             if self.container.current_dataset_name == "data":
                 self.drawRawDataset()
             else:

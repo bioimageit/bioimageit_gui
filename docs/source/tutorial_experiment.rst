@@ -1,3 +1,5 @@
+.. _tutorial-experiment:
+
 Tutorial: experiment
 ====================
 

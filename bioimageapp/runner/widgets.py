@@ -246,7 +246,7 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
         if self.lineEdit.text() == '':
             return ''
         else:    
-            return self.tagWidget.text() + self.operatorWidget.text() + self.lineEdit.text()
+            return self.tagWidget.currentText() + self.operatorWidget.currentText() + self.lineEdit.text()
  
     def setTags(self, tags: list):
         for i in range(self.tagWidget.count()):

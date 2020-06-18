@@ -13,7 +13,7 @@ class BiExperimentModel(BiModel):
         self.container.register(self)
 
     def update(self, action: BiAction):
-        if action.state == BiExperimentStates.Load:
+        if action.state == BiExperimentStates.Load or action.state == BiExperimentStates.RefreshClicked:
             self.container.experiment = Experiment(self.container.experiment_uri)
             self.container.emit(BiExperimentStates.Loaded)  
 
