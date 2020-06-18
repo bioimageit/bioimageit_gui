@@ -6,7 +6,7 @@ from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit)
 
-from bioimageapp.core.widgets import BiFileSelectWidget
+from bioimageapp.core.widgets import BiButton, BiFileSelectWidget
 from bioimageapp.runner.containers import BiRunnerContainer
 
 from bioimagepy.process import Process 
@@ -14,6 +14,8 @@ from bioimagepy.experiment import Experiment
 from bioimagepy.metadata.run import Run
 
 class BiRunnerInputSingleWidget(QWidget):
+    openViewSignal = Signal(str)
+
     def __init__(self, process_info: Process, parent: QWidget = None):
         super().__init__(parent)
         self.info = process_info.metadata
@@ -27,9 +29,17 @@ class BiRunnerInputSingleWidget(QWidget):
                 descLabel = QLabel(inp.description)
                 descLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
                 selectorWidget = BiFileSelectWidget(False, self)
+                selectorWidget.id = row
+                selectorWidget.TextChangedIdSignal.connect(self.showViewButton)
+                viewButton = BiButton('View')
+                viewButton.clickedContent.connect(self.openView)
+                viewButton.setObjectName('btnPrimary')
+                viewButton.content = inp.name
+                viewButton.setVisible(False)
                 self.layout.addWidget(nameLabel, row, 0)
                 self.layout.addWidget(descLabel, row, 1)
                 self.layout.addWidget(selectorWidget, row, 2)
+                self.layout.addWidget(viewButton, row, 3)
                 nameLabel.setVisible(False)
         self.setLayout(self.layout)     
 
@@ -41,6 +51,16 @@ class BiRunnerInputSingleWidget(QWidget):
             inps.append({"name": nameLabel.text(), "uri": selectorWidget.text()})
         return inps 
 
+    def showViewButton(self, id: int):
+        button = self.layout.itemAtPosition(id, 3).widget()
+        if button:
+            button.setVisible(True)
+
+    def openView(self, input_name):   
+        for row in range(self.layout.rowCount()):
+            selectorWidget = self.layout.itemAtPosition(row, 2).widget()
+            if selectorWidget:
+                self.openViewSignal.emit(selectorWidget.text())
 
 class BiRunnerInputFolderWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):

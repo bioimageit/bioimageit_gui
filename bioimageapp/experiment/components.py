@@ -18,7 +18,7 @@ from bioimageapp.core.widgets import BiTagWidget, BiButton
 from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
 from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
 from bioimageapp.experiment.models import BiExperimentModel
-from bioimageapp.experiment.dataview import BiDataView
+from bioimageapp.dataviewer.dataview import BiDataView
 
 from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiRunStates, BiMetadataExperimentStates
 from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiRunContainer, BiMetadataExperimentContainer
@@ -178,7 +178,7 @@ class BiExperimentToolbarComponent(BiComponent):
         # info
         infoButton = QToolButton()
         infoButton.setObjectName("BiBrowserExperimentToolbarInfoButton")
-        infoButton.setToolTip(self.widget.tr("Import data"))
+        infoButton.setToolTip(self.widget.tr("Information"))
         infoButton.released.connect(self.infoButtonClicked)
         layout.addWidget(infoButton, 0, PySide2.QtCore.Qt.AlignLeft)
 

@@ -17,12 +17,17 @@ class BiRunnerModel(BiModel):
         self.container = container
         self.container.register(self)  
         self.thread = BiRunnerThread()
+        self.thread.finished.connect(self.copyOutputs)
 
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.RunProcess:
             self.runProcess()
         if action.state == BiRunnerStates.ProcessUriChanged:
             self.getProcess()    
+
+    def copyOutputs(self):
+        self.container.genarated_outputs = self.thread.output_uris
+        self.container.emit(BiRunnerStates.RunFinished)
 
     def runProcess(self):
         print('in model, run with:') 
@@ -81,8 +86,10 @@ class BiRunnerThread(QThread):
         self.parameters = []
         self.output_uri = ''
         self.mode = ''
+        self.output_uris = []
 
     def run(self):
+        self.output_uris = []
         if self.mode == BiRunnerContainer.MODE_FILE:
             runner = Runner(self.process_info)
             runner.addObserver(self.observer)
@@ -91,6 +98,7 @@ class BiRunnerThread(QThread):
             runner.set_parameters(*self.parameters)
             runner.set_output(self.output_uri)
             runner.exec()   
+            self.output_uris = runner.output_uris
         elif self.mode == BiRunnerContainer.MODE_REP:  
             runner = Runner(self.process_info)
             runner.addObserver(self.observer)
@@ -99,6 +107,7 @@ class BiRunnerThread(QThread):
             runner.set_parameters(*self.parameters)
             runner.set_output(self.output_uri)
             runner.exec()  
+            #self.output_uris = runner.output_uris
         elif self.mode == BiRunnerContainer.MODE_EXP:  
             process = PipelineRunner(self.experiment, self.process_info)
             process.addObserver(self.observer)

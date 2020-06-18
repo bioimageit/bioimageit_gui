@@ -23,7 +23,8 @@ class BiRunnerContainer(BiContainer):
         self.parameters = []
         self.output_uri = ''
         self.progress = 0
-        self.progress_message = '' 
+        self.progress_message = ''
+        self.genarated_outputs = [] 
 
     def set_progress(self, progress: int, message: str):
         self.progress = progress

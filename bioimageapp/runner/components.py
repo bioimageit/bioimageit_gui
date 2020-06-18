@@ -1,12 +1,16 @@
+import pathlib
+
 import PySide2.QtCore
 from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter, 
                                QScrollArea, QLabel, QGridLayout, QComboBox,
                                QPushButton, QLineEdit, QCheckBox, QFileDialog,
                                QHBoxLayout, QProgressBar, QTextEdit)
 
+from bioimagepy.config import ConfigAccess
 from bioimagepy.process import Process 
 
 from bioimageapp.core.framework import BiComponent, BiAction
+from bioimageapp.dataviewer.dataview import BiDataView
 from bioimageapp.runner.containers import BiRunnerContainer
 from bioimageapp.runner.states import BiRunnerStates
 from bioimageapp.runner.widgets import (BiRunnerInputSingleWidget, BiRunnerInputFolderWidget, 
@@ -57,8 +61,13 @@ class BiRunnerComponent(BiComponent):
     
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.ProcessInfoLoaded:
-            print("build exec widget") 
-            self.buildExecWidget()  
+            self.buildExecWidget() 
+        if action.state == BiRunnerStates.RunFinished:
+            for out in self.container.genarated_outputs:
+                for fileinfo in out:
+                    print('open output', fileinfo)
+                    viewer = BiDataView(fileinfo['uri'], fileinfo['format'])
+                    viewer.show()      
 
     def buildExecWidget(self):
 
@@ -92,6 +101,7 @@ class BiRunnerComponent(BiComponent):
 
         # inputs
         self.inputSingleWidget = BiRunnerInputSingleWidget(process_info)
+        self.inputSingleWidget.openViewSignal.connect(self.showData)
         self.inputFolderWidget = BiRunnerInputFolderWidget(process_info)
         self.inputExperimentWidget = BiRunnerInputExperimentWidget(self.container)
 
@@ -135,6 +145,14 @@ class BiRunnerComponent(BiComponent):
 
         self.switchFile()       
         
+    def showData(self, uri: str):
+        print("open data", uri)
+        format = pathlib.Path(uri).suffix[1:]
+        print("format", format)
+
+        viewer = BiDataView(uri, format)
+        viewer.show()
+
     def switchFile(self):
         self.swithMode(BiRunnerContainer.MODE_FILE)
     
@@ -172,7 +190,12 @@ class BiRunnerComponent(BiComponent):
         # create the input datalist
         if self.container.mode == BiRunnerContainer.MODE_FILE:
             self.container.inputs = self.inputSingleWidget.inputs()
+            config = ConfigAccess.instance().config
             self.container.output_uri = ''
+            if 'gui' in config:
+                if 'tmp' in config['gui']:
+                    self.container.output_uri = config['gui']['tmp']
+            
         elif self.container.mode == BiRunnerContainer.MODE_REP: 
             self.container.inputs = self.inputFolderWidget.inputs()
             self.container.output_uri = self.inputFolderWidget.output()
