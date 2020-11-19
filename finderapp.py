@@ -5,8 +5,8 @@ from PySide2.QtWidgets import QApplication
 
 
 sys.path.append("../bioimagepy")
-from bioimagepy.config import ConfigAccess
-from bioimageapp.finderapp import BiFinderApp
+from bioimageit_core.config import ConfigAccess
+from bioimageit_gui.finderapp import BiFinderApp
 
 if __name__ == '__main__':
     # Create the Qt Application
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
-    ConfigAccess(os.path.join(dir_path_parent,'config.json')) 
+    ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
     component = BiFinderApp()
     rec = QApplication.desktop().screenGeometry()
     component.get_widget().resize(rec.width()/2, rec.height()/2) 
@@ -24,6 +24,6 @@ if __name__ == '__main__':
     # Run the main Qt loop
     stylesheet_path = os.path.join(dir_path, 'theme', 'dark', 'stylesheet.css')
     app.setStyleSheet("file:///" + stylesheet_path)
-    icon_path = os.path.join(dir_path,"theme", "default", "icon.png" )
+    icon_path = os.path.join(dir_path, "theme", "default", "icon.png")
     app.setWindowIcon(QIcon(icon_path))
     sys.exit(app.exec_())

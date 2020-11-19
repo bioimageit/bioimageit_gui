@@ -1,5 +1,5 @@
+from bioimageit_gui.core.framework import BiStates
 
-from bioimageapp.core.framework import BiStates
 
 class BiRunnerStates(BiStates):
     ProcessUriChanged = "BiRunnerStates::ProcessUriChanged"

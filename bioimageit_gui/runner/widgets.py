@@ -6,12 +6,13 @@ from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit)
 
-from bioimageapp.core.widgets import BiButton, BiFileSelectWidget
-from bioimageapp.runner.containers import BiRunnerContainer
+from bioiomageit_gui.core.widgets import BiButton, BiFileSelectWidget
+from bioiomageit_gui.runner.containers import BiRunnerContainer
 
-from bioimagepy.process import Process 
-from bioimagepy.experiment import Experiment
-from bioimagepy.metadata.run import Run
+from bioimageit_core.process import Process
+from bioimageit_core.experiment import Experiment
+from bioimageit_core.metadata.run import Run
+
 
 class BiRunnerInputSingleWidget(QWidget):
     openViewSignal = Signal(str)
@@ -48,7 +49,8 @@ class BiRunnerInputSingleWidget(QWidget):
         for row in range(self.layout.rowCount()):
             nameLabel = self.layout.itemAtPosition(row, 0).widget()
             selectorWidget = self.layout.itemAtPosition(row, 2).widget()
-            inps.append({"name": nameLabel.text(), "uri": selectorWidget.text()})
+            inps.append({"name": nameLabel.text(),
+                         "uri": selectorWidget.text()})
         return inps 
 
     def showViewButton(self, id: int):
@@ -61,6 +63,7 @@ class BiRunnerInputSingleWidget(QWidget):
             selectorWidget = self.layout.itemAtPosition(row, 2).widget()
             if selectorWidget:
                 self.openViewSignal.emit(selectorWidget.text())
+
 
 class BiRunnerInputFolderWidget(QWidget):
     def __init__(self, process_info: Process, parent: QWidget = None):
@@ -99,11 +102,13 @@ class BiRunnerInputFolderWidget(QWidget):
             nameLabel = self.layout.itemAtPosition(row, 0).widget()
             selectorWidget = self.layout.itemAtPosition(row, 2).widget()
             filterWidget = self.layout.itemAtPosition(row, 3).widget()
-            inps.append({"name": nameLabel.text(), "uri": selectorWidget.text(), "filter": filterWidget.filter()})
+            inps.append({"name": nameLabel.text(), "uri": selectorWidget.text(),
+                         "filter": filterWidget.filter()})
         return inps 
 
     def output(self):
         return self.outputSelector.text()    
+
 
 class BiRunnerInputFolderFilterWidget(QWidget):
     def __init__(self, parent: QWidget = None):
@@ -174,6 +179,7 @@ class BiRunnerInputFolderFilterWidget(QWidget):
             return self.lineEdit.text() 
         if self.selectWidget.currentText() == 'Ends with':
             return "\\"+self.lineEdit.text()+'$'   
+
 
 class BiRunnerInputDatasetFilterWidget(QWidget):
     def __init__(self, parent: QWidget = None):
@@ -246,7 +252,8 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
         if self.lineEdit.text() == '':
             return ''
         else:    
-            return self.tagWidget.currentText() + self.operatorWidget.currentText() + self.lineEdit.text()
+            return self.tagWidget.currentText() + \
+                   self.operatorWidget.currentText() + self.lineEdit.text()
  
     def setTags(self, tags: list):
         for i in range(self.tagWidget.count()):
@@ -297,7 +304,8 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.setLayout(self.layout)    
 
     def openExperiment(self):
-        experiment_uri = os.path.join(self.experimentEdit.text(), 'experiment.md.json')
+        experiment_uri = os.path.join(self.experimentEdit.text(),
+                                      'experiment.md.json')
         datasets_text = ['data']
         datasets_name = ['data']
         datasets_origin = ['']
@@ -309,12 +317,14 @@ class BiRunnerInputExperimentWidget(QWidget):
             for i in range(experiment.get_processed_datasets_size()):
                 pdataset = experiment.get_processed_dataset_at(i)
                 # get run
-                run_uri = os.path.join(os.path.dirname(pdataset.md_uri), 'run.md.json')
+                run_uri = os.path.join(os.path.dirname(pdataset.md_uri),
+                                       'run.md.json')
                 if os.path.isfile(run_uri):
                     run = Run(run_uri)
                     process = Process(run.metadata.process_uri)
                     for output in process.metadata.outputs:
-                        datasets_text.append(pdataset.metadata.name + ":" + output.description)
+                        datasets_text.append(pdataset.metadata.name + ":" +
+                                             output.description)
                         datasets_name.append(pdataset.metadata.name)
                         datasets_origin.append(output.name)
         idx = 1
@@ -327,7 +337,8 @@ class BiRunnerInputExperimentWidget(QWidget):
                     widget.removeItem(0)
                 for i in range(len(datasets_text)):    
                     widget.addItem(datasets_text[i]) 
-                    widget.setItemData(i, [datasets_name[i], datasets_origin[i]])
+                    widget.setItemData(i, [datasets_name[i],
+                                           datasets_origin[i]])
                 # add tags to filter combobox
                 self.layout.itemAtPosition(idx, 3).widget().setTags(tags)       
 
@@ -344,7 +355,9 @@ class BiRunnerInputExperimentWidget(QWidget):
             itemdata = selectorWidget.itemData(selectorWidget.currentIndex())
             datasetname = itemdata[0]
             dataset_origin = itemdata[1]
-            inps.append({"name": nameLabel.text(), "dataset": datasetname, "filter": filterWidget.filter(), "origin_output_name": dataset_origin})
+            inps.append({"name": nameLabel.text(), "dataset": datasetname,
+                         "filter": filterWidget.filter(),
+                         "origin_output_name": dataset_origin})
         return inps   
     
 
@@ -374,7 +387,8 @@ class BiRunnerParamWidget(QWidget):
                 self.labels[parameter.name] = titleLabel
                 self.layout.addWidget(titleLabel, row, 0)
 
-                if parameter.type == "integer" or parameter.type == "number" or parameter.type == "string":
+                if parameter.type == "integer" or parameter.type == "number" \
+                        or parameter.type == "string":
                     valueEdit = BiProcessInputValue(self) 
                     valueEdit.setKey(parameter.name)
                     valueEdit.setValue(parameter.value)
@@ -389,7 +403,6 @@ class BiRunnerParamWidget(QWidget):
                     w.setContent(parameter.select_info)
                     w.setAdvanced(parameter.is_advanced)
                     self.widgets[parameter.name] = w
-                    #connect(w, SIGNAL(valueChanged(QString, QString)), this, SLOT(showHideConditional(QString,QString)))
                     self.layout.addWidget(titleLabel, row, 0)
                     self.layout.addWidget(w, row, 1)
         
@@ -433,6 +446,7 @@ class BiRunnerParamWidget(QWidget):
             parameters.append(key)
             parameters.append(self.widgets[key].value())
         return parameters     
+
 
 class BiRunnerExecWidget(QWidget):
     runSignal = Signal()
@@ -561,6 +575,7 @@ class BiProcessInputSelect(BiProcessInputWidget):
 
     def updateValue(self, value: str):
         self._value = value
+
 
 # ///////////////////////////////////////////////// //
 #                BiProcessInputBrowser

@@ -1,5 +1,6 @@
 
-from bioimageapp.core.framework import BiStates
+from bioimageit_gui.core.framework import BiStates
+
 
 class BiBrowserStates(BiStates):
     DirectoryModified = "BiBrowserStates.DirectoryModified"

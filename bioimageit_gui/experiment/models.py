@@ -1,11 +1,13 @@
-from bioimagepy.experiment import Experiment
+from bioimageit_core.experiment import Experiment
 
-from bioimageapp.core.framework import BiModel, BiAction
-from bioimageapp.experiment.states import BiExperimentCreateStates, BiExperimentStates
-from bioimageapp.experiment.containers import BiExperimentCreateContainer, BiExperimentContainer
+from bioimageit_gui.core.framework import BiModel, BiAction
+from bioimageit_gui.experiment.states import (BiExperimentCreateStates,
+                                              BiExperimentStates)
+from bioimageit_gui.experiment.containers import (BiExperimentCreateContainer,
+                                                  BiExperimentContainer)
+
 
 class BiExperimentModel(BiModel):
-
     def __init__(self, container: BiExperimentContainer):
         super().__init__()
         self._object_name = 'BiExperimentModel'

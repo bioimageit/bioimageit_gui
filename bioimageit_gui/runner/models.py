@@ -1,13 +1,13 @@
 from PySide2.QtCore import Signal, QObject, QThread
 
-from bioimagepy.core.utils import ProgressObserver
-from bioimagepy.process import Process
-from bioimagepy.runner import Runner
-from bioimagepy.pipeline import PipelineRunner
+from bioimageit_core.process import Process
+from bioimageit_core.runner import Runner
+from bioimageit_core.pipeline import PipelineRunner
 
-from bioimageapp.core.framework import BiModel, BiAction
-from bioimageapp.runner.states import BiRunnerStates
-from bioimageapp.runner.containers import BiRunnerContainer
+from bioimageit_gui.core.framework import BiModel, BiAction
+from bioimageit_gui.runner.states import BiRunnerStates
+from bioimageit_gui.runner.containers import BiRunnerContainer
+
 
 class BiRunnerModel(BiModel):
     def __init__(self, container: BiRunnerContainer):
@@ -113,6 +113,7 @@ class BiRunnerThread(QThread):
             process.addObserver(self.observer)
             process.set_dataset_name(self.output_uri)
             process.set_parameters(*self.parameters)
-            for input in self.inputs:
-                process.add_input(input['name'], input['dataset'], input['filter'], input['origin_output_name'])
+            for input_ in self.inputs:
+                process.add_input(input_['name'], input_['dataset'],
+                                  input_['filter'], input_['origin_output_name'])
             process.exec()                  

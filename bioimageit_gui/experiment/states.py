@@ -1,4 +1,5 @@
-from bioimageapp.core.framework import BiStates
+from bioimageit_gui.core.framework import BiStates
+
 
 class BiExperimentStates(BiStates):
     ImportClicked = "BiExperimentStates.ImportClicked" 
@@ -24,6 +25,7 @@ class BiExperimentStates(BiStates):
     ProcessedDataClicked = "BiExperimentStates.ProcessedDataClicked"
     RefreshClicked = "BiExperimentStates.RefreshClicked"
     CloseClicked = "BiExperimentStates.CloseClicked"
+
 
 class BiExperimentCreateStates(BiStates):
     CreateClicked = "BiExperimentCreateStates.CreateClicked"

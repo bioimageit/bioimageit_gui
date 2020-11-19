@@ -6,17 +6,18 @@ from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter,
                                QPushButton, QLineEdit, QCheckBox, QFileDialog,
                                QHBoxLayout, QProgressBar, QTextEdit)
 
-from bioimagepy.config import ConfigAccess
-from bioimagepy.process import Process 
+from bioimageit_core.config import ConfigAccess
 
-from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.dataviewer.dataview import BiDataView
-from bioimageapp.runner.containers import BiRunnerContainer
-from bioimageapp.runner.states import BiRunnerStates
-from bioimageapp.runner.widgets import (BiRunnerInputSingleWidget, BiRunnerInputFolderWidget, 
-                                        BiRunnerInputExperimentWidget, BiRunnerParamWidget,
-                                        BiRunnerExecWidget, BiRunnerProgressWidget) 
-from bioimageapp.core.widgets import BiFileSelectWidget
+from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_gui.dataviewer.dataview import BiDataView
+from bioimageit_gui.runner.containers import BiRunnerContainer
+from bioimageit_gui.runner.states import BiRunnerStates
+from bioimageit_gui.runner.widgets import (BiRunnerInputSingleWidget,
+                                           BiRunnerInputFolderWidget,
+                                           BiRunnerInputExperimentWidget,
+                                           BiRunnerParamWidget,
+                                           BiRunnerExecWidget,
+                                           BiRunnerProgressWidget)
 
 
 class BiRunnerComponent(BiComponent):
@@ -103,7 +104,8 @@ class BiRunnerComponent(BiComponent):
         self.inputSingleWidget = BiRunnerInputSingleWidget(process_info)
         self.inputSingleWidget.openViewSignal.connect(self.showData)
         self.inputFolderWidget = BiRunnerInputFolderWidget(process_info)
-        self.inputExperimentWidget = BiRunnerInputExperimentWidget(self.container)
+        self.inputExperimentWidget = BiRunnerInputExperimentWidget(
+            self.container)
 
         inputsLabel = QLabel('Inputs')
         inputsLabel.setObjectName('BiSideBarTitle')    
@@ -213,4 +215,4 @@ class BiRunnerComponent(BiComponent):
         self.container.emit(BiRunnerStates.RunProcess)
 
     def get_widget(self):
-        return self.widget      
+        return self.widget

@@ -3,12 +3,12 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 import subprocess
 
-from bioimageapp.core.framework import BiStates, BiAction, BiComponent, BiContainer
-from bioimageapp.core.exceptions import CommandArgsError
-from bioimageapp.finder.states import BiFinderStates
-from bioimageapp.finder.containers import BiFinderContainer
-from bioimageapp.finder.models import BiFinderModel
-from bioimageapp.finder.components import BiFinderComponent
+from bioimageit_gui.core.framework import (BiAction, BiComponent)
+from bioimageit_gui.finder.states import BiFinderStates
+from bioimageit_gui.finder.containers import BiFinderContainer
+from bioimageit_gui.finder.models import BiFinderModel
+from bioimageit_gui.finder.components import BiFinderComponent
+
 
 class BiFinderApp(BiComponent):
     def __init__(self):
@@ -21,12 +21,12 @@ class BiFinderApp(BiComponent):
 
         # initialization
         self.finderContainer.emit(BiFinderStates.Reload)
-        self.finderContainer.register(self) 
-
+        self.finderContainer.register(self)
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.OpenProcess:
-            subprocess.Popen(['python3', 'runnerapp.py', self.finderContainer.clicked_tool])
+            subprocess.Popen(['python3', 'runnerapp.py',
+                              self.finderContainer.clicked_tool])
 
     def get_widget(self):
         return self.finderComponent.get_widget()

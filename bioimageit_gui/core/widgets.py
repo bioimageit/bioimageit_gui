@@ -8,6 +8,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton,
                                QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget)
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
 
+
 class BiButton(QPushButton):
     clickedId = Signal(int)
     clickedContent = Signal(str)
@@ -23,6 +24,7 @@ class BiButton(QPushButton):
         self.clickedId.emit(self.id)
         self.clickedContent.emit(self.content)
 
+
 class BiToolButton(QToolButton):
     clickedId = Signal(int)
     clickedContent = Signal(str)
@@ -36,6 +38,7 @@ class BiToolButton(QToolButton):
     def emitClicked(self):
         self.clickedId.emit(self.id)
         self.clickedContent.emit(self.content)        
+
 
 class BiFileSelectWidget(QWidget):
     TextChangedSignal = Signal()
@@ -79,6 +82,7 @@ class BiFileSelectWidget(QWidget):
                 self.lineEdit.setText(file[0])
                 self.TextChangedSignal.emit()
                 self.TextChangedIdSignal.emit(self.id)
+
 
 class BiDragLabel(QLabel):
     def __init__(self, parent: QWidget):
@@ -130,6 +134,7 @@ class BiTagWidget(QWidget):
 
     def emitRemove(self): 
         self.remove(self.tagName.text())
+
 
 class BiWebBrowser(QWidget):
     def __init__(self, parent: QWidget):
@@ -225,7 +230,6 @@ class BiFlowLayout(QLayout):
             return self.hSpace
         else:
             return self.smartSpacing(QStyle.PM_LayoutHorizontalSpacing)
-    
 
     def verticalSpacing(self) -> str:
         if self.vSpace >= 0:
@@ -453,7 +457,6 @@ class BiHideableWidget(QWidget):
             else:
                 self.hideableWidget.setVisible(True)
             self.isVisible = True
-
 
     def addWidget(self, widget: QWidget):
         if self.useFlowLayout:
@@ -684,11 +687,9 @@ class BiSlidingStackedWidget(QStackedWidget):
         self.active = True
         animgroup.start()
 
-
     def animationDoneSlot(self):
         self.setCurrentIndex(self.next)  
         self.widget(self.now).hide()
         self.widget(self.now).move(self.pnow)
         self.active = False
         self.animationFinished.emit()
-    

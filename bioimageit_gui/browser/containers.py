@@ -1,10 +1,12 @@
 import os
 
-from bioimageapp.core.framework import BiContainer, BiObject
-from bioimageapp.browser.settings import BiBookmarks
+from bioimageit_gui.core.framework import BiContainer, BiObject
+from bioimageit_gui.browser.settings import BiBookmarks
+
 
 class BiBrowserFileInfo(BiObject):     
-    def __init__(self, fileName: str = '', path: str = '', name: str = '', dtype: str = '', date: str = ''):
+    def __init__(self, fileName: str = '', path: str = '', name: str = '',
+                 dtype: str = '', date: str = ''):
         super(BiBrowserFileInfo, self).__init__()
         self.fileName = fileName
         self.path = path # without file name 
@@ -14,6 +16,7 @@ class BiBrowserFileInfo(BiObject):
 
     def filePath(self) -> str:
         return os.path.join(self.path, self.fileName)  
+
 
 class BiBrowserContainer(BiContainer):
 
@@ -60,4 +63,3 @@ class BiBrowserContainer(BiContainer):
                 self.historyPaths.pop(i)
         self.addHistory(path)
         self.posHistory = len(self.historyPaths) - 1   
-             

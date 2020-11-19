@@ -1,4 +1,4 @@
-class BiObject():
+class BiObject:
     def __init__(self):
         self._object_name = 'BiObject'
 
@@ -10,7 +10,8 @@ class BiAction(BiObject):
         self.state = state
         self.parent_container = None
 
-class BiStates():
+
+class BiStates:
     DEFAULT = "States.DEFAULT"
 
 
@@ -28,21 +29,17 @@ class BiContainer(BiObject):
         if parent:
             parent.add_child(self)
 
-
     def add_child(self, child: BiObject):
         self._childs.append(child)
 
-
     def register(self, observer):
         self._observers.append(observer)
-
 
     def emit(self, state_name: str):
         self.current_state = state_name
         action = BiAction(state_name)
         action.parent_container = self
         self.emit_action(action)
-
 
     def emit_action(self, action: BiAction):
         for observer in self._observers:
@@ -64,7 +61,8 @@ class BiComponent(BiActuator):
         self._object_name = 'BiComponent'    
 
     def update(self, action: BiAction):
-        raise NotImplementedError("Please implement ", self._object_name, " update method")
+        raise NotImplementedError("Please implement ", self._object_name,
+                                  " update method")
 
     def get_widget(self):  
         return None   
@@ -79,5 +77,5 @@ class BiModel(BiActuator):
         pass    
 
     def update(self, action: BiAction):
-        raise NotImplementedError("Please implement ", self._object_name, " update method")
-            
+        raise NotImplementedError("Please implement ", self._object_name,
+                                  " update method")

@@ -1,13 +1,17 @@
 import os
 
-from bioimagepy.data import RawData, ProcessedData
-from bioimagepy.metadata.run import Run
+from bioimagit_core.data import RawData, ProcessedData
+from bioimagit_core.metadata.run import Run
 
-from bioimageapp.core.framework import BiModel, BiAction
-from bioimageapp.metadata.states import (BiRawDataStates, BiProcessedDataStates, 
-                                         BiMetadataExperimentStates, BiRunStates)
-from bioimageapp.metadata.containers import (BiRawDataContainer, BiProcessedDataContainer, 
-                                            BiMetadataExperimentContainer, BiRunContainer)
+from bioimagit_gui.core.framework import BiModel, BiAction
+from bioimagit_gui.metadata.states import (BiRawDataStates,
+                                           BiProcessedDataStates,
+                                           BiMetadataExperimentStates,
+                                           BiRunStates)
+from bioimagit_gui.metadata.containers import (BiRawDataContainer,
+                                               BiProcessedDataContainer,
+                                               BiMetadataExperimentContainer,
+                                               BiRunContainer)
 
 
 class BiRawDataModel(BiModel):  
@@ -28,6 +32,7 @@ class BiRawDataModel(BiModel):
             self.container.emit(BiRawDataStates.Saved)
             return
 
+
 class BiProcessedDataModel(BiModel):  
     def __init__(self, container: BiProcessedDataContainer):
         super().__init__()
@@ -40,6 +45,7 @@ class BiProcessedDataModel(BiModel):
             self.container.processeddata = ProcessedData(self.container.md_uri)
             self.container.emit(BiProcessedDataStates.Loaded)
             return    
+
 
 class BiRunModel(BiModel):  
     def __init__(self, container: BiRunContainer):

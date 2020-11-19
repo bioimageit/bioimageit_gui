@@ -1,4 +1,5 @@
-from bioimageapp.core.framework import BiContainer
+from bioimageit_core.core.framework import BiContainer
+
 
 class BiRawDataContainer(BiContainer):
 
@@ -42,4 +43,3 @@ class BiMetadataExperimentContainer(BiContainer):
         # data
         self.md_uri = '' 
         self.experiment = None           
-        

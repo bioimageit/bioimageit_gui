@@ -3,19 +3,22 @@ import PySide2.QtCore
 from PySide2.QtCore import Signal
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
-                               QTableWidget, QTableWidgetItem, QAbstractItemView,
-                               QHBoxLayout, QToolButton)                              
+                               QTableWidget, QTableWidgetItem,
+                               QAbstractItemView, QHBoxLayout, QToolButton)
 
-from bioimagepy.processes.containers import ProcessCategoryContainer
+from bioimageit_core.processes.containers import ProcessCategoryContainer
+
 
 class BiProcessCategoryTile(QWidget):
     clickedSignal = Signal(ProcessCategoryContainer)
 
-    def __init__(self, category: ProcessCategoryContainer, parent: QWidget = None):
+    def __init__(self, category: ProcessCategoryContainer,
+                 parent: QWidget = None):
         super().__init__(parent)
         self.category = category
 
-        self.setCursor(PySide2.QtGui.QCursor(PySide2.QtCore.Qt.PointingHandCursor))
+        self.setCursor(PySide2.QtGui.QCursor(
+            PySide2.QtCore.Qt.PointingHandCursor))
 
         glayout = QVBoxLayout()
         self.setLayout(glayout)

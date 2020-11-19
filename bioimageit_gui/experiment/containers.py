@@ -1,4 +1,5 @@
-from bioimageapp.core.framework import BiContainer
+from bioimageit_gui.core.framework import BiContainer
+
 
 class BiExperimentContainer(BiContainer):
     def __init__(self):
@@ -13,6 +14,7 @@ class BiExperimentContainer(BiContainer):
         self.current_dataset_name = ''
         self.current_dataset = None
         self.clickedRow = -1
+
 
 class BiExperimentImportContainer():
     def __init__(self):
@@ -29,6 +31,7 @@ class BiExperimentImportContainer():
         self.author = ''
         self.createddate = ''    
 
+
 class BiExperimentTagContainer():
     def __init__(self):
         super().__init__()
@@ -40,6 +43,7 @@ class BiExperimentTagContainer():
         self.usingseparator_position = []    
         self.usingname_tag = ''
         self.usingname_search = []      
+
 
 class BiExperimentCreateContainer(BiContainer):
 

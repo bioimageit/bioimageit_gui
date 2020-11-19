@@ -1,6 +1,5 @@
-
-from bioimageapp.core.framework import BiContainer
-from bioimageapp.runner.states import BiRunnerStates
+from bioimageit_gui.core.framework import BiContainer
+from bioimageit_gui.runner.states import BiRunnerStates
 
 
 class BiRunnerContainer(BiContainer):

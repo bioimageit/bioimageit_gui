@@ -1,14 +1,18 @@
 import PySide2.QtCore
-from PySide2.QtGui import QPixmap, QImage, QPalette
-from PySide2.QtCore import QFileInfo, QDir, Signal
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
-                               QTableWidget, QTableWidgetItem, QAbstractItemView,
-                               QGridLayout, QHBoxLayout, QToolButton, QSplitter, 
-                               QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
+                               QTableWidget, QTableWidgetItem,
+                               QAbstractItemView, QGridLayout, QHBoxLayout,
+                               QToolButton, QSplitter, QLineEdit, QPushButton,
+                               QTextEdit, QMessageBox, QFileDialog)
 
-from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiMetadataExperimentStates, BiRunStates
-from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiMetadataExperimentContainer                               
+from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_gui.metadata.states import (BiRawDataStates,
+                                            BiProcessedDataStates,
+                                            BiMetadataExperimentStates,
+                                            BiRunStates)
+from bioimageit_gui.metadata.containers import (BiRawDataContainer,
+                                                BiProcessedDataContainer,
+                                                BiMetadataExperimentContainer)
 
 
 class BiRawDataComponent(BiComponent):
@@ -20,7 +24,7 @@ class BiRawDataComponent(BiComponent):
 
         self.widget = QScrollArea()
         self.widget.setObjectName('BiWidget')
-        #self.widget.setBackgroundRole(QPalette.Dark)
+        # self.widget.setBackgroundRole(QPalette.Dark)
         self.widget.setWidgetResizable(True)
         self.widget.setMinimumWidth(150)
 
@@ -79,7 +83,6 @@ class BiRawDataComponent(BiComponent):
         layout.addWidget(QWidget(), 9, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
         layout.setAlignment(PySide2.QtCore.Qt.AlignTop)
 
-        
     def saveButtonClicked(self):
         self.container.rawdata.metadata.name = self.nameEdit.text()
         self.container.rawdata.metadata.format = self.formatEdit.text()
@@ -120,6 +123,7 @@ class BiRawDataComponent(BiComponent):
     def get_widget(self): 
         return self.widget  
 
+
 class BiProcessedDataComponent(BiComponent):
     def __init__(self, container: BiProcessedDataContainer):
         super().__init__()
@@ -129,7 +133,7 @@ class BiProcessedDataComponent(BiComponent):
 
         self.widget = QScrollArea()
         self.widget.setObjectName('BiWidget')
-        #self.widget.setBackgroundRole(QPalette.Dark)
+        # self.widget.setBackgroundRole(QPalette.Dark)
         self.widget.setWidgetResizable(True)
         self.widget.setMinimumWidth(150)
 
@@ -200,14 +204,14 @@ class BiProcessedDataComponent(BiComponent):
         layout.addWidget(outlabelLabel, 7, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(self.outlabelEdit, 7, 1, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(tagsWidget, 8, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(originTitleLabel, 9, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(originTitleLabel, 9, 0, 1, 2,
+                         PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(originLabel, 10, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(self.originEdit, 10, 1, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(runLabel, 11, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(runButton, 11, 1, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(QWidget(), 12, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
         layout.setAlignment(PySide2.QtCore.Qt.AlignTop)
-
 
     def emitRun(self):
         self.container.emit(BiProcessedDataStates.RunOpenClicked)
@@ -248,6 +252,7 @@ class BiProcessedDataComponent(BiComponent):
 
     def get_widget(self): 
         return self.widget  
+
 
 class BiMetadataExperimentComponent(BiComponent):
     def __init__(self, container: BiMetadataExperimentContainer):

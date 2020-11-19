@@ -4,8 +4,8 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 
 sys.path.append("../bioimagepy")
-from bioimagepy.config import ConfigAccess
-from bioimageapp.browserapp import BiBrowserApp
+from bioimageit_core.config import ConfigAccess
+from bioimageit_gui.browserapp import BiBrowserApp
 
 if __name__ == '__main__':
     # Create the Qt Application
@@ -25,6 +25,6 @@ if __name__ == '__main__':
     # Run the main Qt loop
     stylesheet_path = os.path.join(dir_path, 'theme', 'dark', 'stylesheet.css')
     app.setStyleSheet("file:///" + stylesheet_path)
-    icon_path = os.path.join(dir_path, "theme", "default", "icon.png" )
+    icon_path = os.path.join(dir_path, "theme", "default", "icon.png")
     app.setWindowIcon(QIcon(icon_path))
     sys.exit(app.exec_())

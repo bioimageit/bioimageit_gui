@@ -1,16 +1,17 @@
 import PySide2.QtCore
-from PySide2.QtGui import QPixmap, QImage
-from PySide2.QtCore import QFileInfo, QDir, Signal
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
-                               QTableWidget, QTableWidgetItem, QAbstractItemView,
-                               QHBoxLayout, QToolButton, QSplitter)
+                               QTableWidget, QTableWidgetItem,
+                               QAbstractItemView, QHBoxLayout,
+                               QToolButton, QSplitter)
 
-from bioimageapp.core.widgets import BiButton, BiFlowLayout, BiNavigationBar, BiWebBrowser
+from bioimageit_gui.core.widgets import (BiButton, BiFlowLayout,
+                                         BiNavigationBar, BiWebBrowser)
 
-from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.finder.states import BiFinderStates
-from bioimageapp.finder.containers import BiFinderContainer
-from bioimageapp.finder.widgets import BiProcessCategoryTile
+from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_gui.finder.states import BiFinderStates
+from bioimageit_gui.finder.containers import BiFinderContainer
+from bioimageit_gui.finder.widgets import BiProcessCategoryTile
+
 
 class BiFinderComponent(BiComponent):
     def __init__(self, container: BiFinderContainer):
@@ -25,7 +26,7 @@ class BiFinderComponent(BiComponent):
         # Widget
         self.widget = QWidget()
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         self.widget.setLayout(layout)
         
@@ -50,7 +51,8 @@ class BiFinderComponent(BiComponent):
 
         # tools table
         self.toolsWidget = QWidget()
-        self.toolsWidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.toolsWidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground,
+                                      True)
         self.toolsWidget.setObjectName("BiWidget")
         toolsLayout = QVBoxLayout()
         self.toolsWidget.setLayout(toolsLayout)
@@ -100,26 +102,25 @@ class BiFinderComponent(BiComponent):
 
     def browseTools(self):
         self.tableWidget.setRowCount(0)
-        i= -1    
+        i = -1
         for info in self.container.tools:   
             i += 1
-            open = BiButton(self.widget.tr("Open"))
-            #open.id = i
-            open.content = info.uri
-            open.setObjectName("btnDefault")
-            open.clickedContent.connect(self.openClicked)
+            open_ = BiButton(self.widget.tr("Open"))
+            # open.id = i
+            open_.content = info.uri
+            open_.setObjectName("btnDefault")
+            open_.clickedContent.connect(self.openClicked)
 
-            self.tableWidget.insertRow( self.tableWidget.rowCount() )
-            self.tableWidget.setCellWidget(i, 0, open)    
+            self.tableWidget.insertRow(self.tableWidget.rowCount())
+            self.tableWidget.setCellWidget(i, 0, open_)
 
             self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
             self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))  
    
-        self.tableWidget.setCurrentCell(0,1)   
+        self.tableWidget.setCurrentCell(0, 1)
         self.showClickedDoc(0, 1)
 
     def browseCategories(self):
-
         # free layout
         for i in reversed(range(self.layout.count())): 
             self.layout.itemAt(i).widget().deleteLater()
@@ -134,28 +135,28 @@ class BiFinderComponent(BiComponent):
         self.container.setCurrentCategory(info.id, info.name)
         self.container.emit(BiFinderStates.Reload)  
 
-    def openClicked(self, id: str):
-        self.container.clicked_tool = id
+    def openClicked(self, id_: str):
+        self.container.clicked_tool = id_
         self.container.emit(BiFinderStates.OpenProcess)   
 
     def showClickedDoc(self, row, column):
         if row >= len(self.container.tools):
-             self.docViewer.setHomePageHtml("No tool available")
-             return
+            self.docViewer.setHomePageHtml("No tool available")
+            return
         tool = self.container.tools[row]  
         if tool.help.startswith('http') or tool.help.startswith('www'):
             self.docViewer.setHomePage(tool.help, True)
         elif tool.help.endswith('.html'):    
             self.docViewer.setHomePage(tool.help, False)
         else:
-            self.docViewer.setHomePageHtml("<span>This tool documentation is not available</span>")           
-
+            self.docViewer.setHomePageHtml("<span>This tool documentation "
+                                           "is not available</span>")
 
     def update(self, action: BiAction):
-        if (action.state == BiFinderStates.Reloaded):
+        if action.state == BiFinderStates.Reloaded:
             self.navBar.set_path(self.container.curent_category_name)
             self.browse()
             return
 
     def get_widget(self):
-        return self.widget 
+        return self.widget

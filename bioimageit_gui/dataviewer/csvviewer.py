@@ -5,6 +5,7 @@ from pathlib import Path
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem
 
+
 if __name__ == '__main__':
     # Create the Qt Application
     app = QApplication(sys.argv)

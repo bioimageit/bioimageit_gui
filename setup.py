@@ -10,16 +10,18 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='bioimageapp',
+    name='bioimageit_gui',
     version='0.1.0',
-    description='Gui application for bioimagepy',
+    description='Gui application for BioImageIT',
     long_description=readme,
     author='Sylvain Prigent',
     author_email='sylvain.prigent@inria.fr',
-    url='https://gitlab.inria.fr/serpico/bioimageapp',
+    url='https://github.com/bioimageit/bioimageit_gui',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
-        "pyside2"
+        "pyside2",
+        "napari"
+        "bioimageit_core"
     ],
     )

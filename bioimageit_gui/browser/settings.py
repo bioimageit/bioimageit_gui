@@ -1,8 +1,9 @@
 import os
 import json
 
-class BiBookmarks():
-    def __init__(self, filename = ''):
+
+class BiBookmarks:
+    def __init__(self, filename=''):
         super().__init__()
         self._object_name = 'BiBookmarks'
         self.filename = filename

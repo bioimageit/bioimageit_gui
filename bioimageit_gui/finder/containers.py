@@ -1,5 +1,5 @@
-from bioimageapp.core.framework import BiContainer
-from bioimageapp.finder.states import BiFinderStates
+from bioimageit_gui.core.framework import BiContainer
+
 
 class BiFinderContainer(BiContainer):
     def __init__(self):

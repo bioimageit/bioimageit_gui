@@ -1,12 +1,13 @@
-import sys
 import os
 import json
 from pathlib import Path
+
 
 def write_json(metadata: dict, md_uri: str):
     """Write the metadata to the a json file"""
     with open(md_uri, 'w') as outfile:
         json.dump(metadata, outfile, indent=4)  
+
 
 if __name__ == '__main__':
     
@@ -16,7 +17,9 @@ if __name__ == '__main__':
 
     config_json = dict()  
     config_json["bookmarks"] = []
-    userdata = {"name": "userdata", "url": os.path.join(package_dir, "userdata")}
+    userdata = {"name": "userdata",
+                "url": os.path.join(package_dir,
+                                    "userdata")}
     config_json["bookmarks"].append(userdata)
 
     config_file = os.path.join(package_dir, 'bookmarks.json')

@@ -3,12 +3,10 @@ import sys
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 
+from bioimageit_core.config import ConfigAccess
 
-sys.path.append("../bioimagepy")
-from bioimagepy.config import ConfigAccess
-
-from bioimageapp.runnerapp import BiRunnerApp
-from bioimageapp.core.exceptions import CommandArgsError
+from bioimageit_gui.runnerapp import BiRunnerApp
+from bioimageit_gui.core.exceptions import CommandArgsError
 
 if __name__ == '__main__':
     # Create the Qt Application
@@ -26,13 +24,13 @@ if __name__ == '__main__':
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
     ConfigAccess(os.path.join(dir_path_parent,'config.json')) 
     component = BiRunnerApp(process_xml)
-    #rec = QApplication.desktop().screenGeometry()
-    #component.get_widget().resize(rec.width()/2, rec.height()/2) 
+    # rec = QApplication.desktop().screenGeometry()
+    # component.get_widget().resize(rec.width()/2, rec.height()/2)
     component.get_widget().show()
     
     # Run the main Qt loop
     stylesheet_path = os.path.join(dir_path, 'theme', 'dark', 'stylesheet.css')
     app.setStyleSheet("file:///" + stylesheet_path)
-    icon_path = os.path.join(dir_path, "theme", "default", "icon.png" )
+    icon_path = os.path.join(dir_path, "theme", "default", "icon.png")
     app.setWindowIcon(QIcon(icon_path))
     sys.exit(app.exec_())

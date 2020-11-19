@@ -3,18 +3,21 @@ import os
 from pathlib import Path
 
 import PySide2.QtCore
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QTabWidget, QHBoxLayout
+from PySide2.QtWidgets import (QApplication, QWidget, QVBoxLayout,
+                               QLabel, QTabWidget, QHBoxLayout)
 
-from bioimageapp.core.framework import BiStates, BiAction, BiComponent, BiContainer
-from bioimageapp.core.exceptions import CommandArgsError
-from bioimageapp.browser.states import BiBrowserStates
-from bioimageapp.browser.containers import BiBrowserContainer
-from bioimageapp.browser.components import BiBrowserComponent
+from bioimageit_gui.core.framework import BiAction, BiComponent
+from bioimageit_gui.browser.states import BiBrowserStates
+from bioimageit_gui.browser.containers import BiBrowserContainer
+from bioimageit_gui.browser.components import BiBrowserComponent
 
-from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
-from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer
-from bioimageapp.experiment.components import BiExperimentComponent, BiExperimentCreateComponent
-from bioimageapp.experiment.models import BiExperimentCreateModel
+from bioimageit_gui.experiment.states import (BiExperimentStates,
+                                              BiExperimentCreateStates)
+from bioimageit_gui.experiment.containers import (BiExperimentContainer,
+                                                  BiExperimentCreateContainer)
+from bioimageit_gui.experiment.components import (BiExperimentComponent,
+                                                  BiExperimentCreateComponent)
+from bioimageit_gui.experiment.models import (BiExperimentCreateModel)
                                             
 
 class BiBrowserApp(BiComponent):
@@ -27,10 +30,12 @@ class BiBrowserApp(BiComponent):
         
         # components
         self.browserComponent = BiBrowserComponent(self.browserContainer)
-        self.experimentCreateComponent = BiExperimentCreateComponent(self.experimentCreateContainer)
+        self.experimentCreateComponent = \
+            BiExperimentCreateComponent(self.experimentCreateContainer)
 
         # models
-        self.expreimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
+        self.expreimentCreateModel = \
+            BiExperimentCreateModel(self.experimentCreateContainer)
 
         # connections
         self.browserContainer.register(self)
@@ -59,14 +64,16 @@ class BiBrowserApp(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.OpenExperiment:
             exp_path = self.browserContainer.openExperimentPath
-            if not self.browserContainer.openExperimentPath.endswith("experiment.md.json"):
+            if not self.browserContainer.openExperimentPath.\
+                    endswith("experiment.md.json"):
                 exp_path = os.path.join(exp_path, "experiment.md.json")
             experimentContainer = BiExperimentContainer()
             experimentContainer.experiment_uri = exp_path
             experimentContainer.register(self)
             experimentComponent = BiExperimentComponent(experimentContainer)
             
-            self.tabWidget.addTab(experimentComponent.get_widget(), "Experiment name")
+            self.tabWidget.addTab(
+                experimentComponent.get_widget(), "Experiment name")
             self.tabWidget.setCurrentIndex(self.tabWidget.count()-1)
             experimentContainer.emit(BiExperimentStates.Load)
 
@@ -75,7 +82,9 @@ class BiBrowserApp(BiComponent):
             self.tabWidget.setCurrentIndex(0)
 
         if action.state == BiExperimentStates.Loaded:
-            self.tabWidget.setTabText(self.tabWidget.currentIndex(), action.parent_container.experiment.metadata.name)
+            self.tabWidget.setTabText(self.tabWidget.currentIndex(),
+                                      action.parent_container.
+                                      experiment.metadata.name)
 
         if action.state == BiBrowserStates.NewExperimentClicked:
             self.experimentCreateComponent.get_widget().setVisible(True)
@@ -84,10 +93,10 @@ class BiBrowserApp(BiComponent):
             self.experimentCreateComponent.get_widget().setVisible(False)  
 
         if action.state == BiExperimentCreateStates.ExperimentCreated:
-            self.browserContainer.openExperimentPath = self.experimentCreateContainer.experiment_dir
+            self.browserContainer.openExperimentPath = \
+                self.experimentCreateContainer.experiment_dir
             self.browserContainer.emit(BiBrowserStates.OpenExperiment)
             self.experimentCreateComponent.get_widget().setVisible(False)     
 
     def get_widget(self):
         return self.widget 
-     

@@ -1,9 +1,9 @@
-import csv
 import os
 import subprocess
 from pathlib import Path
 
-class BiDataView():
+
+class BiDataView:
     def __init__(self, uri: str, format: str):
         self.uri = uri
         self.format = format
@@ -23,4 +23,4 @@ class BiDataView():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         path = Path(dir_path).parent
         subprocess.Popen(['python3', os.path.join(path, 'dataviewer', 'csvviewer.py') , uri])
-                
+

@@ -1,8 +1,8 @@
 from bioimagepy.process import ProcessAccess
 
-from bioimageapp.core.framework import BiModel, BiAction
-from bioimageapp.finder.states import BiFinderStates
-from bioimageapp.finder.containers import BiFinderContainer
+from bioimageit_gui.core.framework import BiModel, BiAction
+from bioimageit_gui.finder.states import BiFinderStates
+from bioimageit_gui.finder.containers import BiFinderContainer
 
 
 class BiFinderModel(BiModel):
@@ -18,6 +18,8 @@ class BiFinderModel(BiModel):
             self.container.emit(BiFinderStates.Reloaded)
 
     def reload(self):
-        self.container.categories = ProcessAccess().get_categories(self.container.curent_category)
+        self.container.categories = ProcessAccess().get_categories(
+            self.container.curent_category)
         if len(self.container.categories) == 0:
-            self.container.tools = ProcessAccess().get_category_processes(self.container.curent_category)
+            self.container.tools = ProcessAccess().get_category_processes(
+                self.container.curent_category)

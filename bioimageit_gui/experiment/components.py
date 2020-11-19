@@ -11,19 +11,34 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QFileDialog, QTabWidget, QSpinBox, QCheckBox, 
                                QComboBox, QProgressBar)
 
-from bioimagepy.dataset import ProcessedDataSet 
+from bioimageit_core.dataset import ProcessedDataSet
 
-from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.core.widgets import BiTagWidget, BiButton
-from bioimageapp.experiment.states import BiExperimentStates, BiExperimentCreateStates
-from bioimageapp.experiment.containers import BiExperimentContainer, BiExperimentCreateContainer  
-from bioimageapp.experiment.models import BiExperimentModel
-from bioimageapp.dataviewer.dataview import BiDataView
+from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_gui.core.widgets import BiTagWidget, BiButton
+from bioimageit_gui.experiment.states import (BiExperimentStates,
+                                              BiExperimentCreateStates)
+from bioimageit_gui.experiment.containers import (BiExperimentContainer,
+                                                  BiExperimentCreateContainer)
+from bioimageit_gui.experiment.models import BiExperimentModel
+from bioimageit_gui.dataviewer.dataview import BiDataView
 
-from bioimageapp.metadata.states import BiRawDataStates, BiProcessedDataStates, BiRunStates, BiMetadataExperimentStates
-from bioimageapp.metadata.containers import BiRawDataContainer, BiProcessedDataContainer, BiRunContainer, BiMetadataExperimentContainer
-from bioimageapp.metadata.components import BiRawDataComponent, BiProcessedDataComponent, BiMetadataRunComponent, BiMetadataExperimentComponent
-from bioimageapp.metadata.models import BiRawDataModel, BiProcessedDataModel, BiRunModel, BiMetadataExperimentModel
+from bioimageit_gui.metadata.states import (BiRawDataStates,
+                                            BiProcessedDataStates,
+                                            BiRunStates,
+                                            BiMetadataExperimentStates)
+from bioimageit_gui.metadata.containers import (BiRawDataContainer,
+                                                BiProcessedDataContainer,
+                                                BiRunContainer,
+                                                BiMetadataExperimentContainer)
+from bioimageit_gui.metadata.components import (BiRawDataComponent,
+                                                BiProcessedDataComponent,
+                                                BiMetadataRunComponent,
+                                                BiMetadataExperimentComponent)
+from bioimageit_gui.metadata.models import (BiRawDataModel,
+                                            BiProcessedDataModel,
+                                            BiRunModel,
+                                            BiMetadataExperimentModel)
+
 
 class BiExperimentComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
@@ -44,9 +59,11 @@ class BiExperimentComponent(BiComponent):
         # models
         self.experimentModel = BiExperimentModel(self.container)
         self.rawDataModel = BiRawDataModel(self.rawDataContainer)
-        self.processedDataModel = BiProcessedDataModel(self.processedDataContainer)
+        self.processedDataModel = BiProcessedDataModel(
+            self.processedDataContainer)
         self.runModel = BiRunModel(self.runContainer)
-        self.metadataExperimentModel = BiMetadataExperimentModel(self.metadataExperimentContainer)
+        self.metadataExperimentModel = BiMetadataExperimentModel(
+            self.metadataExperimentContainer)
 
         # components
         self.toolbarComponent = BiExperimentToolbarComponent(self.container)
@@ -64,7 +81,7 @@ class BiExperimentComponent(BiComponent):
         self.widget.setObjectName('BiWidget')
         self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         self.widget.setLayout(layout)
         splitter = QSplitter()
@@ -330,6 +347,7 @@ class BiExperimentDataSetListComponent(BiComponent):
     def get_widget(self): 
         return self.widget 
 
+
 class BiExperimentDataSetViewComponent(BiComponent):
     def __init__(self, container: BiExperimentCreateContainer, default_destination: str = ""):
         super().__init__()
@@ -572,6 +590,7 @@ class BiExperimentCreateComponent(BiComponent):
     def get_widget(self):
         return self.widget
 
+
 class BiExperimentImportComponent(BiComponent):        
     def __init__(self, container: BiExperimentContainer):
         super().__init__()
@@ -778,10 +797,8 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
                 self.progressBar.setValue(self.container.progress)
                 if self.container.progress == 100:
                     self.progressBar.setVisible(False)
-                 
 
     def importButtonClicked(self):
-
         self.container.import_info.dir_data_path = self.dataPath.text()
         self.container.import_info.dir_recursive = self.recursiveBox.isChecked()
         self.container.import_info.dir_filter = self.filterComboBox.currentIndex()
@@ -801,6 +818,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
 
     def get_widget(self):
         return self.widget  
+
 
 class BiExperimentTagComponent(BiComponent):        
     def __init__(self, container: BiExperimentContainer):
@@ -1113,4 +1131,4 @@ class BiExperimentTagsUsingNameComponent(BiComponent):
         pass    
 
     def get_widget(self):
-        return self.widget                        
+        return self.widget

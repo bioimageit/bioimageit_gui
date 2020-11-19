@@ -2,15 +2,17 @@ import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage
 from PySide2.QtCore import QFileInfo, QDir, Signal
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
-                               QTableWidget, QTableWidgetItem, QAbstractItemView,
-                               QGridLayout, QHBoxLayout, QToolButton, QSplitter, 
-                               QLineEdit, QPushButton, QTextEdit, QMessageBox, QFileDialog)
+                               QTableWidget, QTableWidgetItem,
+                               QAbstractItemView, QGridLayout, QHBoxLayout,
+                               QToolButton, QSplitter, QLineEdit, QPushButton,
+                               QTextEdit, QMessageBox, QFileDialog)
 
-from bioimageapp.core.framework import BiComponent, BiAction
-from bioimageapp.core.widgets import BiButton
-from bioimageapp.browser.states import BiBrowserStates
-from bioimageapp.browser.containers import BiBrowserContainer
-from bioimageapp.browser.models import BiBrowserModel
+from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_gui.core.widgets import BiButton
+from bioimageit_gui.browser.states import BiBrowserStates
+from bioimageit_gui.browser.containers import BiBrowserContainer
+from bioimageit_gui.browser.models import BiBrowserModel
+
 
 class BiBrowserComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
@@ -193,7 +195,8 @@ class BiBrowserShortCutsComponent(BiComponent):
             button.content = entry['url']
             button.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
             button.clickedContent.connect(self.buttonClicked)
-            self.layout.insertWidget(self.layout.count()-1, button, 0, PySide2.QtCore.Qt.AlignTop)
+            self.layout.insertWidget(self.layout.count()-1, button, 0,
+                                     PySide2.QtCore.Qt.AlignTop)
 
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.BookmarksModified:
@@ -290,4 +293,3 @@ class BiBrowserTableComponent(BiComponent):
 
     def get_widget(self): 
         return self.widget   
-                
