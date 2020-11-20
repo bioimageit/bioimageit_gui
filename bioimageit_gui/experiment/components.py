@@ -1,4 +1,4 @@
-import ntpath
+import os
 import subprocess
 
 import PySide2.QtCore
@@ -161,7 +161,9 @@ class BiExperimentComponent(BiComponent):
             return    
 
         if action.state == BiExperimentStates.ProcessClicked:
-            subprocess.Popen(['python3', 'finderapp.py']) 
+            finder_path = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), '..', '..', 'finderapp.py')
+            subprocess.Popen(['python', finder_path])
 
         if action.state == BiExperimentStates.DataSetClicked:
             self.hideDataComponents()     

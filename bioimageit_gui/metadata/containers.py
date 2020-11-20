@@ -1,4 +1,4 @@
-from bioimageit_core.core.framework import BiContainer
+from bioimageit_gui.core.framework import BiContainer
 
 
 class BiRawDataContainer(BiContainer):

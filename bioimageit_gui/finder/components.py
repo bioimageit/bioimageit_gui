@@ -77,6 +77,8 @@ class BiFinderComponent(BiComponent):
         toolsSplitter.addWidget(self.docViewer)
     
         self.toolsWidget.setVisible(False)
+        toolsSplitter.setStretchFactor(0, 0.5)
+        toolsSplitter.setStretchFactor(1, 1)
 
     def moveToPrevious(self):
         self.container.movePrevious()

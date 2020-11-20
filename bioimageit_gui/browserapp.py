@@ -53,7 +53,7 @@ class BiBrowserApp(BiComponent):
         self.widget.setObjectName('bioImageApp')
         self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         self.widget.setLayout(layout)
 

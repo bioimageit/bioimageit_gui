@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide2.QtGui import QIcon
+from PySide2.QtGui import QIcon, QGuiApplication
 from PySide2.QtWidgets import QApplication
 
 
@@ -18,7 +18,8 @@ if __name__ == '__main__':
     ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
     component = BiFinderApp()
     rec = QApplication.desktop().screenGeometry()
-    component.get_widget().resize(rec.width()/2, rec.height()/2) 
+    rec = QGuiApplication.primaryScreen().availableGeometry()
+    component.get_widget().resize(2*rec.width()/3, 2*rec.height()/3)
     component.get_widget().show()
     
     # Run the main Qt loop

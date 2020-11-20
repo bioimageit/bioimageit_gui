@@ -92,16 +92,16 @@ class BiRunnerThread(QThread):
         self.output_uris = []
         if self.mode == BiRunnerContainer.MODE_FILE:
             runner = Runner(self.process_info)
-            runner.addObserver(self.observer)
-            for input in self.inputs:
-                runner.add_input(input['name'], input['uri'])
+            runner.add_observer(self.observer)
+            for input_ in self.inputs:
+                runner.add_input(input_['name'], input_['uri'])
             runner.set_parameters(*self.parameters)
             runner.set_output(self.output_uri)
             runner.exec()   
             self.output_uris = runner.output_uris
         elif self.mode == BiRunnerContainer.MODE_REP:  
             runner = Runner(self.process_info)
-            runner.addObserver(self.observer)
+            runner.add_observer(self.observer)
             for input in self.inputs:
                 runner.add_inputs(input['name'], input['uri'], input['filter'])
             runner.set_parameters(*self.parameters)
@@ -110,7 +110,7 @@ class BiRunnerThread(QThread):
             #self.output_uris = runner.output_uris
         elif self.mode == BiRunnerContainer.MODE_EXP:  
             process = PipelineRunner(self.experiment, self.process_info)
-            process.addObserver(self.observer)
+            process.add_observer(self.observer)
             process.set_dataset_name(self.output_uri)
             process.set_parameters(*self.parameters)
             for input_ in self.inputs:

@@ -6,8 +6,8 @@ from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit)
 
-from bioiomageit_gui.core.widgets import BiButton, BiFileSelectWidget
-from bioiomageit_gui.runner.containers import BiRunnerContainer
+from bioimageit_gui.core.widgets import BiButton, BiFileSelectWidget
+from bioimageit_gui.runner.containers import BiRunnerContainer
 
 from bioimageit_core.process import Process
 from bioimageit_core.experiment import Experiment

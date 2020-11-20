@@ -1,17 +1,17 @@
 import os
 
-from bioimagit_core.data import RawData, ProcessedData
-from bioimagit_core.metadata.run import Run
+from bioimageit_core.data import RawData, ProcessedData
+from bioimageit_core.metadata.run import Run
 
-from bioimagit_gui.core.framework import BiModel, BiAction
-from bioimagit_gui.metadata.states import (BiRawDataStates,
-                                           BiProcessedDataStates,
-                                           BiMetadataExperimentStates,
-                                           BiRunStates)
-from bioimagit_gui.metadata.containers import (BiRawDataContainer,
-                                               BiProcessedDataContainer,
-                                               BiMetadataExperimentContainer,
-                                               BiRunContainer)
+from bioimageit_gui.core.framework import BiModel, BiAction
+from bioimageit_gui.metadata.states import (BiRawDataStates,
+                                            BiProcessedDataStates,
+                                            BiMetadataExperimentStates,
+                                            BiRunStates)
+from bioimageit_gui.metadata.containers import (BiRawDataContainer,
+                                                BiProcessedDataContainer,
+                                                BiMetadataExperimentContainer,
+                                                BiRunContainer)
 
 
 class BiRawDataModel(BiModel):  

@@ -1,4 +1,4 @@
-from bioimageit_core.core.framework import BiStates
+from bioimageit_gui.core.framework import BiStates
 
 
 class BiRawDataStates(BiStates):

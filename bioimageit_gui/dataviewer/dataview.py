@@ -16,11 +16,12 @@ class BiDataView:
             self.openTableViewer(self.uri)
 
     def openImageViewer(self, uri):
-        subprocess.Popen(['napari', 'images' , uri])
+        subprocess.Popen(['napari', uri])
 
     def openTableViewer(self, uri):
         print('open csv from: ', uri)
         dir_path = os.path.dirname(os.path.realpath(__file__))
         path = Path(dir_path).parent
-        subprocess.Popen(['python3', os.path.join(path, 'dataviewer', 'csvviewer.py') , uri])
+        subprocess.Popen(['python3', os.path.join(path, 'dataviewer',
+                                                  'csvviewer.py'), uri])
 

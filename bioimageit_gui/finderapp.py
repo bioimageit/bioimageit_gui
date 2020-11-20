@@ -1,4 +1,5 @@
 import sys
+import os
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 import subprocess
@@ -25,7 +26,9 @@ class BiFinderApp(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.OpenProcess:
-            subprocess.Popen(['python3', 'runnerapp.py',
+            runner_path = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), '..', 'runnerapp.py')
+            subprocess.Popen(['python', runner_path,
                               self.finderContainer.clicked_tool])
 
     def get_widget(self):

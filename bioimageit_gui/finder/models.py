@@ -1,4 +1,4 @@
-from bioimagepy.process import ProcessAccess
+from bioimageit_core.process import ProcessAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 from bioimageit_gui.finder.states import BiFinderStates
