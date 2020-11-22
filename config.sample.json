@@ -14,5 +14,7 @@
     },
     "user":{
         "name": "Sylvain Prigent"
-    }
+    },
+    "python": ".bioimageit-env/bin/python",
+    "image_viewer": ".bioimageit-env/bin/napari"
 }
