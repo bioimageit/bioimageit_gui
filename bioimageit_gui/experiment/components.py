@@ -11,6 +11,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QFileDialog, QTabWidget, QSpinBox, QCheckBox, 
                                QComboBox, QProgressBar)
 
+from bioimageit_core.config import ConfigAccess
 from bioimageit_core.dataset import ProcessedDataSet
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
@@ -163,7 +164,13 @@ class BiExperimentComponent(BiComponent):
         if action.state == BiExperimentStates.ProcessClicked:
             finder_path = os.path.join(os.path.dirname(
                 os.path.realpath(__file__)), '..', '..', 'finderapp.py')
-            subprocess.Popen(['python', finder_path])
+
+            config = ConfigAccess.instance().config
+            if 'python' in config:
+                python_path = config['python'] 
+                subprocess.Popen([python_path, finder_path])
+            else:
+                print('Cannot find python in the config.json file') 
 
         if action.state == BiExperimentStates.DataSetClicked:
             self.hideDataComponents()     

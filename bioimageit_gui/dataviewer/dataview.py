@@ -2,6 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 
+from bioimageit_core.config import ConfigAccess
+
 
 class BiDataView:
     def __init__(self, uri: str, format: str):
@@ -16,7 +18,12 @@ class BiDataView:
             self.openTableViewer(self.uri)
 
     def openImageViewer(self, uri):
-        subprocess.Popen(['napari', uri])
+        config = ConfigAccess.instance().config
+        if 'python' in config:
+            viewer_path = config['image_viewer'] 
+            subprocess.Popen([viewer_path, uri])
+        else:
+            print('Cannot find image_viewer in the config.json file')  
 
     def openTableViewer(self, uri):
         print('open csv from: ', uri)
