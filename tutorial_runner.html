@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial: runner &mdash; BioImageIT GUI 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial: pipeline" href="tutorial_pipeline.html" />
+    <link rel="prev" title="Tutorial: finder" href="tutorial_finder.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> BioImageIT GUI
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_experiment.html">Tutorial: experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_finder.html">Tutorial: finder</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: runner</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#application-overview">Application overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#single-file-processing">Single file processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#directory-processing">Directory processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#experiment-processing">Experiment processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_pipeline.html">Tutorial: pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bioimageit_gui</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BioImageIT GUI</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tutorial: runner</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tutorial_runner.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial-runner">
+<h1>Tutorial: runner<a class="headerlink" href="#tutorial-runner" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial, we show step by step how to use the runner application to process data.</p>
+<p>The <em>Runner app</em> can be openned two ways:</p>
+<ul class="simple">
+<li><p>Using the finder app and clic open on the selected tool</p></li>
+<li><p>Using the command line <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">runnerapp.py</span> <span class="pre">/path/to/the/tool/wrapper/xml</span></code></p></li>
+</ul>
+<div class="section" id="application-overview">
+<h2>Application overview<a class="headerlink" href="#application-overview" title="Permalink to this headline">¶</a></h2>
+<p>When we open the <em>Runner app</em> it shows a graphical interface dedicated to the process it runs. Figure below show screen shots
+of the <em>Runner app</em> for the SPARTION2D deconvolution algorithm</p>
+<div class="figure align-center">
+<img alt="_images/figure1.png" src="_images/figure1.png" />
+</div>
+<p>The <em>Runner app</em> contains 3 tabs: <em>File</em>, <em>Folder</em> and <em>Experiment</em>. The <em>File</em> tab aims at processing a single data file
+(or N-uplet of file depending on the tool), the <em>Folder</em> tab aims at batch processing corpus of data file located in a directory, and
+the <em>Experiment</em> tab aims at processing data sets anotated in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> database. In the next sections we details the use of
+each of the 3 modes.</p>
+<p>The <em>Inputs</em> section of the graphical interface show forms to select the inputs. Of course, the forms are differents depending on the
+mode (<em>File</em>, <em>Folder</em> and <em>Experiment</em>).</p>
+<p>The <em>Parameters</em> section of the graphical interface shows a form to tune the processing parameters. These parameters a dedicated to the
+opened processing tools, and the tunning is documented in the tool documentation available through the <em>Finder app</em>.</p>
+<p>The <em>Exec</em> section contains the button to start the processing.</p>
+<p>The <em>Progress</em> section contains a progress bar and a log text area to see how the processing is going.</p>
+</div>
+<div class="section" id="single-file-processing">
+<h2>Single file processing<a class="headerlink" href="#single-file-processing" title="Permalink to this headline">¶</a></h2>
+<p>In this section, we are going to deconvolute a 2D image of spots. The image we use is from the BioImagePy tutorials and is
+available at <a class="reference external" href="https://gitlab.inria.fr/bioimage-it/bioimagepy-tutorial/-/tree/master/synthetic_data/data">https://gitlab.inria.fr/bioimage-it/bioimagepy-tutorial/-/tree/master/synthetic_data/data</a></p>
+<p>First, we select the image using the file selector form named <em>Input Image</em>. When the image is selected, a <em>View</em> button get visible in
+the right of the file selector form.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image21.png"><img alt="_images/image21.png" src="_images/image21.png" style="width: 250px;" /></a>
+</div>
+<p>When we clic the view button, it open the image viewer:</p>
+<div class="figure align-center">
+<img alt="_images/image32.png" src="_images/image32.png" />
+</div>
+<p>Let press the <em>Run</em> button to try deconvolution on the selected image with the default parameters. When we press
+<em>Run</em>, the progress bar indicates the progress and we can see the log informations of the process written all along
+the process. Note that, the first time you run a process, it may take some time to initialize since the software has to download
+the tool and configure the tool.</p>
+<p>When the processing has finished, it automatically open the viewer with the processed data</p>
+<div class="figure align-center">
+<img alt="_images/image42.png" src="_images/image42.png" />
+</div>
+<p>We can see on the figure above that the result is not good. Thus, let tune the parameters. On the <em>Parameters</em> section, the
+<em>Advanced</em> chackbox allow to show/hide the advanced parameters that can be usefull for fine tunning parameters. Parameters tuning
+is tool dependent. Thus, to tune parameters you need to read the tool documentation (available with the <em>Finder app</em>).
+Everytime we change the parameters, we need to press <em>Run</em> and get the new result:</p>
+<div class="figure align-center">
+<img alt="_images/image51.png" src="_images/image51.png" />
+</div>
+<p>Note that when using the <em>File</em> mode, the <em>Runner app</em> does not generate any metadata. This mode aims at providing a convenient
+tool for trail and error parameters tuning. If you need to keep track and record the results and used setting please use the
+<em>Experiment</em> mode.</p>
+</div>
+<div class="section" id="directory-processing">
+<h2>Directory processing<a class="headerlink" href="#directory-processing" title="Permalink to this headline">¶</a></h2>
+<p>The <em>Folder</em> mode allows to process data files located in the same directory. First we select the directory we want to process. In this example,
+we copy &amp; paste 5 images from the BioImagePy tutorials dataset available at <a class="reference external" href="https://gitlab.inria.fr/bioimage-it/bioimagepy-tutorial/-/tree/master/synthetic_data/data">https://gitlab.inria.fr/bioimage-it/bioimagepy-tutorial/-/tree/master/synthetic_data/data</a></p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image61.png"><img alt="_images/image61.png" src="_images/image61.png" style="width: 250px;" /></a>
+</div>
+<p>On the right of the input selector widget, the is a <em>Filter</em> button that is <em>OFF</em> by default. When we clic the <em>Filter</em> button, a
+popup window shows a form that allows to filter the data we want to process. In our example we select all the files whose name ends
+by “.tif”:</p>
+<div class="figure align-center">
+<img alt="_images/image71.png" src="_images/image71.png" />
+</div>
+<p>When we clic on <em>Validate</em>, the filter popup close and the filter status become <em>ON</em>:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image81.png"><img alt="_images/image81.png" src="_images/image81.png" style="width: 250px;" /></a>
+</div>
+<p>Select the output directory with the <em>Output dir</em> widget:</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image91.png"><img alt="_images/image91.png" src="_images/image91.png" style="width: 250px;" /></a>
+</div>
+<p>Change the parameters with the values that we selected in the previous section, and clic <em>RUN</em>. The application runs
+the processing tool for all the files:</p>
+<div class="figure align-center">
+<img alt="_images/image101.png" src="_images/image101.png" />
+</div>
+<p>When the processing is finished, we can find the results in the output directory we gave:</p>
+<div class="figure align-center">
+<img alt="_images/image111.png" src="_images/image111.png" />
+</div>
+</div>
+<div class="section" id="experiment-processing">
+<h2>Experiment processing<a class="headerlink" href="#experiment-processing" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> processing is the topic of the next tutorial where we show how to use the Runner app to build a processing
+pipeline for data stored in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_pipeline.html" class="btn btn-neutral float-right" title="Tutorial: pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_finder.html" class="btn btn-neutral float-left" title="Tutorial: finder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Sylvain Prigent
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

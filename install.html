@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Install &mdash; BioImageIT GUI 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial: experiment" href="tutorial_experiment.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> BioImageIT GUI
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-bioimageit-core">Install bioimageit_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-toolboxes">Install toolboxes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-bioimageit-core">Configure bioimageit_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-bioimageit-gui">Install BioImageIT GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_experiment.html">Tutorial: experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_finder.html">Tutorial: finder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_runner.html">Tutorial: runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_pipeline.html">Tutorial: pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bioimageit_gui</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BioImageIT GUI</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Install</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/install.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="install">
+<h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
+<p>This section contains the instructions to install <code class="docutils literal notranslate"><span class="pre">BioImageApp</span></code>, <code class="docutils literal notranslate"><span class="pre">BioImagePy</span></code> and the toolboxes
+to have a local working instance of <code class="docutils literal notranslate"><span class="pre">BioImageApp</span></code>.
+This instructions are for manual install. Prepackaged solutions are availabale <a class="reference external" href="https://project.inria.fr/bioimageit/install/">here</a></p>
+<div class="section" id="install-bioimageit-core">
+<h2>Install bioimageit_core<a class="headerlink" href="#install-bioimageit-core" title="Permalink to this headline">¶</a></h2>
+<p>BioImageIT GUI depends on <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code>. To install <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code> run the following commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir bioimageit
+git clone https://github.com/bioimageit/bioimageit_core.git
+<span class="nb">cd</span> bioimageit_core
+python -m pip install ./bioimageit_core
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-toolboxes">
+<h2>Install toolboxes<a class="headerlink" href="#install-toolboxes" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code> uses a toolboxes index of remotely packaged tools. The toolboxes index is not installed by default.
+To install the toolboxes run the following commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bioimageit
+git clone https://github.com/bioimageit/bioimageit-toolboxes.git
+<span class="nb">cd</span> bioimageit_core
+python3 install.py
+</pre></div>
+</div>
+<p>The install script unpack the toolboxes, and create a configuration file. The install script ask your user name. This is
+the username that will appear in the metadata files generated by <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code></p>
+</div>
+<div class="section" id="configure-bioimageit-core">
+<h2>Configure bioimageit_core<a class="headerlink" href="#configure-bioimageit-core" title="Permalink to this headline">¶</a></h2>
+<p>If you need to manually configure <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code> you need to edit the <code class="docutils literal notranslate"><span class="pre">config.json</span></code> file. You copy &amp; paste
+the <code class="docutils literal notranslate"><span class="pre">config.sample.json</span></code> available in the <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code> root directory, or you can use the <code class="docutils literal notranslate"><span class="pre">config.json</span></code>
+file generated by the install script. The configuration file looks like this:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;metadata&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;service&quot;</span><span class="o">:</span> <span class="s2">&quot;LOCAL&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;process&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;service&quot;</span><span class="o">:</span> <span class="s2">&quot;LOCAL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;xml_dirs&quot;</span><span class="o">:</span> <span class="p">[</span>
+            <span class="s2">&quot;/use/absolute/path/to/bioimageit/toolboxes/tools&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;categories&quot;</span><span class="o">:</span> <span class="s2">&quot;/use/absolute/path/to/bioimageit/toolboxes/toolboxes.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tools&quot;</span><span class="o">:</span> <span class="s2">&quot;/use/absolute/path/to/bioimageit/toolboxes/tools.json&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;runner&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;service&quot;</span><span class="o">:</span> <span class="s2">&quot;SINGULARITY&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;user&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;your user name&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">metadata</span></code> section allows to configure how the metadata are handled. In the exemple above, we use the LOCAL
+service that have no settings.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">process</span></code> section contains all the processing tools desciptions. In the example above, we use the LOCAL service
+meaning that all the tools informations (XML wrappers) are copied locally. The variable <code class="docutils literal notranslate"><span class="pre">xml_dirs</span></code> is the path of the
+directories containing the processing tools XML wrappers. The variable <code class="docutils literal notranslate"><span class="pre">categories</span></code> is the path to the JSON file
+containing the toolboxes list. The variable <code class="docutils literal notranslate"><span class="pre">tools</span></code> is the path to the index file containing the list of all the
+available tools.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">runner</span></code> section contains the processing tools runner configuration. In the example above, we use Singularity to
+run tools that are packaged in Docker containers.</p>
+<p>Finally, the <code class="docutils literal notranslate"><span class="pre">user</span></code> section contains the user name that will be printed in the metadata every time a data is imported
+or processed by this instance of <code class="docutils literal notranslate"><span class="pre">bioimageit_core</span></code>. This allows traceability.</p>
+</div>
+<div class="section" id="install-bioimageit-gui">
+<h2>Install BioImageIT GUI<a class="headerlink" href="#install-bioimageit-gui" title="Permalink to this headline">¶</a></h2>
+<p>To install <code class="docutils literal notranslate"><span class="pre">BioImageIT</span> <span class="pre">GUI</span></code> run the following commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bioimageit
+git clone https://github.com/bioimageit/bioimageit_gui.git
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_experiment.html" class="btn btn-neutral float-right" title="Tutorial: experiment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Sylvain Prigent
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial: experiment &mdash; BioImageIT GUI 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial: finder" href="tutorial_finder.html" />
+    <link rel="prev" title="Install" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> BioImageIT GUI
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: experiment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-browser-app">The browser app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-tutorial-dataset">The tutorial dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-an-experiment">Create an experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-data">Import data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tag-data">Tag data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-metadata">Edit metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualize-data">Visualize data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_finder.html">Tutorial: finder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_runner.html">Tutorial: runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_pipeline.html">Tutorial: pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bioimageit_gui</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BioImageIT GUI</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tutorial: experiment</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tutorial_experiment.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial-experiment">
+<span id="id1"></span><h1>Tutorial: experiment<a class="headerlink" href="#tutorial-experiment" title="Permalink to this headline">¶</a></h1>
+<p>In BioImageIT, data are represented using 3 levels:</p>
+<ul class="simple">
+<li><p><strong>Data</strong>: a single data is made of one or several data files described with metadata. A data can be a <code class="docutils literal notranslate"><span class="pre">RawData</span></code> if it comes from an acquisition system or a <code class="docutils literal notranslate"><span class="pre">ProcessedData</span></code> if it is a data obtained by processing any other data.</p></li>
+<li><p><strong>DataSet</strong>: a collection of <em>Data</em> described with metadata. We define two types of <em>DataSets</em>: a <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> contains a collection of <code class="docutils literal notranslate"><span class="pre">RawData</span></code>, and a <code class="docutils literal notranslate"><span class="pre">ProcessedDataSet</span></code> contains a collection of <code class="docutils literal notranslate"><span class="pre">ProcessedData`</span></code></p></li>
+<li><p><strong>Experiment</strong>: contains one <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code>, the images to be analysed, and a list of <code class="docutils literal notranslate"><span class="pre">ProcessedDataSet</span></code>, one for each process applied to the Data. The Experiment is described using metadata.</p></li>
+</ul>
+<p>The <strong>BioImageIT browser application</strong> is a desktop graphical interface that allows to manipulate <code class="docutils literal notranslate"><span class="pre">Data</span></code>, <code class="docutils literal notranslate"><span class="pre">Datasets</span></code> and <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> with a set of forms.
+The more common usage of this application is following this data manipulation steps:</p>
+<ul class="simple">
+<li><p>Create an Experiment</p></li>
+<li><p>Import data to the Experiment</p></li>
+<li><p>Tag Data</p></li>
+<li><p>Process data.</p></li>
+</ul>
+<p>with goings and coming between steps 2 to 4</p>
+<p>This first tutorial cover the step 1, 2 and 3.</p>
+<p>Open the browser application with the following command or click the shortcut icon:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 browserapp.py
+</pre></div>
+</div>
+<div class="section" id="the-browser-app">
+<h2>The browser app<a class="headerlink" href="#the-browser-app" title="Permalink to this headline">¶</a></h2>
+<p>The main screen of the browser app is shown in the figure below. It looks like a classical file navigator with on
+top the navigation bar with the previous, next, parent, home navigation buttons, the current directory path and
+the add bookmark button. On the left there is a shortcut bar, with the new experiment button and the bookmarked shortcuts.
+In the screenshot example bellow, we have only one bookmark that is the userdata directory.
+Finally, the main central area is the list of directories and files in the current directory.
+When we browse a classical file system, the browser app is no more no less than a classical file browser. Later in this tutorial,
+we will see that when we open an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> we have a dedicated view to experiment navigation.</p>
+<div class="figure align-center">
+<img alt="_images/image1.png" src="_images/image1.png" />
+</div>
+</div>
+<div class="section" id="the-tutorial-dataset">
+<h2>The tutorial dataset<a class="headerlink" href="#the-tutorial-dataset" title="Permalink to this headline">¶</a></h2>
+<p>To illustrate the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> management with the browser app we will use a synthetic dataset available at <a class="reference external" href="https://github.com/bioimageit/bioimageit-notebooks/tree/main/synthetic_data/data">https://github.com/bioimageit/bioimageit-notebooks/tree/main/synthetic_data/data</a>
+The dataset is made of 40 synthetic images from 2 populations.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image2a.png"><img alt="_images/image2a.png" src="_images/image2a.png" style="width: 250px;" /></a>
+</div>
+<p>Data are spots with a lot of noise, and one population has more spots that the other. In this tutorial, we are going to create
+a new <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>, import the dataset in the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and tag the raw data to identify the two populations.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image2b.png"><img alt="_images/image2b.png" src="_images/image2b.png" style="width: 250px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/image2c.png"><img alt="_images/image2c.png" src="_images/image2c.png" style="width: 250px;" /></a>
+</div>
+</div>
+<div class="section" id="create-an-experiment">
+<h2>Create an experiment<a class="headerlink" href="#create-an-experiment" title="Permalink to this headline">¶</a></h2>
+<p>To create an new <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>, click on the <strong>New Experiment</strong> button on the left bar of the browser app.</p>
+<div class="figure align-center">
+<img alt="_images/image3.png" src="_images/image3.png" />
+</div>
+<p>It opens a new window with a form asking the needed information:</p>
+<ul class="simple">
+<li><p>Destination: the directory where the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> will be create. In the example we selected the default <em>userdata</em> folder in the BioImageIT prepackaged install.</p></li>
+<li><p>Experiment name: the name we give to the experiment</p></li>
+<li><p>Author: the name of the person that created the experiment. It can be several people.</p></li>
+</ul>
+<p>When we click on the create button, a new directory is created in the <em>destination</em> folder with the experiment metadata.
+A popup window says that the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> has been created. Click <em>Ok</em>, and the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> navigation window should show:</p>
+<div class="figure align-center">
+<img alt="_images/image4.png" src="_images/image4.png" />
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> navigation window is made of three main elements.</p>
+<p>1- The navigation bar allows to operate on the experiment metadata. Available tools are:</p>
+<ul class="simple">
+<li><p><em>Information</em>: the information tool button allows to edit the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> main metadata.</p></li>
+<li><p><em>Import data</em>: the import data tool button shows a popup window with forms to import single data or a corpus of data from a directory.</p></li>
+<li><p><em>Tag data</em>: the tag data tool button shows a popup window with forms to add tags to raw data</p></li>
+<li><p><em>Process data</em>: the process data tool button opens the tool finder app to start processing the data</p></li>
+<li><p><em>Refresh</em>: the refresh tool button allows to reload the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> metadata.</p></li>
+</ul>
+<p>2- The left bar contains the list of all the datasets. By now, we only have one empty dataset called <code class="docutils literal notranslate"><span class="pre">data</span></code>. This is the <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> that is automatically created.</p>
+<p>3- The central are contains the list of the data in the selected dataset</p>
+</div>
+<div class="section" id="import-data">
+<h2>Import data<a class="headerlink" href="#import-data" title="Permalink to this headline">¶</a></h2>
+<p>To import data, we click on the <em>Import data</em> tool button on the <code class="docutils literal notranslate"><span class="pre">experiment</span></code> toolbar</p>
+<div class="figure align-center">
+<img alt="_images/image5.png" src="_images/image5.png" />
+</div>
+<p>The popup window has two tabs. On to import a <em>Single Data</em> file, and one to import <em>Multiple Data</em>. In this tutorial, we have all the
+raw data in a folder. Thus we click the import <em>Multiple Data</em> tab. The form has the following inputs:</p>
+<ul class="simple">
+<li><p><em>Folder</em>: the directory where the data to import are</p></li>
+<li><p><em>Recursive</em>: if checked, the data from all subdirectories will be imported</p></li>
+<li><p><em>Filter</em>: add a condition on the to import. In this example, we select all the file with a name ending by <em>.tif</em></p></li>
+<li><p><em>Copy data</em>: if true, the data are copied in the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> folder of the experiment. otherwise, the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> will only keep the <strong>absolute</strong> path of the data.</p></li>
+<li><p><em>Format</em>: a metadata information about the data format</p></li>
+<li><p><em>Author</em>: a metadata information about who created the data</p></li>
+<li><p><em>Created date</em>: a metadata information about when the data have been created.</p></li>
+</ul>
+<p>Click <em>import</em>. When the data are imported a popup window inform that the import is done. Click <em>ok</em>. The <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> automatically
+updates and now we have the list of the <code class="docutils literal notranslate"><span class="pre">RawData</span></code>.</p>
+<div class="figure align-center">
+<img alt="_images/image6.png" src="_images/image6.png" />
+</div>
+</div>
+<div class="section" id="tag-data">
+<h2>Tag data<a class="headerlink" href="#tag-data" title="Permalink to this headline">¶</a></h2>
+<p>As we saw at the beginning of this tutorial, the imported data are from 2 populations. We now want to tag the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> to identify them.
+Click on the <em>Tag data</em> tool button.</p>
+<div class="figure align-center">
+<img alt="_images/image7.png" src="_images/image7.png" />
+</div>
+<p>The tag data popup window contains 3 tabs:</p>
+<ul class="simple">
+<li><p><em>Tags</em>: contains a form to manually declare new tags to the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>. This is useful only when we want to manually tag all the data</p></li>
+<li><p><em>Tag using separator</em>: contains a tool to automatically extract tags from the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> file names using separator strings.</p></li>
+<li><p><em>Tag using names</em>: contains a tool to automatically extract tags from the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> by searching specific words in the file names.</p></li>
+</ul>
+<p>In the sample data we use for this tutorial, the file names contains the words <em>population1</em> and <em>population2</em>. Thus, we will
+use the <em>Tag using names</em> tool. The <em>Tag using names</em> tool form has 2 inputs:</p>
+<ul class="simple">
+<li><p><em>Tag</em>: the name we want to give to the tag. In our example, we use <em>Population</em></p></li>
+<li><p><em>Search names</em>: the words we want to extract from the file names. In out example, we want to extract <em>population1</em> and <em>population2</em></p></li>
+</ul>
+<p>click <em>Validate</em>, and a new column with the extracted tag is now visible in the <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> data list view:</p>
+<div class="figure align-center">
+<img alt="_images/image8.png" src="_images/image8.png" />
+</div>
+<p>In our sample data, the file names also contains a number located between two <em>_</em>. We propose now to extract this number as a tag for each
+data. We click on the <em>Tag data</em> tool button and select the tab <em>Tag using separator</em>.</p>
+<div class="figure align-center">
+<img alt="_images/image9.png" src="_images/image9.png" />
+</div>
+<p>We fill the form as follow:</p>
+<ul class="simple">
+<li><p><em>Tag</em>: the name we want to give the tag. Here we chose <em>number</em></p></li>
+<li><p><em>Separator</em>: the chars that is used as separator in the filename. In our example it is <em>_</em></p></li>
+<li><p><em>Position</em>: The position of the word we want extract with respect to <em>Separator</em>. In our example we set 1 because we want the word that is just after the first <em>_</em> in the file name.</p></li>
+</ul>
+<p>Click <em>Validate</em>, and a new column with the extracted tag is now visible in the <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> data list view:</p>
+<div class="figure align-center">
+<img alt="_images/image10.png" src="_images/image10.png" />
+</div>
+</div>
+<div class="section" id="edit-metadata">
+<h2>Edit metadata<a class="headerlink" href="#edit-metadata" title="Permalink to this headline">¶</a></h2>
+<p>When we click on any <code class="docutils literal notranslate"><span class="pre">RawData</span></code> on the data table, a bar become visible on the right side of the window. It contains a form with all
+the metadata and the tags of the selected <code class="docutils literal notranslate"><span class="pre">RadData</span></code>.
+We can then manually edit any of the editable metadata:</p>
+<div class="figure align-center">
+<img alt="_images/image11.png" src="_images/image11.png" />
+</div>
+</div>
+<div class="section" id="visualize-data">
+<h2>Visualize data<a class="headerlink" href="#visualize-data" title="Permalink to this headline">¶</a></h2>
+<p>When we double click any <code class="docutils literal notranslate"><span class="pre">RawData</span></code> on the data table, it opens a data viewer. The viewer is different depending on the data <strong>format</strong>.
+The data format is specified in each data metadata. If the browser app does not recognize the format, it cannot open it since it does not have any viewer for this data.</p>
+<p>In our example, the data format are <em>tif</em>. Thus, the browser app opens the <em>Napari</em> viewer:</p>
+<div class="figure align-center">
+<img alt="_images/image12.png" src="_images/image12.png" />
+</div>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial we saw all the functionalities of the browser app interface that are:</p>
+<ul class="simple">
+<li><p>Browse the file system</p></li>
+<li><p>Create an experiment</p></li>
+<li><p>import data to an experiment</p></li>
+<li><p>tag an experiment data</p></li>
+<li><p>edit data metadata</p></li>
+<li><p>visualize data</p></li>
+</ul>
+<p>The last button that we did not use it the <em>Process data</em> tool button in the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> tool bar. When we click on it, it opens
+the tool finder app to start processing data. This is the topic of the next tutorial:</p>
+<div class="figure align-center">
+<img alt="_images/image13.png" src="_images/image13.png" />
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial_finder.html" class="btn btn-neutral float-right" title="Tutorial: finder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral float-left" title="Install" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Sylvain Prigent
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
