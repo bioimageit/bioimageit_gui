@@ -1,7 +1,7 @@
-bioimageapp
-===========
+bioimageit_gui
+==============
 
 .. toctree::
    :maxdepth: 4
 
-   bioimageapp
+   bioimageit_gui

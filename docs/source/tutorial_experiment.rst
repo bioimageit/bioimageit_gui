@@ -5,7 +5,7 @@ Tutorial: experiment
 
 In BioImageIT, data are represented using 3 levels:
 
-* **Data**: a single data is made of one or several data files descibed with metadata. A data can be a ``RawData`` if it comes from an acquisition system or a ``ProcessedData`` if it is a data obtained by processing any other data.
+* **Data**: a single data is made of one or several data files described with metadata. A data can be a ``RawData`` if it comes from an acquisition system or a ``ProcessedData`` if it is a data obtained by processing any other data.
 
 * **DataSet**: a collection of *Data* described with metadata. We define two types of *DataSets*: a ``RawDataSet`` contains a collection of ``RawData``, and a ``ProcessedDataSet`` contains a collection of ``ProcessedData```
 
@@ -19,11 +19,11 @@ The more common usage of this application is following this data manipulation st
 * Tag Data 
 * Process data. 
 
-with goings and comming between steps 2 to 4
+with goings and coming between steps 2 to 4
 
 This first tutorial cover the step 1, 2 and 3.
 
-Open the browser application with the following command or clic the shortcut icon:
+Open the browser application with the following command or click the shortcut icon:
 
 .. code:: shell
     
@@ -47,8 +47,8 @@ we will see that when we open an ``Experiment`` we have a dedicated view to expe
 The tutorial dataset
 --------------------
 
-To illustrate the ``Experiment`` management with the browser app we will use a syntetic dataset available at `<https://gitlab.inria.fr/bioimage-it/bioimagepy-tutorial/-/tree/master/synthetic_data/data>`_  
-The dataset is made of 40 syntetic images from 2 populations. 
+To illustrate the ``Experiment`` management with the browser app we will use a synthetic dataset available at `<https://github.com/bioimageit/bioimageit-notebooks/tree/main/synthetic_data/data>`_
+The dataset is made of 40 synthetic images from 2 populations.
 
 .. figure::  images/experiment/image2a.png
    :width:   250 
@@ -68,7 +68,7 @@ a new ``Experiment``, import the dataset in the ``Experiment`` and tag the raw d
 Create an experiment
 --------------------
 
-To create an new ``Experiment``, clic on the **New Experiment** button on the left bar of the browser app.
+To create an new ``Experiment``, click on the **New Experiment** button on the left bar of the browser app.
 
 .. figure::  images/experiment/image3.png
    :align:   center 
@@ -79,15 +79,15 @@ It opens a new window with a form asking the needed information:
 * Experiment name: the name we give to the experiment
 * Author: the name of the person that created the experiment. It can be several people.
 
-When we clic on the create button, a new directory is created in the *destination* folder with the experiment metadata.
-A popup window says that the ``Experiment`` has been created. Clic *Ok*, and the ``Experiment`` navigation window should show:
+When we click on the create button, a new directory is created in the *destination* folder with the experiment metadata.
+A popup window says that the ``Experiment`` has been created. Click *Ok*, and the ``Experiment`` navigation window should show:
 
 .. figure::  images/experiment/image4.png
    :align:   center 
 
 The ``Experiment`` navigation window is made of three main elements. 
 
-1- The navifation bar allows to operate on the experiment metadata. Available tools are:
+1- The navigation bar allows to operate on the experiment metadata. Available tools are:
 
 * *Information*: the information tool button allows to edit the ``Experiment`` main metadata.
 * *Import data*: the import data tool button shows a popup window with forms to import single data or a corpus of data from a directory.
@@ -102,13 +102,13 @@ The ``Experiment`` navigation window is made of three main elements.
 Import data
 -----------
 
-To import data, we clic on the *Import data* tool button on the ``experiment`` toolbar
+To import data, we click on the *Import data* tool button on the ``experiment`` toolbar
 
 .. figure::  images/experiment/image5.png
    :align:   center 
 
 The popup window has two tabs. On to import a *Single Data* file, and one to import *Multiple Data*. In this tutorial, we have all the 
-raw data in a folder. Thus we clic the import *Multiple Data* tab. The form has the following inputs:
+raw data in a folder. Thus we click the import *Multiple Data* tab. The form has the following inputs:
 
 * *Folder*: the directory where the data to import are
 * *Recursive*: if checked, the data from all subdirectories will be imported
@@ -118,7 +118,7 @@ raw data in a folder. Thus we clic the import *Multiple Data* tab. The form has 
 * *Author*: a metadata information about who created the data
 * *Created date*: a metadata information about when the data have been created.
 
-Clic *import*. When the data are imported a popup window inform that the import is done. Clic *ok*. The ``RawDataSet`` automatically 
+Click *import*. When the data are imported a popup window inform that the import is done. Click *ok*. The ``RawDataSet`` automatically
 updates and now we have the list of the ``RawData``.
 
 .. figure::  images/experiment/image6.png
@@ -127,15 +127,15 @@ updates and now we have the list of the ``RawData``.
 Tag data
 --------
 
-As we saw at the begining of this tutorial, the imported data are from 2 populations. We now want to tag the ``RawData`` to identify them.
-Clic on the *Tag data* tool button.
+As we saw at the beginning of this tutorial, the imported data are from 2 populations. We now want to tag the ``RawData`` to identify them.
+Click on the *Tag data* tool button.
 
 .. figure::  images/experiment/image7.png
    :align:   center 
 
 The tag data popup window contains 3 tabs:
 
-* *Tags*: contains a form to manually declare new tags to the ``Experiment``. This is usefull only when we want to manually tag all the data
+* *Tags*: contains a form to manually declare new tags to the ``Experiment``. This is useful only when we want to manually tag all the data
 * *Tag using separator*: contains a tool to automatically extract tags from the ``RawData`` file names using separator strings.
 * *Tag using names*: contains a tool to automatically extract tags from the ``RawData`` by searching specific words in the file names.
 
@@ -145,13 +145,13 @@ use the *Tag using names* tool. The *Tag using names* tool form has 2 inputs:
 * *Tag*: the name we want to give to the tag. In our example, we use *Population*
 * *Search names*: the words we want to extract from the file names. In out example, we want to extract *population1* and *population2* 
 
-clic *Validate*, and a new column with the extracted tag is now visible in the ``RawDataSet`` data list view:
+click *Validate*, and a new column with the extracted tag is now visible in the ``RawDataSet`` data list view:
 
 .. figure::  images/experiment/image8.png
    :align:   center 
 
 In our sample data, the file names also contains a number located between two *_*. We propose now to extract this number as a tag for each 
-data. We clic on the *Tag data* tool button and select the tab *Tag using separator*. 
+data. We click on the *Tag data* tool button and select the tab *Tag using separator*.
 
 .. figure::  images/experiment/image9.png
    :align:   center 
@@ -162,7 +162,7 @@ We fill the form as follow:
 * *Separator*: the chars that is used as separator in the filename. In our example it is *_*
 * *Position*: The position of the word we want extract with respect to *Separator*. In our example we set 1 because we want the word that is just after the first *_* in the file name. 
 
-Clic *Validate*, and a new column with the extracted tag is now visible in the ``RawDataSet`` data list view:
+Click *Validate*, and a new column with the extracted tag is now visible in the ``RawDataSet`` data list view:
 
 .. figure::  images/experiment/image10.png
    :align:   center    
@@ -171,7 +171,7 @@ Clic *Validate*, and a new column with the extracted tag is now visible in the `
 Edit metadata
 -------------
 
-When we clic on any ``RawData`` on the data table, a bar become visible on the right side of the window. It contains a form with all 
+When we click on any ``RawData`` on the data table, a bar become visible on the right side of the window. It contains a form with all
 the metadata and the tags of the selected ``RadData``.
 We can then manually edit any of the editable metadata:
 
@@ -182,7 +182,7 @@ We can then manually edit any of the editable metadata:
 Visualize data
 -------------- 
 
-When we double clic any ``RawData`` on the data table, it opens a data viewer. The viewer is different depending on the data **format**.
+When we double click any ``RawData`` on the data table, it opens a data viewer. The viewer is different depending on the data **format**.
 The data format is specified in each data metadata. If the browser app does not recognize the format, it cannot open it since it does not have any viewer for this data. 
 
 In our example, the data format are *tif*. Thus, the browser app opens the *Napari* viewer:
@@ -193,7 +193,7 @@ In our example, the data format are *tif*. Thus, the browser app opens the *Napa
 Summary
 -------
 
-In this tutorial we saw all the functionnalities of the browser app interface that are:
+In this tutorial we saw all the functionalities of the browser app interface that are:
 
 * Browse the file system
 * Create an experiment
@@ -202,7 +202,7 @@ In this tutorial we saw all the functionnalities of the browser app interface th
 * edit data metadata
 * visualize data 
 
-The last button that we did not use it the *Process data* tool button in the ``Experiment`` tool bar. When we clic on it, it opens 
+The last button that we did not use it the *Process data* tool button in the ``Experiment`` tool bar. When we click on it, it opens
 the tool finder app to start processing data. This is the topic of the next tutorial:
 
 .. figure::  images/experiment/image13.png
