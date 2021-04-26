@@ -20,8 +20,6 @@ setup(
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
-        "pyside2",
-        "napari",
-        "bioimageit_core"
+        "pyside2"
     ],
     )
