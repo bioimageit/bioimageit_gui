@@ -15,7 +15,7 @@ from bioimageit_core.metadata.run import Run
 
 
 class BiRunnerInputSingleWidget(QWidget):
-    openViewSignal = Signal(str)
+    openViewSignal = Signal(str, str)
 
     def __init__(self, process_info: Process, parent: QWidget = None):
         super().__init__(parent)
@@ -62,7 +62,9 @@ class BiRunnerInputSingleWidget(QWidget):
         for row in range(self.layout.rowCount()):
             selectorWidget = self.layout.itemAtPosition(row, 2).widget()
             if selectorWidget:
-                self.openViewSignal.emit(selectorWidget.text())
+                format_ = self.info.inputs[selectorWidget.id].type
+                print("emit open view with", format_, ", ", selectorWidget.text())
+                self.openViewSignal.emit(selectorWidget.text(), format_)
 
 
 class BiRunnerInputFolderWidget(QWidget):

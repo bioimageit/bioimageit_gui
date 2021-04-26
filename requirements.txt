@@ -1,3 +1,3 @@
 pyside2
-napari
 bioimageit_core
+bioimageit_viewer

@@ -5,6 +5,8 @@ from PySide2.QtWidgets import QApplication
 
 sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
+from bioimageit_core.formats import FormatsAccess
+
 from bioimageit_gui.browserapp import BiBrowserApp
 
 if __name__ == '__main__':
@@ -14,7 +16,9 @@ if __name__ == '__main__':
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
-    ConfigAccess(os.path.join(dir_path_parent, 'config.json')) 
+    ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
+    FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+
     bookmark_file = os.path.join(dir_path_parent, 'bookmarks.json')
     component = BiBrowserApp(bookmark_file)
 

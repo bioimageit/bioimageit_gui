@@ -4,6 +4,7 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 
 from bioimageit_core.config import ConfigAccess
+from bioimageit_core.formats import FormatsAccess
 
 from bioimageit_gui.runnerapp import BiRunnerApp
 from bioimageit_gui.core.exceptions import CommandArgsError
@@ -22,7 +23,9 @@ if __name__ == '__main__':
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
-    ConfigAccess(os.path.join(dir_path_parent,'config.json')) 
+    ConfigAccess(os.path.join(dir_path_parent,'config.json'))
+    FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+
     component = BiRunnerApp(process_xml)
     # rec = QApplication.desktop().screenGeometry()
     # component.get_widget().resize(rec.width()/2, rec.height()/2)

@@ -6,6 +6,7 @@ from PySide2.QtWidgets import QApplication
 
 sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
+from bioimageit_core.formats import FormatsAccess
 from bioimageit_gui.finderapp import BiFinderApp
 
 if __name__ == '__main__':
@@ -16,6 +17,9 @@ if __name__ == '__main__':
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
     ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
+
+    FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+
     component = BiFinderApp()
     rec = QApplication.desktop().screenGeometry()
     rec = QGuiApplication.primaryScreen().availableGeometry()

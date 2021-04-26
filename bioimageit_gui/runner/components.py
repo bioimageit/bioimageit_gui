@@ -147,12 +147,12 @@ class BiRunnerComponent(BiComponent):
 
         self.switchFile()       
         
-    def showData(self, uri: str):
+    def showData(self, uri: str, format_: str):
         print("open data", uri)
-        format = pathlib.Path(uri).suffix[1:]
-        print("format", format)
+        #format = pathlib.Path(uri).suffix[1:]
+        print("format", format_)
 
-        viewer = BiDataView(uri, format)
+        viewer = BiDataView(uri, format_)
         viewer.show()
 
     def switchFile(self):
