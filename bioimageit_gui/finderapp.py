@@ -4,6 +4,7 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 import subprocess
 
+from bioimageit_core.config import ConfigAccess
 from bioimageit_gui.core.framework import (BiAction, BiComponent)
 from bioimageit_gui.finder.states import BiFinderStates
 from bioimageit_gui.finder.containers import BiFinderContainer
@@ -28,7 +29,10 @@ class BiFinderApp(BiComponent):
         if action.state == BiFinderStates.OpenProcess:
             runner_path = os.path.join(os.path.dirname(
                 os.path.realpath(__file__)), '..', 'runnerapp.py')
-            subprocess.Popen(['python', runner_path,
+   
+            runner_script = ConfigAccess.instance().get('apps')['runner']  
+            print('run cmd:', runner_script, self.finderContainer.clicked_tool)   
+            subprocess.Popen([runner_script,
                               self.finderContainer.clicked_tool])
 
     def get_widget(self):
