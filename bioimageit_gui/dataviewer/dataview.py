@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 import json
 
+from bioimageit_core.config import ConfigAccess
 from bioimageit_core.formats import FormatsAccess
 
 
@@ -22,9 +23,11 @@ class BiDataView:
             plan['plan'] = [plan0]
             with open('.plan.json', 'w') as outfile:
                 json.dump(plan, outfile, indent=4)
-            subprocess.Popen(['python3',
-                              'bioimageit_viewer'+os.path.sep+'biviewerapp.py',
-                              '.plan.json'])
+
+            viewer_app = ConfigAccess.instance().get('apps')['viewer']    
+            subprocess.Popen([viewer_app, '.plan.json'])
+                           #   'bioimageit_viewer'+os.path.sep+'biviewerapp.py',
+                           #   '.plan.json'])
 
         else:
             print('Cannot find viewer for format ' + self.format_)
@@ -41,3 +44,4 @@ class BiDataView:
         #    display.get_widget().show()
         #else:
         #    print('Cannot find viewer for format ' + self.format_)
+
