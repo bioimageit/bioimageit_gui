@@ -15,19 +15,21 @@ class BiDataView:
     def show(self):
         format_info = FormatsAccess.instance().get(self.format_)
         if 'viewer' in format_info:
+            install_dir = ConfigAccess.instance().get('install_dir')
             plan = dict()
             plan0 = dict()
             plan0['position'] = [0, 0, 1, 1]
             plan0['widget'] = format_info['viewer']
             plan0['data'] = [{'uri': self.uri, 'format': self.format_}]
             plan['plan'] = [plan0]
-            with open('.plan.json', 'w') as outfile:
+            with open(os.path.join(install_dir,'.plan.json'), 'w') as outfile:
                 json.dump(plan, outfile, indent=4)
 
-            viewer_app = ConfigAccess.instance().get('apps')['viewer']    
-            subprocess.Popen([viewer_app, '.plan.json'])
+            viewer_app = ConfigAccess.instance().get('apps')['viewer'] 
+            subprocess.Popen([viewer_app, os.path.join(install_dir, '.plan.json')])
                            #   'bioimageit_viewer'+os.path.sep+'biviewerapp.py',
                            #   '.plan.json'])
+
 
         else:
             print('Cannot find viewer for format ' + self.format_)

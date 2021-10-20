@@ -40,6 +40,7 @@ class BiProcessCategoryTile(QWidget):
         thumbnailLabel = QLabel()
 
         img = QImage(os.path.join(category.thumbnail))
+        print(os.path.join(category.thumbnail))
         thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(200, 200, PySide2.QtCore.Qt.KeepAspectRatio)))
         layout.addWidget(thumbnailLabel, 0, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignHCenter)
 
