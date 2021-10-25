@@ -1,7 +1,9 @@
 import sys
 import os
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QApplication
+
+from PySide2 import QtCore
+from PySide2.QtGui import QIcon, QGuiApplication
+from PySide2.QtWidgets import QApplication, QStyle
 
 sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
@@ -22,8 +24,17 @@ if __name__ == '__main__':
     bookmark_file = os.path.join(dir_path_parent, 'bookmarks.json')
     component = BiBrowserApp(bookmark_file)
 
-    rec = QApplication.desktop().screenGeometry()
-    component.get_widget().resize(rec.width()/2, rec.height()/2) 
+    rec = app.primaryScreen().size()
+    component.get_widget().resize(int(3*rec.width() / 4), int(3*rec.height() / 4))
+
+    component.get_widget().setGeometry(
+        QStyle.alignedRect(
+            QtCore.Qt.LeftToRight,
+            QtCore.Qt.AlignCenter,
+            component.get_widget().size(),
+            QGuiApplication.primaryScreen().availableGeometry(),
+        ),
+    )
     component.get_widget().show()
     
     # Run the main Qt loop

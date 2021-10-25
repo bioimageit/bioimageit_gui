@@ -1,7 +1,8 @@
 import sys
 import os
+from PySide2 import QtCore
 from PySide2.QtGui import QIcon, QGuiApplication
-from PySide2.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication, QStyle
 
 
 sys.path.append("../bioimagepy")
@@ -21,9 +22,17 @@ if __name__ == '__main__':
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
 
     component = BiFinderApp()
-    rec = QApplication.desktop().screenGeometry()
-    rec = QGuiApplication.primaryScreen().availableGeometry()
-    component.get_widget().resize(2*rec.width()/3, 2*rec.height()/3)
+    rec = app.primaryScreen().size()
+    component.get_widget().resize(int(3*rec.width() / 4), int(3*rec.height() / 4))
+
+    component.get_widget().setGeometry(
+        QStyle.alignedRect(
+            QtCore.Qt.LeftToRight,
+            QtCore.Qt.AlignCenter,
+            component.get_widget().size(),
+            QGuiApplication.primaryScreen().availableGeometry(),
+        ),
+    )
     component.get_widget().show()
     
     # Run the main Qt loop

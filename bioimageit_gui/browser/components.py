@@ -98,6 +98,7 @@ class BiBrowserToolBarComponent(BiComponent):
 
         # data selector
         self.pathLineEdit = QLineEdit(self.widget)
+        self.pathLineEdit.setAttribute(PySide2.QtCore.Qt.WA_MacShowFocusRect, False)
         self.pathLineEdit.returnPressed.connect(self.pathEditReturnPressed)
         layout.addWidget(self.pathLineEdit, 1)
 
@@ -234,6 +235,7 @@ class BiBrowserTableComponent(BiComponent):
         layout.addWidget(self.tableWidget)
 
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.setColumnCount(4)
         self.tableWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
         self.tableWidget.cellClicked.connect(self.cellClicked)

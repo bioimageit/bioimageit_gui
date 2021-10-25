@@ -311,11 +311,11 @@ class BiExperimentDataSetListComponent(BiComponent):
             self.layout.itemAt(i).widget().deleteLater()
 
         rawLabel = QLabel('Raw dataset')
-        rawLabel.setObjectName("BiSideBarTitle")
+        rawLabel.setObjectName("BiBrowserShortCutsTitle")
         rawLabel.setMaximumHeight(50)
 
         ProcessedLabel = QLabel('Processed dataset')
-        ProcessedLabel.setObjectName("BiSideBarTitle")
+        ProcessedLabel.setObjectName("BiBrowserShortCutsTitle")
         ProcessedLabel.setMaximumHeight(50)
         
         dataButton = BiButton('data')
@@ -369,6 +369,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
         self.widget.setLayout(layout)
 
         self.tableWidget = QTableWidget()
+        self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(4)
 

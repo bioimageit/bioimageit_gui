@@ -368,6 +368,7 @@ class BiNavigationBar(QWidget):
 
         # bar
         self.lineEdit = QLineEdit()
+        self.lineEdit.setAttribute(PySide2.QtCore.Qt.WA_MacShowFocusRect, False)
         self.lineEdit.returnPressed.connect(self.returnPressed)
         layout.addWidget(self.lineEdit, 1)
 

@@ -459,7 +459,7 @@ class BiRunnerExecWidget(QWidget):
 
         runButton = QPushButton(self.tr("Run"), self)
         runButton.released.connect(self.run)
-        runButton.setObjectName("btnPrimaryNegative")
+        runButton.setObjectName("btnDefault")
 
         layout.addWidget(runButton)
         self.setLayout(layout)

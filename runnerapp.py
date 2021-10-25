@@ -27,8 +27,6 @@ if __name__ == '__main__':
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
 
     component = BiRunnerApp(process_xml)
-    # rec = QApplication.desktop().screenGeometry()
-    # component.get_widget().resize(rec.width()/2, rec.height()/2)
     component.get_widget().show()
     
     # Run the main Qt loop

@@ -66,8 +66,10 @@ class BiFinderComponent(BiComponent):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(3)
+        self.tableWidget.setMaximumWidth(350)
+        self.tableWidget.setMinimumWidth(350)
         self.tableWidget.cellClicked.connect(self.showClickedDoc)
-        labels = ["Open", "Name", "Version"]
+        labels = ["", "Name", "Version"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
         toolsSplitter.addWidget(self.tableWidget)
 
@@ -77,7 +79,7 @@ class BiFinderComponent(BiComponent):
         toolsSplitter.addWidget(self.docViewer)
     
         self.toolsWidget.setVisible(False)
-        toolsSplitter.setStretchFactor(0, 0.5)
+        toolsSplitter.setStretchFactor(0, 0)
         toolsSplitter.setStretchFactor(1, 1)
 
     def moveToPrevious(self):
@@ -110,7 +112,7 @@ class BiFinderComponent(BiComponent):
             open_ = BiButton(self.widget.tr("Open"))
             # open.id = i
             open_.content = info.uri
-            open_.setObjectName("btnDefault")
+            open_.setObjectName("btnTableDefault")
             open_.clickedContent.connect(self.openClicked)
 
             self.tableWidget.insertRow(self.tableWidget.rowCount())
