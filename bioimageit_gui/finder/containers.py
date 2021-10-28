@@ -15,7 +15,7 @@ class BiFinderContainer(BiContainer):
         self.parent_category = 'root'
         self.history = []
         self.history_names = []
-        self.history_docss = []
+        self.history_docs = []
         self.pos_history = 0
         self.clicked_tool = -1
 
