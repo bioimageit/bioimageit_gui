@@ -2,7 +2,7 @@ import PySide2.QtCore
 from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QHBoxLayout,
-                               QToolButton, QSplitter)
+                               QToolButton, QSplitter, QPushButton)
 
 from bioimageit_gui.core.widgets import (BiButton, BiFlowLayout,
                                          BiNavigationBar, BiWebBrowser)
@@ -62,6 +62,16 @@ class BiFinderComponent(BiComponent):
         toolsLayout.addWidget(toolsSplitter)   
 
         # table
+        toolsListWidget = QWidget()
+        toolsListLayout = QVBoxLayout()
+        toolsListLayout.setContentsMargins(0, 0, 0, 0)
+        toolsListWidget.setLayout(toolsListLayout)
+
+        tutorialButton = QPushButton("Tutorial")
+        toolsListLayout.addWidget(tutorialButton)
+        tutorialButton.setObjectName("btnDefault")
+        tutorialButton.released.connect(self.showToolboxDoc)
+
         self.tableWidget = QTableWidget()
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -71,7 +81,8 @@ class BiFinderComponent(BiComponent):
         self.tableWidget.cellClicked.connect(self.showClickedDoc)
         labels = ["", "Name", "Version"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
-        toolsSplitter.addWidget(self.tableWidget)
+        toolsListLayout.addWidget(self.tableWidget)
+        toolsSplitter.addWidget(toolsListWidget)
 
         # doc viewer
         self.docViewer = BiWebBrowser(self.toolsWidget)
@@ -135,13 +146,24 @@ class BiFinderComponent(BiComponent):
             widget.clickedSignal.connect(self.clickedTile)
             self.layout.addWidget(widget)
 
-    def clickedTile(self, info: dict):
-        self.container.setCurrentCategory(info.id, info.name)
+    def clickedTile(self, info):
+        self.container.setCurrentCategory(info.id, info.name, info.doc)
         self.container.emit(BiFinderStates.Reload)  
 
     def openClicked(self, id_: str):
         self.container.clicked_tool = id_
         self.container.emit(BiFinderStates.OpenProcess)   
+
+    def showToolboxDoc(self):
+        print(self.container.current_category_doc)
+        link = self.container.current_category_doc
+        if link.startswith('http') or link.startswith('www'):
+            self.docViewer.setHomePage(link, True)
+        elif link.endswith('.html'):    
+            self.docViewer.setHomePage(link, False)
+        else:
+            self.docViewer.setHomePageHtml("<span>This toolbox have no "
+                                           "documentation</span>")
 
     def showClickedDoc(self, row, column):
         if row >= len(self.container.tools):
