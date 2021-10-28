@@ -13,6 +13,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
 
 from bioimageit_core.config import ConfigAccess
 from bioimageit_core.dataset import ProcessedDataSet
+from bioimageit_core.formats import FormatsAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.core.widgets import BiTagWidget, BiButton
@@ -662,7 +663,9 @@ class BiExperimentImportSingleDataComponent(BiComponent):
 
         formatLabel = QLabel(self.widget.tr("Format"))
         formatLabel.setObjectName("BiWidget")
-        self.formatEdit = QLineEdit()
+        self.formatCombox = QComboBox()
+        self.formatCombox.addItems(FormatsAccess.instance().names())
+        #self.formatEdit = QLineEdit()
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
@@ -700,7 +703,7 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         self.container.import_info.file_data_path = self.dataPath.text()
         self.container.import_info.file_copy_data = self.copyDataBox.isChecked()
         self.container.import_info.file_name = self.nameEdit.text()
-        self.container.import_info.fotmat = self.formatEdit.text()
+        self.container.import_info.fotmat = self.formatCombox.currentText()
         self.container.import_info.author = self.authorEdit.text()
         self.container.import_info.createddate = self.createddateEdit.text()
         self.container.emit(BiExperimentStates.NewImportFile)
