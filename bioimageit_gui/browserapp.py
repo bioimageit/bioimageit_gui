@@ -1,11 +1,12 @@
-import sys
 import os
+import subprocess
 from pathlib import Path
 
 import PySide2.QtCore
 from PySide2.QtWidgets import (QApplication, QWidget, QVBoxLayout,
                                QLabel, QTabWidget, QHBoxLayout)
 
+from bioimageit_core.config import ConfigAccess
 from bioimageit_gui.core.framework import BiAction, BiComponent
 from bioimageit_gui.browser.states import BiBrowserStates
 from bioimageit_gui.browser.containers import BiBrowserContainer
@@ -88,6 +89,10 @@ class BiBrowserApp(BiComponent):
 
         if action.state == BiBrowserStates.NewExperimentClicked:
             self.experimentCreateComponent.get_widget().setVisible(True)
+
+        if action.state == BiBrowserStates.OpenFinderClicked:
+            finder_app = ConfigAccess.instance().get('apps')['processing']     
+            subprocess.Popen([finder_app])
 
         if action.state == BiExperimentCreateStates.CancelClicked:
             self.experimentCreateComponent.get_widget().setVisible(False)  

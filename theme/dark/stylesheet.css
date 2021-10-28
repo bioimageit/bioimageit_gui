@@ -1299,7 +1299,8 @@ QLabel#BiBrowserProcessedDataIcon{
 BiBrowserShortCuts
  // /////////////////////////////////////////////// */
 QPushButton#BiBrowserShortCutsNewButton{
-  qproperty-icon: url("plus-black-symbol.svg");
+  /*qproperty-icon: url("plus-black-symbol.svg");*/
+  qproperty-icon: url("database.svg");
   padding: 6px 12px;
   margin-bottom: 0;
   font-size: 14px;
@@ -1320,6 +1321,25 @@ QPushButton#BiBrowserShortCutsNewButton:pressed {
 QPushButton#BiBrowserShortCutsNewButton:disabled {
  color : #a1a1a1;
  background-color: #262930;
+}
+
+QPushButton#BiBrowserShortCutsFinderButton{
+  qproperty-icon: url("play.svg");
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #f0f1f2;
+  background-color: #414851;
+  border-radius: 4px;
+}
+
+QPushButton#BiBrowserShortCutsFinderButton:hover {
+  color: #d1d1d1;
+  background-color: #5A626C;
+}
+
+QPushButton#BiBrowserShortCutsFinderButton:pressed {
+ border: 3px solid #5A626C;
 }
 
 .QWidget#BiLeftBar{

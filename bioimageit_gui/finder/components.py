@@ -64,7 +64,7 @@ class BiFinderComponent(BiComponent):
         # table
         toolsListWidget = QWidget()
         toolsListLayout = QVBoxLayout()
-        toolsListLayout.setContentsMargins(0, 0, 0, 0)
+        toolsListLayout.setContentsMargins(0, 0, 7, 0)
         toolsListWidget.setLayout(toolsListLayout)
 
         tutorialButton = QPushButton("Tutorial")
@@ -76,8 +76,8 @@ class BiFinderComponent(BiComponent):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setColumnCount(3)
-        self.tableWidget.setMaximumWidth(350)
-        self.tableWidget.setMinimumWidth(350)
+        self.tableWidget.setMaximumWidth(300)
+        self.tableWidget.setMinimumWidth(300)
         self.tableWidget.cellClicked.connect(self.showClickedDoc)
         labels = ["", "Name", "Version"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
@@ -133,7 +133,7 @@ class BiFinderComponent(BiComponent):
             self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))  
    
         self.tableWidget.setCurrentCell(0, 1)
-        self.showClickedDoc(0, 1)
+        self.showToolboxDoc()
 
     def browseCategories(self):
         # free layout

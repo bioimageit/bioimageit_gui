@@ -169,6 +169,11 @@ class BiBrowserShortCutsComponent(BiComponent):
         addExpermentbutton.released.connect(self.newExperimentClicked)
         layout.addWidget(addExpermentbutton, 0, PySide2.QtCore.Qt.AlignTop)
 
+        openFinderButton = QPushButton(self.widget.tr("Toolboxes"))
+        openFinderButton.setObjectName("BiBrowserShortCutsFinderButton")
+        openFinderButton.released.connect(self.openFinderClicked)
+        layout.addWidget(openFinderButton, 0, PySide2.QtCore.Qt.AlignTop)
+
         separatorLabel = QLabel(self.wwidget.tr("Bookmarks"), self.wwidget)
         layout.addWidget(separatorLabel, 0, PySide2.QtCore.Qt.AlignTop)
         separatorLabel.setObjectName("BiBrowserShortCutsTitle")
@@ -202,6 +207,9 @@ class BiBrowserShortCutsComponent(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.BookmarksModified:
             self.reloadBookmarks()
+
+    def openFinderClicked(self):
+        self.container.emit(BiBrowserStates.OpenFinderClicked)
 
     def newExperimentClicked(self):
         self.container.emit(BiBrowserStates.NewExperimentClicked)

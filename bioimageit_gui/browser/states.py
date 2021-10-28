@@ -17,4 +17,5 @@ class BiBrowserStates(BiStates):
     BookmarksModified = "BiBrowserStates.BookmarksModified"
     BookmarkOpenClicked = "BiBrowserStates.BookmarkOpenClicked"
     NewExperimentClicked = "BiBrowserStates.NewExperimentClicked"
+    OpenFinderClicked = "BiBrowserStates.OpenFinderClicked"
     TableLoaded = "TableLoaded.TableLoaded"     
