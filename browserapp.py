@@ -5,7 +5,6 @@ from PySide2 import QtCore
 from PySide2.QtGui import QIcon, QGuiApplication
 from PySide2.QtWidgets import QApplication, QStyle
 
-sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
 from bioimageit_core.formats import FormatsAccess
 
@@ -13,7 +12,7 @@ from bioimageit_gui.browserapp import BiBrowserApp
 
 if __name__ == '__main__':
     # Create the Qt Application
-    app = QApplication(sys.argv)
+    app = QApplication(['BioImageIT'])
         
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -35,6 +34,7 @@ if __name__ == '__main__':
             QGuiApplication.primaryScreen().availableGeometry(),
         ),
     )
+    component.get_widget().setWindowTitle("BioImageIT")
     component.get_widget().show()
     
     # Run the main Qt loop

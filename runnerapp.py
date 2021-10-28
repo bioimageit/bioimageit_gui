@@ -11,7 +11,7 @@ from bioimageit_gui.core.exceptions import CommandArgsError
 
 if __name__ == '__main__':
     # Create the Qt Application
-    app = QApplication(sys.argv)
+    app = QApplication(["BioImageIT"])
     
     # load the settings
     process_xml = ""
@@ -27,6 +27,7 @@ if __name__ == '__main__':
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
 
     component = BiRunnerApp(process_xml)
+    component.get_widget().setWindowTitle("BioImageIT")
     component.get_widget().show()
     
     # Run the main Qt loop

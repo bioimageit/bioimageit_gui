@@ -12,7 +12,7 @@ from bioimageit_gui.finderapp import BiFinderApp
 
 if __name__ == '__main__':
     # Create the Qt Application
-    app = QApplication(sys.argv)
+    app = QApplication(["BioImageIT"])
         
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -33,6 +33,7 @@ if __name__ == '__main__':
             QGuiApplication.primaryScreen().availableGeometry(),
         ),
     )
+    component.get_widget().setWindowTitle("BioImageIT")
     component.get_widget().show()
     
     # Run the main Qt loop
