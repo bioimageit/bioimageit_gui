@@ -57,7 +57,7 @@ class BiHomeComponent(BiComponent):
         self.shortcutsWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
         self.shortcutsWidget.setHorizontalHeaderLabels(['', 'Name', 'Date', 'Author'])
         
-        self.emptyshortcutsWidget = QLabel("Your workspace is empty. \n Start creating a new experiment")
+        self.emptyshortcutsWidget = QLabel("Your workspace is empty. \n Start creating a new experiment !")
         self.emptyshortcutsWidget.setObjectName('BiHomeEmpty')
         
         layout.addWidget(btnsWidget, 0)

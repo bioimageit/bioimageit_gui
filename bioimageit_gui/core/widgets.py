@@ -20,9 +20,9 @@ BiSlidingStackedWidget
 import PySide2.QtCore
 from PySide2.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
                             QEasingCurve, QParallelAnimationGroup)
-from PySide2.QtGui import QMouseEvent, QDrag, QCursor
+from PySide2.QtGui import QMouseEvent, QDrag, QCursor, QIcon
 from PySide2.QtWebEngineWidgets import QWebEngineView
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton, 
+from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton,
                                QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout,
                                QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget)
 from PySide2.QtCore import QObject, Signal, Slot, QUrl 
@@ -713,3 +713,70 @@ class BiSlidingStackedWidget(QStackedWidget):
         self.widget(self.now).move(self.pnow)
         self.active = False
         self.animationFinished.emit()
+
+
+class BiAppBar(QWidget):
+    open = Signal(int)
+    close = Signal(int)
+
+    def __init__(self):
+        super().__init__()
+
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
+
+        #self.setLayout(self.layout)
+        #self.setObjectName("BiHomeToolBar")
+
+        # global
+        layout = QHBoxLayout()
+        w = QWidget()
+        w.setObjectName("BiHomeToolBar")
+        layout.addWidget(w, 1, PySide2.QtCore.Qt.AlignHCenter)
+        layout.setContentsMargins(0, 7, 0, 0)
+        w.setLayout(self.layout)
+
+        # total
+        tlayout = QHBoxLayout()
+        wt = QWidget()
+        tlayout.addWidget(wt, 1, PySide2.QtCore.Qt.AlignHCenter)
+        tlayout.setContentsMargins(0, 0, 0, 0)
+        wt.setLayout(layout)
+        wt.setObjectName("BiHomeToolBar")
+        wt.setFixedWidth(52)
+        self.setFixedWidth(52)
+        self.setLayout(tlayout)
+
+    def addButton(self, icon: str, toolTip: str, id: int, closable: bool):
+        button = BiClosableButton(closable, self)
+        button.setObjectName('BiHomeToolBarButton')
+        button.setCheckable(True)
+        button.setIcon(QIcon(icon))
+        if (toolTip != ""):
+            button.setToolTip(toolTip)
+        button.setId(id)
+        self.layout.insertWidget(self.layout.count() -1, button, 0, PySide2.QtCore.Qt.AlignHCenter)
+
+        button.clicked.connect(self.open)
+        button.closed.connect(self.close)
+
+    def removeButton(self, id: int):
+        for i in range(self.layout.count()-1, -1, -1):
+            item = self.layout.itemAt(i)
+            button = item.widget()
+            if button:
+                if isinstance(button, BiClosableButton):
+                    if (button.id() == id):
+                        del button
+                        return
+
+    def setChecked(self, id: int, update_current: bool):
+        for i in range(0, self.layout.count()):
+            button = self.layout.itemAt(i).widget()
+            if isinstance(button, BiClosableButton):
+                if button.id() == id and update_current:
+                    button.setChecked(True)   
+                else:
+                    button.setChecked(False)          
+    

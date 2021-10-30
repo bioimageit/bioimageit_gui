@@ -925,9 +925,9 @@ QToolButton:disabled {
 blForm
  // /////////////////////////////////////////////// */
 #BiLabelFormHeader1{
-    color: #f0f1f2;
+    color: #c6c6c6;
     font: bold;
-    border-top : 2px solid #f0f1f2;
+    border-top : 2px solid #c6c6c6;
     text-transform: uppercase;
     padding-left: 0px;
     margin-left: 0px;
@@ -1593,12 +1593,47 @@ QLabel#BiPHomeTileTitle{
 }
 
 QLabel#BiHomeEmpty{
-  min-height: 450px;
-  max-height: 450px;
+  min-height: 350px;
+  max-height: 350px;
   max-width: 450px;
   min-width: 450px;
   background-color: #242830;
   border-radius: 8px;
   color: #5A626C;
   qproperty-alignment: AlignCenter;
+}
+
+/* // ///////////////////////////////////////////////
+ khMainWindowToolBar
+// /////////////////////////////////////////////// */
+#BiHomeToolBar{
+	background-color: #414851;
+}
+
+#BiHomeToolBar:handle{
+	background-color: #414851;
+}
+
+QPushButton#BiHomeToolBarButton{
+	border: none;
+  min-height: 40px;
+  max-height: 40px;
+  max-width: 40px;
+  min-width: 40px;
+	border-bottom-right-radius: 9px;
+  border-bottom-left-radius: 9px;
+  border-top-right-radius: 9px;
+  border-top-left-radius: 9px;
+}
+QPushButton#BiHomeToolBarButton:hover{
+	background-color: #5A626C;
+}
+QPushButton#BiHomeToolBarButton:pressed{
+	background-color: #5A626C;
+}
+QPushButton#BiHomeToolBarButton:checked{
+	background-color: #0071C3;
+}
+QPushButton#BiHomeToolBarButton:disabled{
+	background-color: #414851;
 }
