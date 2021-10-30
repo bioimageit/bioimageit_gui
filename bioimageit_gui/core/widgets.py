@@ -1,3 +1,22 @@
+"""Set of basic widgets for BioImageIT
+
+Classes
+-------
+BiButton
+BiToolButton
+BiFileSelectWidget
+BiDragLabel
+BiTagWidget
+BiWebBrowser
+BiFlowLayout
+BiNavigationBar
+BiHideableWidget
+BiClosableButton
+BiStaticStackedWidget
+BiSlidingStackedWidget
+
+"""
+
 import PySide2.QtCore
 from PySide2.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
                             QEasingCurve, QParallelAnimationGroup)

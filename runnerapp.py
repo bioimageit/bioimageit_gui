@@ -4,7 +4,7 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 
 from bioimageit_core.config import ConfigAccess
-from bioimageit_core.formats import FormatsAccess
+from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.runnerapp import BiRunnerApp
 from bioimageit_gui.core.exceptions import CommandArgsError
