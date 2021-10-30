@@ -6,7 +6,7 @@ from PySide2.QtGui import QIcon, QGuiApplication
 from PySide2.QtWidgets import QApplication, QStyle
 
 from bioimageit_core.config import ConfigAccess
-from bioimageit_core.formats import FormatsAccess
+from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.browserapp import BiBrowserApp
 

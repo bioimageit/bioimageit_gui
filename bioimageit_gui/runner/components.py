@@ -194,9 +194,8 @@ class BiRunnerComponent(BiComponent):
             self.container.inputs = self.inputSingleWidget.inputs()
             config = ConfigAccess.instance().config
             self.container.output_uri = ''
-            if 'gui' in config:
-                if 'tmp' in config['gui']:
-                    self.container.output_uri = config['gui']['tmp']
+            if 'workspace' in config:
+                self.container.output_uri = config['workspace']
             
         elif self.container.mode == BiRunnerContainer.MODE_REP: 
             self.container.inputs = self.inputFolderWidget.inputs()

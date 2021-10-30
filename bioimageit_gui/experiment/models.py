@@ -58,8 +58,7 @@ class BiExperimentModel(BiModel):
             self.container.emit(BiExperimentStates.DataImported)
 
         if action.state == BiExperimentStates.TagsModified:
-            for tag in self.container.tag_info.tags:
-                self.container.experiment.set_tag(tag)
+            self.container.experiment.set_tags(self.container.tag_info.tags)
             self.container.emit(BiExperimentStates.TagsSaved)
 
         if action.state == BiExperimentStates.TagUsingSeparators:

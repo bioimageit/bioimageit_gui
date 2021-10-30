@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 from bioimageit_core.config import ConfigAccess
-from bioimageit_core.formats import FormatsAccess
+from bioimageit_formats import FormatsAccess
 
 
 class BiDataView:
@@ -14,12 +14,13 @@ class BiDataView:
 
     def show(self):
         format_info = FormatsAccess.instance().get(self.format_)
-        if 'viewer' in format_info:
+
+        if format_info.viewer != "":
             install_dir = ConfigAccess.instance().get('install_dir')
             plan = dict()
             plan0 = dict()
             plan0['position'] = [0, 0, 1, 1]
-            plan0['widget'] = format_info['viewer']
+            plan0['widget'] = format_info.viewer
             plan0['data'] = [{'uri': self.uri, 'format': self.format_}]
             plan['plan'] = [plan0]
             with open(os.path.join(install_dir,'.plan.json'), 'w') as outfile:
@@ -29,8 +30,6 @@ class BiDataView:
             subprocess.Popen([viewer_app, os.path.join(install_dir, '.plan.json')])
                            #   'bioimageit_viewer'+os.path.sep+'biviewerapp.py',
                            #   '.plan.json'])
-
-
         else:
             print('Cannot find viewer for format ' + self.format_)
 

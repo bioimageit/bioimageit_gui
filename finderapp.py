@@ -7,7 +7,7 @@ from PySide2.QtWidgets import QApplication, QStyle
 
 sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
-from bioimageit_core.formats import FormatsAccess
+from bioimageit_formats import FormatsAccess
 from bioimageit_gui.finderapp import BiFinderApp
 
 if __name__ == '__main__':

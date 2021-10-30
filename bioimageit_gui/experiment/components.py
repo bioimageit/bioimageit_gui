@@ -1,5 +1,6 @@
 import os
 import subprocess
+from datetime import date
 
 import PySide2.QtCore
 from PySide2.QtGui import QPixmap, QImage, QPalette
@@ -13,7 +14,7 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
 
 from bioimageit_core.config import ConfigAccess
 from bioimageit_core.dataset import ProcessedDataSet
-from bioimageit_core.formats import FormatsAccess
+from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.core.widgets import BiTagWidget, BiButton
@@ -523,7 +524,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
 
 
 class BiExperimentCreateComponent(BiComponent):
-    def __init__(self, container: BiExperimentCreateContainer, default_destination: str = ""):
+    def __init__(self, container: BiExperimentCreateContainer):
         super().__init__()
         self._object_name = 'BiExperimentCreateComponent'
         self.container = container
@@ -542,7 +543,7 @@ class BiExperimentCreateComponent(BiComponent):
         destinationLabel = QLabel(self.widget.tr("Destination"))
         destinationLabel.setObjectName("BiLabel")
         self.destinationEdit = QLineEdit()
-        self.destinationEdit.setText(default_destination)
+        self.destinationEdit.setText(ConfigAccess.instance().get('workspace'))
         browseButton = QPushButton(self.widget.tr("..."))
         browseButton.setObjectName("BiBrowseButton")
         browseButton.released.connect(self.browseButtonClicked)
@@ -554,6 +555,7 @@ class BiExperimentCreateComponent(BiComponent):
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiLabel")
         self.authorEdit = QLineEdit()
+        self.authorEdit.setText(ConfigAccess.instance().get('user')['name']) 
 
         createButton = QPushButton(self.widget.tr("Create"))
         createButton.setObjectName("btnPrimary")
@@ -665,15 +667,16 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         formatLabel.setObjectName("BiWidget")
         self.formatCombox = QComboBox()
         self.formatCombox.addItems(FormatsAccess.instance().names())
-        #self.formatEdit = QLineEdit()
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
+        self.authorEdit.setText(ConfigAccess.instance().get('user')['name'])
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
         createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
+        self.createddateEdit.setText(date.today().strftime("%Y-%m-%d"))
 
         importButton = QPushButton(self.widget.tr("import"))
         importButton.setObjectName("btnPrimary")
@@ -688,7 +691,7 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         layout.addWidget(nameLabel, 3, 0)
         layout.addWidget(self.nameEdit, 3, 1, 1, 2)
         layout.addWidget(formatLabel, 4, 0)
-        layout.addWidget(self.formatEdit, 4, 1, 1, 2)
+        layout.addWidget(self.formatCombox, 4, 1, 1, 2)
         layout.addWidget(authorLabel, 5, 0)
         layout.addWidget(self.authorEdit, 5, 1, 1, 2)
         layout.addWidget(createddateLabel, 6, 0)
@@ -762,15 +765,18 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
 
         formatLabel = QLabel(self.widget.tr("Format"))
         formatLabel.setObjectName("BiWidget")
-        self.formatEdit = QLineEdit()
+        self.formatCombox = QComboBox()
+        self.formatCombox.addItems(FormatsAccess.instance().names())
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
+        self.authorEdit.setText(ConfigAccess.instance().get('user')['name'])
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
         createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
+        self.createddateEdit.setText(date.today().strftime("%Y-%m-%d"))
 
         importButton = QPushButton(self.widget.tr("import"))
         importButton.setObjectName("btnPrimary")
@@ -788,7 +794,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         layout.addWidget(copyDataLabel, 4, 0)
         layout.addWidget(self.copyDataBox, 4, 1, 1, 2)
         layout.addWidget(formatLabel, 5, 0)
-        layout.addWidget(self.formatEdit, 5, 1, 1, 2)
+        layout.addWidget(self.formatCombox, 5, 1, 1, 2)
         layout.addWidget(authorLabel, 6, 0)
         layout.addWidget(self.authorEdit, 6, 1, 1, 2)
         layout.addWidget(createddateLabel, 7, 0)
@@ -814,7 +820,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         self.container.import_info.dir_filter_value = self.filterEdit.text()
         self.container.import_info.dir_copy_data = self.copyDataBox.isChecked()
         self.container.import_info.author = self.authorEdit.text()
-        self.container.import_info.format = self.formatEdit.text()
+        self.container.import_info.format = self.formatCombox.currentText()
         self.container.import_info.createddate = self.createddateEdit.text()
         self.container.emit(BiExperimentStates.NewImportDir)
 
@@ -903,14 +909,14 @@ class BiExperimentTagsListComponent(BiComponent):
         buttonsWidget = QWidget()
         buttonsLayout = QHBoxLayout()
         buttonsLayout.setContentsMargins(0,0,0,0)
-        buttonsLayout.setSpacing(2)
+        buttonsLayout.setSpacing(15)
         buttonsWidget.setLayout(buttonsLayout)
         cancelButton = QPushButton(self.widget.tr("Cancel"))
         cancelButton.setObjectName("btnDefault")
         saveButton = QPushButton(self.widget.tr("Save"))
         saveButton.setObjectName("btnPrimary")
         buttonsLayout.addWidget(cancelButton, 1, PySide2.QtCore.Qt.AlignRight)
-        buttonsLayout.addWidget(saveButton, 0, PySide2.QtCore.Qt.AlignRight)
+        buttonsLayout.addWidget(saveButton, 0)
 
         layout.addWidget(title)
         layout.addWidget(addWidget)
@@ -957,7 +963,7 @@ class BiExperimentTagsListComponent(BiComponent):
             item = self.tagListLayout.itemAt(i)
             widget = item.widget()
             if widget:
-                tags.append(widget.content())
+                tags.append(widget.content())     
         self.container.tag_info.tags = tags        
         self.container.emit(BiExperimentStates.TagsModified)
 

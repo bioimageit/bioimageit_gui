@@ -133,7 +133,7 @@ class BiTagWidget(QWidget):
         return self.tagName.text()
 
     def emitRemove(self): 
-        self.remove(self.tagName.text())
+        self.remove.emit(self.tagName.text())
 
 
 class BiWebBrowser(QWidget):
