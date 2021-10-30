@@ -7,4 +7,5 @@ class BiHomeContainer(BiContainer):
         self._object_name = 'BiHomeContainer'
 
         # data
-        self.clicked_expeirment = ''
+        self.experiments = []
+        self.clicked_experiment = ''
