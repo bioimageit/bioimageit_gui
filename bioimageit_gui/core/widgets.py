@@ -726,13 +726,10 @@ class BiAppBar(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
 
-        #self.setLayout(self.layout)
-        #self.setObjectName("BiHomeToolBar")
-
         # global
         layout = QHBoxLayout()
         w = QWidget()
-        w.setObjectName("BiHomeToolBar")
+        #w.setObjectName("BiHomeToolBar")
         layout.addWidget(w, 1, PySide2.QtCore.Qt.AlignHCenter)
         layout.setContentsMargins(0, 7, 0, 0)
         w.setLayout(self.layout)

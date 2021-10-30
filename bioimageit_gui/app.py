@@ -6,6 +6,12 @@ from bioimageit_gui.core.widgets import BiAppBar, BiStaticStackedWidget
 from bioimageit_gui.core.framework import (BiAction, BiComponent)
 from bioimageit_gui.home import BiHomeComponent, BiHomeContainer, BiHomeStates
 
+from bioimageit_gui.finder.states import BiFinderStates
+from bioimageit_gui.finder.containers import BiFinderContainer
+from bioimageit_gui.finder.models import BiFinderModel
+from bioimageit_gui.finder.components import BiFinderComponent
+
+
 class BioImageITApp(BiComponent):
     def __init__(self):
         super().__init__()
@@ -15,12 +21,19 @@ class BioImageITApp(BiComponent):
 
         # containers    
         self.homeContainer = BiHomeContainer()
+        self.finderContainer = BiFinderContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
+        self.finderComponent = BiFinderComponent(self.finderContainer)
+
+        # models
+        self.finderModel = BiFinderModel(self.finderContainer)
 
         # register
         self.homeContainer.register(self)
+        self.finderContainer.emit(BiFinderStates.Reload)
+        self.finderContainer.register(self)
 
         self.widget = QWidget()
         layout = QHBoxLayout()
@@ -68,9 +81,7 @@ class BioImageITApp(BiComponent):
 
     def open_toolboxes(self):
         if self.toolboxes_tab_id < 0:
-            widget = QLabel('Hello Toolboxes')
-            widget.setObjectName('BiWidget')
-            self.stackedWidget.addWidget(widget)
+            self.stackedWidget.addWidget(self.finderComponent.get_widget())
             self.toolboxes_tab_id = self.stackedWidget.count()-1
             self.mainBar.addButton(BiThemeAccess.instance().icon('tools'), 
                                    "Browser", 

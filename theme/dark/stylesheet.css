@@ -1608,6 +1608,8 @@ QLabel#BiHomeEmpty{
 // /////////////////////////////////////////////// */
 #BiHomeToolBar{
 	background-color: #414851;
+  border-right: 2px solid #262930;
+
 }
 
 #BiHomeToolBar:handle{
