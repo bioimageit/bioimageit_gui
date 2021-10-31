@@ -18,9 +18,9 @@ from bioimageit_gui.finder.components import BiFinderComponent
 from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
                                      BiBrowser2Container, BiBrowser2Model)
 
-from bioimageit_gui.experiment.containers import BiExperimentContainer                                     
-from bioimageit_gui.experiment.components import BiExperimentComponent 
-from bioimageit_gui.experiment.states import BiExperimentStates
+from bioimageit_gui.experiment2.containers import BiExperimentContainer                                     
+from bioimageit_gui.experiment2.components import BiExperimentComponent 
+from bioimageit_gui.experiment2.states import BiExperimentStates
 
 class BioImageITApp(BiComponent):
     def __init__(self):
