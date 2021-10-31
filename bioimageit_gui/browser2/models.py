@@ -28,7 +28,6 @@ class BiBrowser2Model(BiModel):
             return
     
         if action.state == BiBrowser2States.ItemDoubleClicked:
-            print('model in double cliekd update')
             row = self.container.doubleClickedRow
             dcFile = self.container.files[row]
             self.browse(dcFile)
@@ -58,7 +57,8 @@ class BiBrowser2Model(BiModel):
                                       'experiment.md.json')
         if os.path.isfile(experiment_file):
             self.container.openExperimentPath = os.path.join(fileInfo.path,
-                                                             fileInfo.fileName)
+                                                             fileInfo.fileName,
+                                                             "experiment.md.json")
             self.container.emit(BiBrowser2States.OpenExperiment)
         elif fileInfo.type == "dir":    
             self.container.setCurrentPath(os.path.join(fileInfo.path,

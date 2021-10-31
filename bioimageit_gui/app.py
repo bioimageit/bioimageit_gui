@@ -1,5 +1,8 @@
 from pathlib import Path
+import subprocess
 from PySide2.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
+
+from bioimageit_core.config import ConfigAccess
 
 from bioimageit_gui.core.theme import BiThemeAccess
 
@@ -15,6 +18,9 @@ from bioimageit_gui.finder.components import BiFinderComponent
 from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
                                      BiBrowser2Container, BiBrowser2Model)
 
+from bioimageit_gui.experiment.containers import BiExperimentContainer                                     
+from bioimageit_gui.experiment.components import BiExperimentComponent 
+from bioimageit_gui.experiment.states import BiExperimentStates
 
 class BioImageITApp(BiComponent):
     def __init__(self):
@@ -73,7 +79,37 @@ class BioImageITApp(BiComponent):
         if action.state == BiHomeStates.OpenBrowser:
             self.open_browser()
         elif action.state == BiHomeStates.OpenToolboxes:
-            self.open_toolboxes()    
+            self.open_toolboxes()
+        elif action.state == BiBrowser2States.OpenExperiment:
+            self.open_experiment(self.browserContainer.openExperimentPath)   
+        elif action.state == BiHomeStates.OpenExperiment:
+            self.open_experiment(self.homeContainer.clicked_experiment) 
+        elif action.state == BiFinderStates.OpenProcess:
+            tool_uri = self.finderContainer.clicked_tool
+            self.open_process(tool_uri)              
+
+    def open_experiment(self, uri):
+        print('app is opening experiment: ', uri)
+        # instantiate
+        experimentContainer = BiExperimentContainer()
+        experimentContainer.experiment_uri = uri
+        experimentContainer.register(self)
+        experimentComponent = BiExperimentComponent(experimentContainer)
+        experimentContainer.emit(BiExperimentStates.Load)
+        # add to tag
+        self.stackedWidget.addWidget(experimentComponent.get_widget())
+        tab_idx = self.stackedWidget.count()-1
+        self.mainBar.addButton(BiThemeAccess.instance().icon('database'), 
+                               "Experiment", 
+                               tab_idx, False)
+        # slide to it
+        self.stackedWidget.slideInIdx(tab_idx)
+        self.mainBar.setChecked(tab_idx, True)
+
+    def open_process(self, uri):
+        runner_script = ConfigAccess.instance().get('apps')['runner']  
+        print('run open process:', runner_script, self.finderContainer.clicked_tool)   
+        subprocess.Popen([runner_script, uri])   
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)

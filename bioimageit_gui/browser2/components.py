@@ -258,7 +258,6 @@ class BiBrowser2TableComponent(BiComponent):
             self.container.emit(BiBrowser2States.TableLoaded)    
             
     def cellDoubleClicked(self, row: int, col: int):
-        print('double cliked catched')
         self.container.doubleClickedRow = row
         self.container.emit(BiBrowser2States.ItemDoubleClicked)
         self.highlightLine(row)

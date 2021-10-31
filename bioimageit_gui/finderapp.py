@@ -27,9 +27,6 @@ class BiFinderApp(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.OpenProcess:
-            runner_path = os.path.join(os.path.dirname(
-                os.path.realpath(__file__)), '..', 'runnerapp.py')
-   
             runner_script = ConfigAccess.instance().get('apps')['runner']  
             print('run cmd:', runner_script, self.finderContainer.clicked_tool)   
             subprocess.Popen([runner_script,

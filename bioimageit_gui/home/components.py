@@ -83,9 +83,9 @@ class BiHomeComponent(BiComponent):
                 iconLabel = QLabel(self.shortcutsWidget)
                 iconLabel.setObjectName("BiBrowserExperimentIcon")
                 self.shortcutsWidget.setCellWidget(i, 0, iconLabel)  
-                self.shortcutsWidget.setItem(i, 1, QTableWidgetItem(exp.name))  
-                self.shortcutsWidget.setItem(i, 2, QTableWidgetItem(exp.date))  
-                self.shortcutsWidget.setItem(i, 3, QTableWidgetItem(exp.author))  
+                self.shortcutsWidget.setItem(i, 1, QTableWidgetItem(exp['info'].name))  
+                self.shortcutsWidget.setItem(i, 2, QTableWidgetItem(exp['info'].date))  
+                self.shortcutsWidget.setItem(i, 3, QTableWidgetItem(exp['info'].author))  
             self.shortcutsWidget.setVisible(True)
             self.emptyshortcutsWidget.setVisible(False)    
         
@@ -98,16 +98,14 @@ class BiHomeComponent(BiComponent):
             self.container.emit(BiHomeStates.OpenBrowser) 
         elif action == 'OpenSettings':
             self.container.emit(BiHomeStates.OpenSettings)
-        print('emit ', action)                 
 
     def cellClicked(self, row: int, col: int):
         for col in range(0, self.shortcutsWidget.columnCount()):
             self.shortcutsWidget.setCurrentCell(row, col, PySide2.QtCore.QItemSelectionModel.Select) 
 
     def cellDoubleClicked(self, row: int, col: int):
-        self.container.clicked_experiment = row
+        self.container.clicked_experiment = self.container.experiments[row]['md_uri']
         self.container.emit(BiHomeStates.OpenExperiment)
-        print('emit open experiment:', self.container.experiments[row].name)
 
     def update(self, action: BiAction):
         pass
