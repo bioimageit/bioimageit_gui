@@ -1,3 +1,4 @@
+from pathlib import Path
 from PySide2.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
 
 from bioimageit_gui.core.theme import BiThemeAccess
@@ -11,6 +12,9 @@ from bioimageit_gui.finder.containers import BiFinderContainer
 from bioimageit_gui.finder.models import BiFinderModel
 from bioimageit_gui.finder.components import BiFinderComponent
 
+from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
+                                     BiBrowser2Container, BiBrowser2Model)
+
 
 class BioImageITApp(BiComponent):
     def __init__(self):
@@ -22,19 +26,28 @@ class BioImageITApp(BiComponent):
         # containers    
         self.homeContainer = BiHomeContainer()
         self.finderContainer = BiFinderContainer()
+        self.browserContainer = BiBrowser2Container()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
         self.finderComponent = BiFinderComponent(self.finderContainer)
+        self.BrowserComponent = BiBrowser2Component(self.browserContainer)
 
         # models
         self.finderModel = BiFinderModel(self.finderContainer)
+        self.browserModel = BiBrowser2Model(self.browserContainer)
 
         # register
         self.homeContainer.register(self)
         self.finderContainer.emit(BiFinderStates.Reload)
         self.finderContainer.register(self)
+        self.browserContainer.register(self)
 
+        # init
+        self.browserContainer.currentPath = str(Path.home())
+        self.browserContainer.emit(BiBrowser2States.DirectoryModified)
+
+        # widgets
         self.widget = QWidget()
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -70,7 +83,7 @@ class BioImageITApp(BiComponent):
         if self.browser_tab_id < 0:
             widget = QLabel('Hello Browser')
             widget.setObjectName('BiWidget')
-            self.stackedWidget.addWidget(widget)
+            self.stackedWidget.addWidget(self.BrowserComponent.get_widget())
             self.browser_tab_id = self.stackedWidget.count()-1
             self.mainBar.addButton(BiThemeAccess.instance().icon('open-folder_negative'), 
                                    "Browser", 

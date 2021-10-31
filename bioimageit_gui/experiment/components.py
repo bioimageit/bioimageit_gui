@@ -454,7 +454,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
     def highlightLine(self, row: int):
         for col in range(self.tableWidget.columnCount()):
             if self.tableWidget.item(row, col):
-                self.tableWidget.item(row, col).setSelected(True) 
+                self.tableWidget.item(row, col).setSelected(True)    
 
     def drawProcessedDataSet(self):
         # headers

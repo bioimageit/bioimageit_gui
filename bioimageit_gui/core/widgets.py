@@ -34,7 +34,7 @@ class BiButton(QPushButton):
 
     def __init__(self, title: str, parent: QWidget = None):
         super(BiButton, self).__init__(title, parent)
-        self.setCursor(QCursor(PySide2.QtCore.Qt.PointingHandCursor))
+        #self.setCursor(QCursor(PySide2.QtCore.Qt.PointingHandCursor))
         self.pressed.connect(self.emitClicked)
         self.id = 0
         self.content = ''

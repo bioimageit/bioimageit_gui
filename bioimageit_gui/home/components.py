@@ -55,7 +55,9 @@ class BiHomeComponent(BiComponent):
         self.shortcutsWidget.horizontalHeader().setStretchLastSection(True)
         self.shortcutsWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.shortcutsWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
+        self.shortcutsWidget.cellClicked.connect(self.cellClicked)
         self.shortcutsWidget.setHorizontalHeaderLabels(['', 'Name', 'Date', 'Author'])
+        self.shortcutsWidget.verticalHeader().setDefaultSectionSize(12)
         
         self.emptyshortcutsWidget = QLabel("Your workspace is empty. \n Start creating a new experiment !")
         self.emptyshortcutsWidget.setObjectName('BiHomeEmpty')
@@ -97,6 +99,10 @@ class BiHomeComponent(BiComponent):
         elif action == 'OpenSettings':
             self.container.emit(BiHomeStates.OpenSettings)
         print('emit ', action)                 
+
+    def cellClicked(self, row: int, col: int):
+        for col in range(0, self.shortcutsWidget.columnCount()):
+            self.shortcutsWidget.setCurrentCell(row, col, PySide2.QtCore.QItemSelectionModel.Select) 
 
     def cellDoubleClicked(self, row: int, col: int):
         self.container.clicked_experiment = row
