@@ -1,28 +1,33 @@
 import sys
 import os
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QApplication
+
+from PySide2 import QtCore
+from PySide2.QtGui import QIcon, QGuiApplication
+from PySide2.QtWidgets import QApplication, QStyle
 
 from bioimageit_core.config import ConfigAccess
 from bioimageit_formats import FormatsAccess
 
-from bioimageit_gui.browserapp import BiBrowserApp
+from bioimageit_gui.core.theme import BiThemeAccess
+from bioimageit_gui.app import BioImageITApp
 
 if __name__ == '__main__':
     # Create the Qt Application
-    app = QApplication(sys.argv)
+    app = QApplication(['BioImageIT'])
         
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
     ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+    BiThemeAccess(os.path.join(dir_path, 'theme', 'dark'))
+    FormatsAccess(ConfigAccess.instance().get('formats')['file'])
 
     bookmark_file = os.path.join(dir_path_parent, 'bookmarks.json')
-    component = BiBrowserApp(bookmark_file)
+    component = BioImageITApp()
 
-    rec = QApplication.desktop().screenGeometry()
-    component.get_widget().resize(rec.width()/2, rec.height()/2) 
+    component.get_widget().setWindowTitle("BioImageIT")
+    component.get_widget().showMaximized()
     component.get_widget().show()
     
     # Run the main Qt loop

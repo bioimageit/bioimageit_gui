@@ -36,6 +36,7 @@ class BiRunnerViewApp(BiComponent):
 
         # viewer widget
         self.viewerComponent = BiMultiViewer()
+        self.viewerComponent.setMinimumWidth(400)
 
         # Widget
         self.widget = QWidget()

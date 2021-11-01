@@ -42,8 +42,8 @@ class BiHomeComponent(BiComponent):
         openSettingsTile.clickedSignal.connect(self.tileClicked)
         btnsLayout.addWidget(openNewExperimentTile, 1, PySide2.QtCore.Qt.AlignRight)
         btnsLayout.addWidget(openToolboxesTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openBrowserTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openSettingsTile,  1, PySide2.QtCore.Qt.AlignLeft)
+        btnsLayout.addWidget(openBrowserTile,  1, PySide2.QtCore.Qt.AlignLeft)
+        #btnsLayout.addWidget(openSettingsTile,  1, PySide2.QtCore.Qt.AlignLeft)
 
         experimentsTitle = QLabel('Experiments')
         experimentsTitle.setObjectName('BiLabelFormHeader1')

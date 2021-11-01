@@ -679,6 +679,14 @@ class BiAppBar(QWidget):
         button.clicked.connect(self.open)
         button.closed.connect(self.close)
 
+    def print_buttons(self):
+        for i in range(self.layout.count()-1, -1, -1):
+            item = self.layout.itemAt(i)
+            button = item.widget()
+            if button:
+                if isinstance(button, BiClosableButton):
+                    print("button:", button.id())
+
     def removeButton(self, id: int):
         for i in range(self.layout.count()-1, -1, -1):
             item = self.layout.itemAt(i)
@@ -686,8 +694,9 @@ class BiAppBar(QWidget):
             if button:
                 if isinstance(button, BiClosableButton):
                     if (button.id() == id):
-                        del button
-                        return
+                        button.deleteLater()
+                    elif button.id() > id:
+                        button.setId(button.id()-1)              
 
     def setChecked(self, id: int, update_current: bool):
         for i in range(0, self.layout.count()):

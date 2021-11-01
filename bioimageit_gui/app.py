@@ -18,9 +18,10 @@ from bioimageit_gui.finder.components import BiFinderComponent
 from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
                                      BiBrowser2Container, BiBrowser2Model)
 
-from bioimageit_gui.experiment2.containers import BiExperimentContainer                                     
-from bioimageit_gui.experiment2.components import BiExperimentViewerComponent 
-from bioimageit_gui.experiment2.states import BiExperimentStates
+from bioimageit_gui.experiment2.containers import BiExperimentCreateContainer                                     
+from bioimageit_gui.experiment2.components import (BiExperimentViewerComponent, BiExperimentCreateComponent) 
+from bioimageit_gui.experiment2.models import BiExperimentCreateModel
+from bioimageit_gui.experiment2.states import (BiExperimentStates, BiExperimentCreateStates)
 
 from bioimageit_gui.runnerapp import BiRunnerViewApp
 
@@ -35,21 +36,25 @@ class BioImageITApp(BiComponent):
         self.homeContainer = BiHomeContainer()
         self.finderContainer = BiFinderContainer()
         self.browserContainer = BiBrowser2Container()
+        self.experimentCreateContainer = BiExperimentCreateContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
         self.finderComponent = BiFinderComponent(self.finderContainer)
         self.BrowserComponent = BiBrowser2Component(self.browserContainer)
+        self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
 
         # models
         self.finderModel = BiFinderModel(self.finderContainer)
         self.browserModel = BiBrowser2Model(self.browserContainer)
+        self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
 
         # register
         self.homeContainer.register(self)
         self.finderContainer.emit(BiFinderStates.Reload)
         self.finderContainer.register(self)
         self.browserContainer.register(self)
+        self.experimentCreateContainer.register(self)
 
         # init
         self.browserContainer.currentPath = str(Path.home())
@@ -64,6 +69,7 @@ class BioImageITApp(BiComponent):
         
         self.mainBar = BiAppBar()
         self.mainBar.setStyleSheet('QLabel{background-color:#414851;}')
+        self.mainBar.close.connect(self.remove_tab)
         self.stackedWidget = BiStaticStackedWidget(self.widget)
         layout.addWidget(self.mainBar)
         layout.addWidget(self.stackedWidget)
@@ -78,7 +84,16 @@ class BioImageITApp(BiComponent):
 
 
     def update(self, action: BiAction):
-        if action.state == BiHomeStates.OpenBrowser:
+        if action.state == BiHomeStates.OpenNewExperiment:
+            self.experimentCreateComponent.get_widget().setVisible(True)
+        elif action.state == BiExperimentCreateStates.CancelClicked:
+            self.experimentCreateComponent.get_widget().setVisible(False)   
+        if action.state == BiExperimentCreateStates.ExperimentCreated:
+            uri = self.experimentCreateContainer.experiment_dir
+            print('open new experiment from:', uri)
+            self.open_experiment(uri)
+            self.experimentCreateComponent.get_widget().setVisible(False) 
+        elif action.state == BiHomeStates.OpenBrowser:
             self.open_browser()
         elif action.state == BiHomeStates.OpenToolboxes:
             self.open_toolboxes()
@@ -94,27 +109,32 @@ class BioImageITApp(BiComponent):
 
     def open_experiment(self, uri):
         # instantiate
-        experimentComponent = BiExperimentViewerComponent(uri)
+        experimentComponent = BiExperimentViewerComponent(uri, 1)
         experimentComponent.experimentContainer.register(self)
         tab_id = self.add_tab(experimentComponent.get_widget(), 
                               BiThemeAccess.instance().icon('database'), 
-                              "Experiment")
+                              "Experiment", True)
         experimentComponent.experimentComponent.parent_id = tab_id                      
 
     def open_process(self, uri):
         runner = BiRunnerViewApp(uri)
-        self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner') 
+        self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner', True) 
 
-    def add_tab(self, widget, icon, name):
+    def add_tab(self, widget, icon, name, closable=False):
         # fill tab and widget
         self.stackedWidget.addWidget(widget)
         tab_idx = self.stackedWidget.count()-1
-        self.mainBar.addButton(icon,  name, tab_idx, False)
+        self.mainBar.addButton(icon,  name, tab_idx, closable)
         # slide to it
         self.stackedWidget.slideInIdx(tab_idx)
         self.mainBar.setChecked(tab_idx, True)
         return tab_idx
 
+    def remove_tab(self, idx):
+        self.mainBar.removeButton(idx)
+        self.stackedWidget.remove(idx)
+        self.stackedWidget.slideInIdx(0)
+        self.mainBar.setChecked(0, True)
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)

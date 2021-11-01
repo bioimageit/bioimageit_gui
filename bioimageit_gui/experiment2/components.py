@@ -47,7 +47,7 @@ from bioimageit_viewer.viewer2 import BiMultiViewer
 
 
 class BiExperimentViewerComponent(BiComponent):
-    def __init__(self, experiment_uri):
+    def __init__(self, experiment_uri, parent_id):
         super().__init__()
         self.container = BiExperimentViewContainer()
         self.container.experiment_uri = experiment_uri
@@ -57,7 +57,7 @@ class BiExperimentViewerComponent(BiComponent):
         self.experimentContainer = BiExperimentContainer()
         self.experimentContainer.experiment_uri = experiment_uri
         self.experimentContainer.register(self)
-        self.experimentComponent = BiExperimentComponent(self.experimentContainer)
+        self.experimentComponent = BiExperimentComponent(self.experimentContainer, parent_id)
         self.experimentContainer.emit(BiExperimentStates.Load)
 
         # viewer component
@@ -88,10 +88,10 @@ class BiExperimentViewerComponent(BiComponent):
 
 
 class BiExperimentComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, container: BiExperimentContainer, parent_id = -1):
         super().__init__()
         self._object_name = 'BiExperimentComponent'
-        self.parent_id = -1
+        self.parent_id = parent_id
         # containers
         self.container = container
         self.container.register(self)
@@ -114,7 +114,7 @@ class BiExperimentComponent(BiComponent):
             self.metadataExperimentContainer)
 
         # components
-        self.toolbarComponent = BiExperimentToolbarComponent(self.container)
+        self.toolbarComponent = BiExperimentToolbarComponent(self.container, parent_id)
         self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
         self.rawDataComponent = BiRawDataComponent(self.rawDataContainer)
         self.processedDataComponent = BiProcessedDataComponent(self.processedDataContainer)
@@ -222,7 +222,7 @@ class BiExperimentComponent(BiComponent):
 
 
 class BiExperimentToolbarComponent(BiComponent):
-    def __init__(self, container: BiExperimentContainer):
+    def __init__(self, container: BiExperimentContainer, parent_id):
         super().__init__()
         self._object_name = 'BiBrowserExperimentToolbar'
         self.container = container
@@ -285,10 +285,11 @@ class BiExperimentToolbarComponent(BiComponent):
         layout.addWidget(self.nameLabel, 0, PySide2.QtCore.Qt.AlignRight)
 
         # close button
-        closeButton = QToolButton()
-        closeButton.setObjectName('BiBrowserExperimentToolbarCloseButton')
-        closeButton.released.connect(self.closeButtonClicked)
-        layout.addWidget(closeButton, 0, PySide2.QtCore.Qt.AlignRight)
+        if parent_id < 0:
+            closeButton = QToolButton()
+            closeButton.setObjectName('BiBrowserExperimentToolbarCloseButton')
+            closeButton.released.connect(self.closeButtonClicked)
+            layout.addWidget(closeButton, 0, PySide2.QtCore.Qt.AlignRight)
 
     def updateTitle(self):
         self.nameLabel.setText(self.container.experiment.metadata.name)

@@ -838,7 +838,7 @@ QSplitter::handle:vertical {
 }
 
 QSplitter::handle:pressed {
-    background-color:#5A626C;
+    background-color:#0071C3;
 }
 
 /*////////////////////////////////////////////////////////////////////////////
