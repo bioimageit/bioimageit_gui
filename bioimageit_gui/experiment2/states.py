@@ -1,6 +1,10 @@
 from bioimageit_gui.core.framework import BiStates
 
 
+class BiExperimentViewerStates(BiStates):
+    CloseClicked = "BiExperimentViewerStates.CloseClicked"
+
+
 class BiExperimentStates(BiStates):
     ImportClicked = "BiExperimentStates.ImportClicked" 
     TagClicked = "BiExperimentStates.TagClicked"  
@@ -25,6 +29,9 @@ class BiExperimentStates(BiStates):
     ProcessedDataClicked = "BiExperimentStates.ProcessedDataClicked"
     RefreshClicked = "BiExperimentStates.RefreshClicked"
     CloseClicked = "BiExperimentStates.CloseClicked"
+    ViewDataClicked = "BiExperimentStates.ViewDataClicked"
+    ViewRawMetaDataClicked = "BiExperimentStates.ViewRawMetaDataClicked"
+    ViewProcessedMetaDataClicked = "BiExperimentStates.ViewProcessedMetaDataClicked"
 
 
 class BiExperimentCreateStates(BiStates):

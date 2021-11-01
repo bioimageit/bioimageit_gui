@@ -1,6 +1,14 @@
 from bioimageit_gui.core.framework import BiContainer
 
 
+class BiExperimentViewContainer(BiContainer):
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiExperimentViewContainer'    
+
+        self.experiment_uri = ''
+
+
 class BiExperimentContainer(BiContainer):
     def __init__(self):
         super().__init__()
@@ -14,6 +22,7 @@ class BiExperimentContainer(BiContainer):
         self.current_dataset_name = ''
         self.current_dataset = None
         self.clickedRow = -1
+        self.selected_data_info = None
 
 
 class BiExperimentImportContainer():

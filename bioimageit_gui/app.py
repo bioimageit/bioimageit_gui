@@ -19,8 +19,10 @@ from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
                                      BiBrowser2Container, BiBrowser2Model)
 
 from bioimageit_gui.experiment2.containers import BiExperimentContainer                                     
-from bioimageit_gui.experiment2.components import BiExperimentComponent 
+from bioimageit_gui.experiment2.components import BiExperimentViewerComponent 
 from bioimageit_gui.experiment2.states import BiExperimentStates
+
+from bioimageit_gui.runnerapp import BiRunnerViewApp
 
 class BioImageITApp(BiComponent):
     def __init__(self):
@@ -86,30 +88,33 @@ class BioImageITApp(BiComponent):
             self.open_experiment(self.homeContainer.clicked_experiment) 
         elif action.state == BiFinderStates.OpenProcess:
             tool_uri = self.finderContainer.clicked_tool
-            self.open_process(tool_uri)              
+            self.open_process(tool_uri)  
+        elif action.state == BiExperimentStates.ProcessClicked:
+            self.open_toolboxes()                                  
 
     def open_experiment(self, uri):
-        print('app is opening experiment: ', uri)
         # instantiate
-        experimentContainer = BiExperimentContainer()
-        experimentContainer.experiment_uri = uri
-        experimentContainer.register(self)
-        experimentComponent = BiExperimentComponent(experimentContainer)
-        experimentContainer.emit(BiExperimentStates.Load)
-        # add to tag
-        self.stackedWidget.addWidget(experimentComponent.get_widget())
+        experimentComponent = BiExperimentViewerComponent(uri)
+        experimentComponent.experimentContainer.register(self)
+        tab_id = self.add_tab(experimentComponent.get_widget(), 
+                              BiThemeAccess.instance().icon('database'), 
+                              "Experiment")
+        experimentComponent.experimentComponent.parent_id = tab_id                      
+
+    def open_process(self, uri):
+        runner = BiRunnerViewApp(uri)
+        self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner') 
+
+    def add_tab(self, widget, icon, name):
+        # fill tab and widget
+        self.stackedWidget.addWidget(widget)
         tab_idx = self.stackedWidget.count()-1
-        self.mainBar.addButton(BiThemeAccess.instance().icon('database'), 
-                               "Experiment", 
-                               tab_idx, False)
+        self.mainBar.addButton(icon,  name, tab_idx, False)
         # slide to it
         self.stackedWidget.slideInIdx(tab_idx)
         self.mainBar.setChecked(tab_idx, True)
+        return tab_idx
 
-    def open_process(self, uri):
-        runner_script = ConfigAccess.instance().get('apps')['runner']  
-        print('run open process:', runner_script, self.finderContainer.clicked_tool)   
-        subprocess.Popen([runner_script, uri])   
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)
@@ -129,11 +134,12 @@ class BioImageITApp(BiComponent):
         self.mainBar.setChecked(self.browser_tab_id, True)
 
     def open_toolboxes(self):
+        print("open toolboxes:", self.toolboxes_tab_id)
         if self.toolboxes_tab_id < 0:
             self.stackedWidget.addWidget(self.finderComponent.get_widget())
             self.toolboxes_tab_id = self.stackedWidget.count()-1
             self.mainBar.addButton(BiThemeAccess.instance().icon('tools'), 
-                                   "Browser", 
+                                   "Toolboxes", 
                                    self.toolboxes_tab_id, False)
 
         self.stackedWidget.slideInIdx(self.toolboxes_tab_id)

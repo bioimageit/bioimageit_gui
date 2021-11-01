@@ -24,6 +24,8 @@ class BiRunnerContainer(BiContainer):
         self.progress = 0
         self.progress_message = ''
         self.genarated_outputs = [] 
+        self.clicked_view_uri = ''
+        self.clicked_view_format = ''
 
     def set_progress(self, progress: int, message: str):
         self.progress = progress

@@ -9,7 +9,6 @@ from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter,
 from bioimageit_core.config import ConfigAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
-from bioimageit_gui.dataviewer.dataview import BiDataView
 from bioimageit_gui.runner.containers import BiRunnerContainer
 from bioimageit_gui.runner.states import BiRunnerStates
 from bioimageit_gui.runner.widgets import (BiRunnerInputSingleWidget,
@@ -62,13 +61,7 @@ class BiRunnerComponent(BiComponent):
     
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.ProcessInfoLoaded:
-            self.buildExecWidget() 
-        if action.state == BiRunnerStates.RunFinished:
-            for out in self.container.genarated_outputs:
-                for fileinfo in out:
-                    print('open output', fileinfo)
-                    viewer = BiDataView(fileinfo['uri'], fileinfo['format'])
-                    viewer.show()      
+            self.buildExecWidget()       
 
     def buildExecWidget(self):
 
@@ -149,11 +142,14 @@ class BiRunnerComponent(BiComponent):
         
     def showData(self, uri: str, format_: str):
         print("open data", uri)
-        #format = pathlib.Path(uri).suffix[1:]
         print("format", format_)
 
-        viewer = BiDataView(uri, format_)
-        viewer.show()
+        self.container.clicked_view_uri = uri
+        self.container.clicked_view_format = format_
+        self.container.emit(BiRunnerStates.ClickedView)
+
+        #viewer = BiDataView(uri, format_)
+        #viewer.show()
 
     def switchFile(self):
         self.swithMode(BiRunnerContainer.MODE_FILE)

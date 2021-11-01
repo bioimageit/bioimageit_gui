@@ -4,8 +4,9 @@ from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QAbstractItemView, QHBoxLayout,
                                QToolButton, QSplitter, QPushButton)
 
+#from bioimageit_gui.core.web import BiWebBrowser
 from bioimageit_gui.core.widgets import (BiButton, BiFlowLayout,
-                                         BiNavigationBar, BiWebBrowser)
+                                         BiNavigationBar)
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.finder.states import BiFinderStates
@@ -85,8 +86,9 @@ class BiFinderComponent(BiComponent):
         toolsSplitter.addWidget(toolsListWidget)
 
         # doc viewer
-        self.docViewer = BiWebBrowser(self.toolsWidget)
-        self.docViewer.setToolBarVisible(False)
+        self.docViewer = QLabel() #BiWebBrowser(self.toolsWidget)
+        self.docViewer.setObjectName("BiLabel")
+        #self.docViewer.setToolBarVisible(False)
         toolsSplitter.addWidget(self.docViewer)
     
         self.toolsWidget.setVisible(False)
@@ -157,26 +159,45 @@ class BiFinderComponent(BiComponent):
     def showToolboxDoc(self):
         print(self.container.current_category_doc)
         link = self.container.current_category_doc
-        if link.startswith('http') or link.startswith('www'):
-            self.docViewer.setHomePage(link, True)
-        elif link.endswith('.html'):    
-            self.docViewer.setHomePage(link, False)
+
+        if link != '':    
+            self.docViewer.setOpenExternalLinks(True)
+            self.docViewer.setText(f'<a href="{link}">{link}</a>')
         else:
-            self.docViewer.setHomePageHtml("<span>This toolbox have no "
-                                           "documentation</span>")
+            self.docViewer.setText("<span>This toolbox have no documentation</span>")
+
+        #if link.startswith('http') or link.startswith('www'):
+        #    self.docViewer.setHomePage(link, True)
+        #elif link.endswith('.html'):    
+        #    self.docViewer.setHomePage(link, False)
+        #else:
+        #    self.docViewer.setHomePageHtml("<span>This toolbox have no "
+        #                                   "documentation</span>")
 
     def showClickedDoc(self, row, column):
-        if row >= len(self.container.tools):
-            self.docViewer.setHomePageHtml("No tool available")
+
+        if row >= len(self.container.tools): 
+            self.docViewer.setText("No tool available")  
             return
         tool = self.container.tools[row]  
-        if tool.help.startswith('http') or tool.help.startswith('www'):
-            self.docViewer.setHomePage(tool.help, True)
-        elif tool.help.endswith('.html'):    
-            self.docViewer.setHomePage(tool.help, False)
+        link = tool.help  
+        if link != '':    
+            self.docViewer.setOpenExternalLinks(True)
+            self.docViewer.setText(f'<a href="{link}">{link}</a>')
         else:
-            self.docViewer.setHomePageHtml("<span>This tool documentation "
-                                           "is not available</span>")
+            self.docViewer.setText("<span>This toolbox have no documentation</span>")  
+
+        #if row >= len(self.container.tools):
+        #    self.docViewer.setHomePageHtml("No tool available")
+        #    return
+        #tool = self.container.tools[row]  
+        #if tool.help.startswith('http') or tool.help.startswith('www'):
+        #    self.docViewer.setHomePage(tool.help, True)
+        #elif tool.help.endswith('.html'):    
+        #    self.docViewer.setHomePage(tool.help, False)
+        #else:
+        #    self.docViewer.setHomePageHtml("<span>This tool documentation "
+        #                                   "is not available</span>")
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.Reloaded:
