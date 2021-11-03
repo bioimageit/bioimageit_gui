@@ -183,9 +183,9 @@ class BiFinderComponent(BiComponent):
         link = tool.help  
         if link != '':    
             self.docViewer.setOpenExternalLinks(True)
-            self.docViewer.setText(f'<a href="{link}">{link}</a>')
+            self.docViewer.setText(f'<span>The documentation can not be displayed here. It is available at:</span><p><a href="{link}">{link}</a></p>')
         else:
-            self.docViewer.setText("<span>This toolbox have no documentation</span>")  
+            self.docViewer.setText("<span>This tool have no documentation</span>")  
 
         #if row >= len(self.container.tools):
         #    self.docViewer.setHomePageHtml("No tool available")
