@@ -102,7 +102,7 @@ class BiRunnerThread(QThread):
         elif self.mode == BiRunnerContainer.MODE_REP:  
             runner = Runner(self.process_info)
             runner.add_observer(self.observer)
-            for input in self.inputs:
+            for input in self.inputs: 
                 runner.add_inputs(input['name'], input['uri'], input['filter'])
             runner.set_parameters(*self.parameters)
             runner.set_output(self.output_uri)

@@ -47,10 +47,11 @@ class BiRunnerInputSingleWidget(QWidget):
     def inputs(self) -> list:
         inps = []
         for row in range(self.layout.rowCount()):
-            nameLabel = self.layout.itemAtPosition(row, 0).widget()
-            selectorWidget = self.layout.itemAtPosition(row, 2).widget()
-            inps.append({"name": nameLabel.text(),
-                         "uri": selectorWidget.text()})
+            if self.layout.itemAtPosition(row, 0):
+                nameLabel = self.layout.itemAtPosition(row, 0).widget()
+                selectorWidget = self.layout.itemAtPosition(row, 2).widget()
+                inps.append({"name": nameLabel.text(),
+                            "uri": selectorWidget.text()})
         return inps 
 
     def showViewButton(self, id: int):

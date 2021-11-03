@@ -182,7 +182,7 @@ class BiRunnerComponent(BiComponent):
             self.inputExperimentWidget.setVisible(True)
             self.fileButton.setChecked(False)
             self.folderButton.setChecked(False)
-            self.experimentButton.setChecked(True)
+            self.experimentButton.setChecked(True) 
 
     def run(self):
         # create the input datalist
@@ -207,7 +207,7 @@ class BiRunnerComponent(BiComponent):
         print('parameters:', self.container.parameters)
         print('output:', self.container.output_uri)
         
-        self.container.emit(BiRunnerStates.RunProcess)
+        self.container.emit(BiRunnerStates.RunProcess) 
 
     def get_widget(self):
         return self.widget

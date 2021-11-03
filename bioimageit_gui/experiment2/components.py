@@ -538,7 +538,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
         # headers
         tags = self.container.experiment.metadata.tags
         self.tableWidget.setColumnCount(6 + len(tags))
-        labels = ["Name"]
+        labels = ["", "", "Name"]
         labels.append("Parent")
         labels.append("Label")
         for tag in tags:
