@@ -453,7 +453,8 @@ class BiExperimentDataSetViewComponent(BiComponent):
             if self.container.current_dataset_name == "data":
                 self.drawRawDataset()
             else:
-                self.drawProcessedDataSet()        
+                if self.container.current_dataset:
+                    self.drawProcessedDataSet()        
                  
     def drawRawDataset(self):
         # headers
@@ -789,11 +790,12 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         pass
 
     def importButtonClicked(self):
-
+        
+        #print('import clicked with format:', self.formatCombox.currentText())
         self.container.import_info.file_data_path = self.dataPath.text()
         self.container.import_info.file_copy_data = self.copyDataBox.isChecked()
         self.container.import_info.file_name = self.nameEdit.text()
-        self.container.import_info.fotmat = self.formatCombox.currentText()
+        self.container.import_info.format = self.formatCombox.currentText()
         self.container.import_info.author = self.authorEdit.text()
         self.container.import_info.createddate = self.createddateEdit.text()
         self.container.emit(BiExperimentStates.NewImportFile)
