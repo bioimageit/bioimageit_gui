@@ -87,7 +87,7 @@ class BiFinderComponent(BiComponent):
 
         # doc viewer
         self.docViewer = QLabel() #BiWebBrowser(self.toolsWidget)
-        self.docViewer.setObjectName("BiLabel")
+        self.docViewer.setObjectName("BiDocViewer")
         #self.docViewer.setToolBarVisible(False)
         toolsSplitter.addWidget(self.docViewer)
     
@@ -162,7 +162,7 @@ class BiFinderComponent(BiComponent):
 
         if link != '':    
             self.docViewer.setOpenExternalLinks(True)
-            self.docViewer.setText(f'<a href="{link}">{link}</a>')
+            self.docViewer.setText(f'<span>The documentation can not be displayed here. It is available at:</span><p><a href="{link}">{link}</a></p>')
         else:
             self.docViewer.setText("<span>This toolbox have no documentation</span>")
 

@@ -1793,3 +1793,11 @@ color : #fff;
 background-color: #222222;
 border: 2px solid #222222;
 }
+
+QLabel#BiDocViewer
+{
+  background-color: #242830;
+  border-radius: 8px;
+  color: #5A626C;
+  qproperty-alignment: AlignCenter;
+}
