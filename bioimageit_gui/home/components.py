@@ -33,17 +33,21 @@ class BiHomeComponent(BiComponent):
         btnsLayout = QHBoxLayout()
         btnsWidget.setLayout(btnsLayout)
         openNewExperimentTile = BiHomeTile('New \n experiment', BiThemeAccess.instance().icon('plus-black-symbol'), 'OpenNewExperiment')
+        openBrowserTile = BiHomeTile('Browse \n experiments', BiThemeAccess.instance().icon('folder-gray'), 'OpenBrowser')
+        openDesignerTile = BiHomeTile('Pipeline \n designer', BiThemeAccess.instance().icon('workflow'), 'OpenDesigner')
         openToolboxesTile = BiHomeTile('Toolboxes', BiThemeAccess.instance().icon('tools'), 'OpenToolboxes')
-        openBrowserTile = BiHomeTile('Browse', BiThemeAccess.instance().icon('open-folder_negative'), 'OpenBrowser')
         openSettingsTile = BiHomeTile('Settings', BiThemeAccess.instance().icon('cog-wheel-silhouette'), 'OpenSettings')
+
         openNewExperimentTile.clickedSignal.connect(self.tileClicked)
+        openDesignerTile.clickedSignal.connect(self.tileClicked)
         openToolboxesTile.clickedSignal.connect(self.tileClicked)
         openBrowserTile.clickedSignal.connect(self.tileClicked)
         openSettingsTile.clickedSignal.connect(self.tileClicked)
         btnsLayout.addWidget(openNewExperimentTile, 1, PySide2.QtCore.Qt.AlignRight)
+        btnsLayout.addWidget(openBrowserTile,  0, PySide2.QtCore.Qt.AlignCenter)
+        btnsLayout.addWidget(openDesignerTile,  0, PySide2.QtCore.Qt.AlignCenter)
         btnsLayout.addWidget(openToolboxesTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openBrowserTile,  1, PySide2.QtCore.Qt.AlignLeft)
-        #btnsLayout.addWidget(openSettingsTile,  1, PySide2.QtCore.Qt.AlignLeft)
+        btnsLayout.addWidget(openSettingsTile,  1, PySide2.QtCore.Qt.AlignLeft)
 
         experimentsTitle = QLabel('Experiments')
         experimentsTitle.setObjectName('BiLabelFormHeader1')
@@ -92,10 +96,12 @@ class BiHomeComponent(BiComponent):
     def tileClicked(self, action: str):
         if action == 'OpenNewExperiment':
             self.container.emit(BiHomeStates.OpenNewExperiment)
-        elif action == 'OpenToolboxes':
-            self.container.emit(BiHomeStates.OpenToolboxes)    
         elif action == 'OpenBrowser':
             self.container.emit(BiHomeStates.OpenBrowser) 
+        elif action == 'OpenDesigner':
+            self.container.emit(BiHomeStates.OpenDesigner) 
+        elif action == 'OpenToolboxes':
+            self.container.emit(BiHomeStates.OpenToolboxes)    
         elif action == 'OpenSettings':
             self.container.emit(BiHomeStates.OpenSettings)
 

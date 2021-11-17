@@ -25,24 +25,30 @@ from bioimageit_gui.experiment2.states import (BiExperimentStates, BiExperimentC
 
 from bioimageit_gui.runnerapp import BiRunnerViewApp
 
+from bioimageit_gui.settings import BiSettingsComponent, BiSettingsContainer
+from bioimageit_gui.designer import BiDesignerComponent
+
 class BioImageITApp(BiComponent):
     def __init__(self):
         super().__init__()
 
         self.browser_tab_id = -1
         self.toolboxes_tab_id = -1
+        self.settings_tab_id = -1
 
         # containers    
         self.homeContainer = BiHomeContainer()
         self.finderContainer = BiFinderContainer()
         self.browserContainer = BiBrowser2Container()
         self.experimentCreateContainer = BiExperimentCreateContainer()
+        self.settingsContainer = BiSettingsContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
         self.finderComponent = BiFinderComponent(self.finderContainer)
         self.BrowserComponent = BiBrowser2Component(self.browserContainer)
         self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
+        self.settingsComponent = BiSettingsComponent(self.settingsContainer)
 
         # models
         self.finderModel = BiFinderModel(self.finderContainer)
@@ -76,7 +82,6 @@ class BioImageITApp(BiComponent):
 
         self.mainBar.open.connect(self.slide_to)
 
-
         # home component
         self.mainBar.addButton(BiThemeAccess.instance().icon('home'), "Home", 0, False)
         self.stackedWidget.addWidget(self.homeComponent.get_widget())
@@ -95,8 +100,13 @@ class BioImageITApp(BiComponent):
             self.experimentCreateComponent.get_widget().setVisible(False) 
         elif action.state == BiHomeStates.OpenBrowser:
             self.open_browser()
+        elif action.state == BiHomeStates.OpenDesigner:
+            print('open deigner')
+            self.open_designer()     
         elif action.state == BiHomeStates.OpenToolboxes:
             self.open_toolboxes()
+        elif action.state == BiHomeStates.OpenSettings:
+            self.open_settings()    
         elif action.state == BiBrowser2States.OpenExperiment:
             self.open_experiment(self.browserContainer.openExperimentPath)   
         elif action.state == BiHomeStates.OpenExperiment:
@@ -114,7 +124,14 @@ class BioImageITApp(BiComponent):
         tab_id = self.add_tab(experimentComponent.get_widget(), 
                               BiThemeAccess.instance().icon('database'), 
                               "Experiment", True)
-        experimentComponent.experimentComponent.parent_id = tab_id                      
+        experimentComponent.experimentComponent.parent_id = tab_id    
+
+    def open_designer(self):
+        # instantiate
+        designerComponent = BiDesignerComponent()
+        self.add_tab(designerComponent.get_widget(), 
+                     BiThemeAccess.instance().icon('workflow'), 
+                     "Designer", True)                      
 
     def open_process(self, uri):
         runner = BiRunnerViewApp(uri)
@@ -142,11 +159,9 @@ class BioImageITApp(BiComponent):
 
     def open_browser(self):
         if self.browser_tab_id < 0:
-            widget = QLabel('Hello Browser')
-            widget.setObjectName('BiWidget')
             self.stackedWidget.addWidget(self.BrowserComponent.get_widget())
             self.browser_tab_id = self.stackedWidget.count()-1
-            self.mainBar.addButton(BiThemeAccess.instance().icon('open-folder_negative'), 
+            self.mainBar.addButton(BiThemeAccess.instance().icon('folder-gray'), 
                                    "Browser", 
                                    self.browser_tab_id, False)
 
@@ -164,6 +179,18 @@ class BioImageITApp(BiComponent):
 
         self.stackedWidget.slideInIdx(self.toolboxes_tab_id)
         self.mainBar.setChecked(self.toolboxes_tab_id, True)
+
+    def open_settings(self):
+        print("open settings:", self.settings_tab_id)
+        if self.settings_tab_id < 0:
+            self.stackedWidget.addWidget(self.settingsComponent.get_widget())
+            self.settings_tab_id = self.stackedWidget.count()-1
+            self.mainBar.addButton(BiThemeAccess.instance().icon('cog-wheel-silhouette'), 
+                                   "Toolboxes", 
+                                   self.settings_tab_id, False)
+
+        self.stackedWidget.slideInIdx(self.settings_tab_id)
+        self.mainBar.setChecked(self.settings_tab_id, True)    
     
     def get_widget(self):
         return self.widget    
