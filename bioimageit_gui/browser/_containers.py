@@ -3,7 +3,7 @@ import os
 from bioimageit_gui.core.framework import BiContainer, BiObject
 
 
-class BiBrowser2FileInfo(BiObject):     
+class BiBrowserFileInfo(BiObject):     
     def __init__(self, fileName: str = '', path: str = '', name: str = '',
                  dtype: str = '', date: str = ''):
         super().__init__()
@@ -17,7 +17,7 @@ class BiBrowser2FileInfo(BiObject):
         return os.path.join(self.path, self.fileName)  
 
 
-class BiBrowser2Container(BiContainer):
+class BiBrowserContainer(BiContainer):
 
     def __init__(self):
         super().__init__()

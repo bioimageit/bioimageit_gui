@@ -1,10 +1,10 @@
 from bioimageit_core.experiment import Experiment
 
 from bioimageit_gui.core.framework import BiModel, BiAction
-from bioimageit_gui.experiment.states import (BiExperimentCreateStates,
-                                              BiExperimentStates)
-from bioimageit_gui.experiment.containers import (BiExperimentCreateContainer,
-                                                  BiExperimentContainer)
+from ._states import (BiExperimentCreateStates,
+                      BiExperimentStates)
+from ._containers import (BiExperimentCreateContainer,
+                          BiExperimentContainer)
 
 
 class BiExperimentModel(BiModel):

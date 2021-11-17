@@ -15,15 +15,17 @@ from bioimageit_gui.finder.containers import BiFinderContainer
 from bioimageit_gui.finder.models import BiFinderModel
 from bioimageit_gui.finder.components import BiFinderComponent
 
-from bioimageit_gui.browser2 import (BiBrowser2Component, BiBrowser2States,
-                                     BiBrowser2Container, BiBrowser2Model)
+from bioimageit_gui.browser import (BiBrowserComponent, BiBrowserStates,
+                                     BiBrowserContainer, BiBrowserModel)
 
-from bioimageit_gui.experiment2.containers import BiExperimentCreateContainer                                     
-from bioimageit_gui.experiment2.components import (BiExperimentViewerComponent, BiExperimentCreateComponent) 
-from bioimageit_gui.experiment2.models import BiExperimentCreateModel
-from bioimageit_gui.experiment2.states import (BiExperimentStates, BiExperimentCreateStates)
+from bioimageit_gui.experiment import (BiExperimentCreateContainer, 
+                                       BiExperimentViewerComponent, 
+                                       BiExperimentCreateComponent, 
+                                       BiExperimentCreateModel,
+                                       BiExperimentStates,
+                                       BiExperimentCreateStates)
 
-from bioimageit_gui.runnerapp import BiRunnerViewApp
+from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
 
 from bioimageit_gui.settings import BiSettingsComponent, BiSettingsContainer
 from bioimageit_gui.designer import BiDesignerComponent
@@ -39,20 +41,20 @@ class BioImageITApp(BiComponent):
         # containers    
         self.homeContainer = BiHomeContainer()
         self.finderContainer = BiFinderContainer()
-        self.browserContainer = BiBrowser2Container()
+        self.browserContainer = BiBrowserContainer()
         self.experimentCreateContainer = BiExperimentCreateContainer()
         self.settingsContainer = BiSettingsContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
         self.finderComponent = BiFinderComponent(self.finderContainer)
-        self.BrowserComponent = BiBrowser2Component(self.browserContainer)
+        self.BrowserComponent = BiBrowserComponent(self.browserContainer)
         self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
         self.settingsComponent = BiSettingsComponent(self.settingsContainer)
 
         # models
         self.finderModel = BiFinderModel(self.finderContainer)
-        self.browserModel = BiBrowser2Model(self.browserContainer)
+        self.browserModel = BiBrowserModel(self.browserContainer)
         self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
 
         # register
@@ -64,7 +66,7 @@ class BioImageITApp(BiComponent):
 
         # init
         self.browserContainer.currentPath = str(Path.home())
-        self.browserContainer.emit(BiBrowser2States.DirectoryModified)
+        self.browserContainer.emit(BiBrowserStates.DirectoryModified)
 
         # widgets
         self.widget = QWidget()
@@ -107,7 +109,7 @@ class BioImageITApp(BiComponent):
             self.open_toolboxes()
         elif action.state == BiHomeStates.OpenSettings:
             self.open_settings()    
-        elif action.state == BiBrowser2States.OpenExperiment:
+        elif action.state == BiBrowserStates.OpenExperiment:
             self.open_experiment(self.browserContainer.openExperimentPath)   
         elif action.state == BiHomeStates.OpenExperiment:
             self.open_experiment(self.homeContainer.clicked_experiment) 

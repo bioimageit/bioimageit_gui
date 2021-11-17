@@ -50,45 +50,6 @@ QPushButton#BiBrowseButton{
 QWidget#BiLightGrayWidget{
   background-color: #f0f1f2;
 }
-/* ///////////////////////////////////////////////
-			       blBrowser
-////////////////////////////////////////////////*/
-
-QPushButton#BiWebBrowserBack {
-  padding: 2px 4px;
-  font-size: 14px;
-  color: #000;
-  background-color: #262930;
-  border: 1px solid #e1e1e1;
-  border-radius: 4px;
-  image: url(arrow-pointing-to-left.svg);
-}
-
-QPushButton#BiWebBrowserForward {
-  padding: 2px 4px;
-  margin-bottom: 0;
-  font-size: 14px;
-  color: #000;
-  background-color: #262930;
-  border: 1px solid #e1e1e1;
-  border-radius: 4px;
-  image: url(arrow-pointing-to-right.svg);
-}
-
-QPushButton#BiWebBrowserHome {
-  padding: 2px 4px;
-  margin-bottom: 0;
-  font-size: 14px;
-  color: #000;
-  background-color: #262930;
-  border: 1px solid #e1e1e1;
-  border-radius: 4px;
-  image: url(home.svg);
-}
-
-/* ///////////////////////////////////////////////
-			       Buttons
-////////////////////////////////////////////////*/
 
 /* ///////////////////////////////////////////////
 			       Buttons
@@ -625,23 +586,24 @@ QSpinBox::down-arrow {
 //////////////////////////////////////////////*/
 QComboBox {
   color : #e1e1e1;
-  background-color: #414851;
-  border: 1px solid #414851;
+  background-color: #5A626C;
+  border: 1px solid #5A626C;
   border-radius: 4px;
   padding: 6px 12px;
+  min-width: 6em;
 }
 
 QComboBox:editable {
-    background: #414851;
+    background: #5A626C;
 }
 
 QComboBox:!editable, QComboBox::drop-down:editable {
-     background-color: #414851;
+     background-color: #5A626C;
 }
 
 /* QComboBox gets the "on" state when the popup is open */
 QComboBox:!editable:on, QComboBox::drop-down:editable:on {
-    background-color: #414851;
+    background-color: #5A626C;
 }
 
 QComboBox:on { /* shift the text when the popup opens */
@@ -1215,20 +1177,12 @@ QWidget#BiProcessDataWidget{
   border-right: 2px solid #e1e1e1;
 }
 
-QToolButton#BiBrowserToolBarPreviousButton{
-  image: url(arrow-pointing-to-left.svg);
-}
-
 QToolButton#BiNavigationBarPreviousButton{
   image: url(arrow-pointing-to-left.svg);
 }
 
 QToolButton#BiNavigationBarHomeButton{
   image: url(home.svg);
-}
-
-QToolButton#BiBrowserToolBarNextButton{
-  image: url(arrow-pointing-to-right.svg);
 }
 
 QToolButton#BiNavigationBarNextButton{
@@ -1247,108 +1201,6 @@ QToolButton#BiExperimentToolBarBookmarkButton{
   image: url(star.svg);
 }
 
-QToolButton#BiBrowserExperimentToolbarInfoButton{
-  image: url(exclamation-sign.svg);
-}
-
-QToolButton#BiBrowserExperimentToolbarImportButton{
-  image: url(upload.svg);
-}
-
-QToolButton#BiBrowserExperimentToolbarTagButton{
-  image: url(tags.svg);
-}
-
-QToolButton#BiBrowserExperimentToolbarProcessButton{
-  image: url(play.svg);
-}
-
-QToolButton#BiBrowserExperimentToolbarRefreshButton{
-  image: url(refresh-arrow.svg);
-}
-
-QToolButton#BiBrowserExperimentToolbarCloseButton{
-  image: url(close.svg);
-}
-
-QLabel#BiBrowserDirIcon{
-  image: url(open-folder.svg);
-}
-
-QLabel#BiBrowserRunIcon{
-  image: url(settings.svg);
-}
-
-QLabel#BiBrowserExperimentIcon{
-  padding: 2px 2px 2px 2px;
-  image: url(database.svg);
-}
-
-QLabel#BiBrowserRawDatSetIcon{
-  image: url(copy-document.svg);
-}
-
-QLabel#BiBrowserProcessedDataSetIcon{
-  image: url(copy-document.svg);
-}
-
-QLabel#BiBrowserRawDatIcon{
-  image: url(blank-file.svg);
-}
-
-QLabel#BiBrowserProcessedDataIcon{
-  image: url(blank-file.svg);
-}
-
-
-
-/* // ///////////////////////////////////////////////
-BiBrowserShortCuts
- // /////////////////////////////////////////////// */
-QPushButton#BiBrowserShortCutsNewButton{
-  /*qproperty-icon: url("plus-black-symbol.svg");*/
-  qproperty-icon: url("database.svg");
-  padding: 6px 12px;
-  margin-bottom: 0;
-  font-size: 14px;
-  color: #f0f1f2;
-  background-color: #414851;
-  border-radius: 4px;
-}
-
-QPushButton#BiBrowserShortCutsNewButton:hover {
-  color: #d1d1d1;
-  background-color: #5A626C;
-}
-
-QPushButton#BiBrowserShortCutsNewButton:pressed {
- border: 3px solid #5A626C;
-}
-
-QPushButton#BiBrowserShortCutsNewButton:disabled {
- color : #a1a1a1;
- background-color: #262930;
-}
-
-QPushButton#BiBrowserShortCutsFinderButton{
-  qproperty-icon: url("play.svg");
-  padding: 6px 12px;
-  margin-bottom: 0;
-  font-size: 14px;
-  color: #f0f1f2;
-  background-color: #414851;
-  border-radius: 4px;
-}
-
-QPushButton#BiBrowserShortCutsFinderButton:hover {
-  color: #d1d1d1;
-  background-color: #5A626C;
-}
-
-QPushButton#BiBrowserShortCutsFinderButton:pressed {
- border: 3px solid #5A626C;
-}
-
 .QWidget#BiLeftBar{
   border-top: 1px solid #5A626C;
   background-color: #414851;
@@ -1360,51 +1212,6 @@ QPushButton#BiBrowserShortCutsFinderButton:pressed {
 
 .QLabel#BiSideBarTitle{
   background-color: #5A626C;
-  color: #f0f1f2;
-  border-top: 1px solid #f0f1f2;
-}
-
-QSplitter#BiBrowserAppSplitterRight{
-  background-color: #262930;
-}
-
-QSplitter#BiBrowserAppSplitterLeft{
-  background-color: #7f7f7f;
-}
-
-QPushButton#BiBrowserShortCutsButton {
-  text-align: left;
-  padding: 6px 12px;
-  margin-bottom: 0;
-  font-size: 14px;
-  color: #f0f1f2;
-  border-radius: 4px;
-  background-color: #414851;
-}
-
-QPushButton#BiBrowserShortCutsButton:hover {
-  color: #f0f1f2;
-  background-color: #0071C3;
-}
-
-QPushButton#BiBrowserShortCutsButton:checked {
-  color: #f0f1f2;
-  background-color: #0071C3;
-}
-
-QPushButton#BiBrowserShortCutsButton:pressed {
-  /*border: 3px solid #7f7f7f;*/
-}
-
-QPushButton#BiBrowserShortCutsButton:disabled {
-  color : #f0f1f2;
-  background-color: #262930;
-}
-
-QLabel#BiBrowserShortCutsTitle{
-  padding: 0 0 0 0;
-  margin: 0 0 0 0;
-  background-color: #262930;
   color: #f0f1f2;
   border-top: 1px solid #f0f1f2;
 }
@@ -1648,34 +1455,34 @@ QPushButton#BiHomeToolBarButton:disabled{
 
 
 /* ****************************************
-*            Browser2
+*            Browser
 *******************************************/
-QToolButton#BiBrowser2BarHomeButton{
+QToolButton#BiBrowserBarHomeButton{
   image: url(home.svg);
 }
-QToolButton#BiBrowser2ToolBarPreviousButton{
+QToolButton#BiBrowserToolBarPreviousButton{
   image: url(arrow-pointing-to-left.svg);
 }
-QToolButton#BiBrowser2ToolBarNextButton{
+QToolButton#BiBrowserToolBarNextButton{
   image: url(arrow-pointing-to-right.svg);
 }
-QToolButton#BiBrowser2ToolBarUpButton{
+QToolButton#BiBrowserToolBarUpButton{
   image: url(arrow-up.svg);
 }
-QToolButton#BiBrowser2ToolBarRefreshButton{
+QToolButton#BiBrowserToolBarRefreshButton{
   image: url(refresh-arrow.svg);
 }
 
-QLabel#BiBrowser2DirIcon{
+QLabel#BiBrowserDirIcon{
   image: url(open-folder.svg);
 }
 
-QLabel#BiBrowser2ExperimentIcon{
+QLabel#BiBrowserExperimentIcon{
   image: url(database_primary.svg);
 }
 
 
-QPushButton#BiBrowser2HomeButton {
+QPushButton#BiBrowserHomeButton {
   image: url(home.svg);
   padding: 2px 4px;
   font-size: 14px;
@@ -1685,11 +1492,11 @@ QPushButton#BiBrowser2HomeButton {
   text-align: left;
 }
 
-QPushButton#BiBrowser2HomeButton:hover{
+QPushButton#BiBrowserHomeButton:hover{
   background-color: #5A626C;
 }
 
-QPushButton#BiBrowser2DesktopButton {
+QPushButton#BiBrowserDesktopButton {
   padding: 2px 4px;
   font-size: 14px;
   color: #f0f1f2;
@@ -1698,11 +1505,11 @@ QPushButton#BiBrowser2DesktopButton {
   text-align: left;
   image: url(home.svg);
 }
-QPushButton#BiBrowser2DesktopButton:hover{
+QPushButton#BiBrowserDesktopButton:hover{
   background-color: #5A626C;
 }
 
-QPushButton#BiBrowser2DocumentsButton
+QPushButton#BiBrowserDocumentsButton
 {
   padding: 2px 4px;
   font-size: 14px;
@@ -1731,6 +1538,26 @@ QWidget#BiShortcutButton
   background-color: #414851;
   border-radius: 4px;
   text-align: left;
+}
+
+
+/* ******************************
+*         Experiment toolbar
+********************************** */
+QToolButton#BiExperimentToolbarInfoButton{
+  image: url(exclamation-sign.svg);
+}
+
+QToolButton#BiExperimentToolbarImportButton{
+  image: url(upload.svg);
+}
+
+QToolButton#BiExperimentToolbarTagButton{
+  image: url(tags.svg);
+}
+
+QToolButton#BiExperimentToolbarRefreshButton{
+  image: url(refresh-arrow.svg);
 }
 
 /* ******************************
@@ -1801,3 +1628,5 @@ QLabel#BiDocViewer
   color: #5A626C;
   qproperty-alignment: AlignCenter;
 }
+
+

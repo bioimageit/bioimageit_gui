@@ -1,26 +1,22 @@
 import os
 import json
 
-from PySide2.QtCore import QObject, QDir, QFileInfo
+from PySide2.QtCore import QDir
 
-from bioimageit_core.process import ProcessAccess
 from bioimageit_core.experiment import Experiment
 from bioimageit_core.metadata.run import Run
 from bioimageit_core.dataset import RawDataSet, ProcessedDataSet, RawData
 
 from bioimageit_gui.core.framework import BiModel, BiAction
-from bioimageit_gui.browser.states import BiBrowserStates
-from bioimageit_gui.browser.settings import BiBookmarks
-from bioimageit_gui.browser.containers import (BiBrowserContainer,
-                                               BiBrowserFileInfo)
+from ._states import BiBrowserStates
+from ._containers import (BiBrowserContainer,
+                          BiBrowserFileInfo)
 
 
 class BiBrowserModel(BiModel):
-    def __init__(self, container: BiBrowserContainer,
-                 useExperimentProcess: bool = False):
+    def __init__(self, container: BiBrowserContainer):
         super().__init__()
         self._object_name = 'BiBrowserModel'
-        self._useExperimentProcess = useExperimentProcess
         self.container = container
         self.container.register(self)
         self.files = list
@@ -32,24 +28,10 @@ class BiBrowserModel(BiModel):
             return
     
         if action.state == BiBrowserStates.ItemDoubleClicked:
-            
             row = self.container.doubleClickedRow
             dcFile = self.container.files[row]
             self.browse(dcFile)
-            return
-
-        if action.state == BiBrowserStates.BookmarkOpenClicked:
-            fileInfoQt = QFileInfo(self.container.bookmarkPath)
-            dtype = 'file'
-            if fileInfoQt.isDir():
-                dtype = 'dir'    
-            fileInfo = BiBrowserFileInfo(fileInfoQt.fileName(),
-                                         fileInfoQt.path(),
-                                         fileInfoQt.fileName(),
-                                         dtype,
-                                         fileInfoQt.lastModified().toString(
-                                             "yyyy-MM-dd"))
-            self.browse(fileInfo)    
+            return   
 
         if action.state == BiBrowserStates.PreviousClicked:
             self.container.moveToPrevious()
@@ -69,20 +51,14 @@ class BiBrowserModel(BiModel):
             self.container.emit(BiBrowserStates.DirectoryModified)
             return
 
-        if action.state == BiBrowserStates.BookmarkClicked:
-            dir = QDir(self.container.currentPath)
-            self.container.bookmarks.set(dir.dirName(),
-                                         self.container.currentPath)
-            self.container.bookmarks.write()
-            self.container.emit(BiBrowserStates.BookmarksModified)
-            return
 
     def browse(self, fileInfo: BiBrowserFileInfo):
         experiment_file = os.path.join(fileInfo.path, fileInfo.fileName,
                                       'experiment.md.json')
         if os.path.isfile(experiment_file):
             self.container.openExperimentPath = os.path.join(fileInfo.path,
-                                                             fileInfo.fileName)
+                                                             fileInfo.fileName,
+                                                             "experiment.md.json")
             self.container.emit(BiBrowserStates.OpenExperiment)
         elif fileInfo.type == "dir":    
             self.container.setCurrentPath(os.path.join(fileInfo.path,
@@ -191,6 +167,3 @@ class BiBrowserModel(BiModel):
 
         self.container.files = self.files
         self.container.emit(BiBrowserStates.FilesInfoLoaded)
-
-    def loadBookmarks(self, file: str):
-        self.container.bookmarks = BiBookmarks(file)

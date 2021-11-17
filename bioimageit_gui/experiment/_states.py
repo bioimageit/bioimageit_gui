@@ -1,10 +1,6 @@
 from bioimageit_gui.core.framework import BiStates
 
 
-class BiExperimentViewerStates(BiStates):
-    CloseClicked = "BiExperimentViewerStates.CloseClicked"
-
-
 class BiExperimentStates(BiStates):
     ImportClicked = "BiExperimentStates.ImportClicked" 
     TagClicked = "BiExperimentStates.TagClicked"  

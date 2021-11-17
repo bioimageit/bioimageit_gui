@@ -9,7 +9,7 @@ from bioimageit_core.config import ConfigAccess
 from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.core.theme import BiThemeAccess
-from bioimageit_gui.app import BioImageITApp
+from bioimageit_gui.apps.app import BioImageITApp
 
 if __name__ == '__main__':
     # Create the Qt Application

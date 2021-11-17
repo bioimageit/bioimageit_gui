@@ -2,7 +2,7 @@
 from bioimageit_gui.core.framework import BiStates
 
 
-class BiBrowser2States(BiStates):
+class BiBrowserStates(BiStates):
     DirectoryModified = "BiBrowserStates.DirectoryModified"
     PreviousClicked = "BiBrowserStates.PreviousClicked"
     NextClicked = "BiBrowserStates.NextClicked"

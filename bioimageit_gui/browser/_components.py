@@ -1,17 +1,18 @@
+import os
+import getpass
+from pathlib import Path
+
 import PySide2.QtCore
-from PySide2.QtGui import QPixmap, QImage
-from PySide2.QtCore import QFileInfo, QDir, Signal
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
+from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                                QTableWidget, QTableWidgetItem,
-                               QAbstractItemView, QGridLayout, QHBoxLayout,
-                               QToolButton, QSplitter, QLineEdit, QPushButton,
-                               QTextEdit, QMessageBox, QFileDialog)
+                               QAbstractItemView, QHBoxLayout,
+                               QToolButton, QSplitter, QLineEdit)
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
-from bioimageit_gui.core.widgets import BiButton
-from bioimageit_gui.browser.states import BiBrowserStates
-from bioimageit_gui.browser.containers import BiBrowserContainer
-from bioimageit_gui.browser.models import BiBrowserModel
+from bioimageit_gui.core.theme import BiThemeAccess
+from ._states import BiBrowserStates
+from ._containers import BiBrowserContainer
+from ._widgets import BiShortcutButton
 
 
 class BiBrowserComponent(BiComponent):
@@ -21,13 +22,12 @@ class BiBrowserComponent(BiComponent):
         self.container = container
         self.container.register(self)  
 
-        self.browserModel = BiBrowserModel(self.container, True)
         self.toolBarComponent = BiBrowserToolBarComponent(self.container)
         self.shortCutComponent = BiBrowserShortCutsComponent(self.container)
         self.tableComponent = BiBrowserTableComponent(self.container)
 
         self.widget = QWidget()
-        self.widget.setObjectName("BiSideBar")
+        self.widget.setObjectName("BiWidget")
         self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
@@ -84,14 +84,14 @@ class BiBrowserToolBarComponent(BiComponent):
 
         # up
         upButton = QToolButton()
-        upButton.setObjectName("BiExperimentToolBarUpButton")
+        upButton.setObjectName("BiBrowserToolBarUpButton")
         upButton.setToolTip(self.widget.tr("Tags"))
         upButton.released.connect(self.upButtonClicked)
         layout.addWidget(upButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
         # up
         refreshButton = QToolButton()
-        refreshButton.setObjectName("BiExperimentToolBarRefreshButton")
+        refreshButton.setObjectName("BiBrowserToolBarRefreshButton")
         refreshButton.setToolTip(self.widget.tr("Tags"))
         refreshButton.released.connect(self.refreshButtonClicked)
         layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
@@ -101,13 +101,6 @@ class BiBrowserToolBarComponent(BiComponent):
         self.pathLineEdit.setAttribute(PySide2.QtCore.Qt.WA_MacShowFocusRect, False)
         self.pathLineEdit.returnPressed.connect(self.pathEditReturnPressed)
         layout.addWidget(self.pathLineEdit, 1)
-
-        # bookmark
-        bookmarkButton = QToolButton()
-        bookmarkButton.setObjectName("BiExperimentToolBarBookmarkButton")
-        bookmarkButton.setToolTip(self.widget.tr("Bookmark"))
-        bookmarkButton.released.connect(self.bookmarkButtonClicked)
-        layout.addWidget(bookmarkButton, 0, PySide2.QtCore.Qt.AlignLeft)
 
     def update(self, action: BiAction):
         if action.state == BiBrowserStates.FilesInfoLoaded:
@@ -130,15 +123,6 @@ class BiBrowserToolBarComponent(BiComponent):
         self.container.setCurrentPath(self.pathLineEdit.text())
         self.container.emit(BiBrowserStates.RefreshClicked)
 
-    def bookmarkButtonClicked(self):
-        msgBox = QMessageBox()
-        msgBox.setText("Want to bookmark this directory ?")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msgBox.setDefaultButton(QMessageBox.Yes)
-        ret = msgBox.exec_()
-        if ret:
-            self.container.emit(BiBrowserStates.BookmarkClicked)
-
     def get_widget(self): 
         return self.widget            
        
@@ -146,7 +130,7 @@ class BiBrowserToolBarComponent(BiComponent):
 class BiBrowserShortCutsComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
         super(BiBrowserShortCutsComponent, self).__init__()
-        self._object_name = 'BiBrowserPreviewComponent'
+        self._object_name = 'BiBrowserShortCutsComponent'
         self.container = container
         self.container.register(self)
 
@@ -164,19 +148,38 @@ class BiBrowserShortCutsComponent(BiComponent):
         layout = QVBoxLayout()
         self.wwidget.setLayout(layout)
 
-        addExpermentbutton = QPushButton(self.wwidget.tr("New Experiment"))
-        addExpermentbutton.setObjectName("BiBrowserShortCutsNewButton")
-        addExpermentbutton.released.connect(self.newExperimentClicked)
-        layout.addWidget(addExpermentbutton, 0, PySide2.QtCore.Qt.AlignTop)
+        home_dir = Path.home() 
+        username = getpass.getuser()
 
-        openFinderButton = QPushButton(self.widget.tr("Toolboxes"))
-        openFinderButton.setObjectName("BiBrowserShortCutsFinderButton")
-        openFinderButton.released.connect(self.openFinderClicked)
-        layout.addWidget(openFinderButton, 0, PySide2.QtCore.Qt.AlignTop)
+        homeButton = BiShortcutButton(username, BiThemeAccess.instance().icon('home'))
+        homeButton.setObjectName("BiBrowserHomeButton")
+        homeButton.content = os.path.join(home_dir)
+        homeButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        homeButton.clickedContent.connect(self.buttonClicked)
 
-        separatorLabel = QLabel(self.wwidget.tr("Bookmarks"), self.wwidget)
-        layout.addWidget(separatorLabel, 0, PySide2.QtCore.Qt.AlignTop)
-        separatorLabel.setObjectName("BiBrowserShortCutsTitle")
+        desktopButton = BiShortcutButton('Desktop', BiThemeAccess.instance().icon('desktop'))
+        desktopButton.setObjectName("BiBrowserDesktopButton")
+        desktopButton.content = os.path.join(home_dir, 'Desktop')
+        desktopButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        desktopButton.clickedContent.connect(self.buttonClicked)
+
+        documentsButton = BiShortcutButton('Documents', BiThemeAccess.instance().icon('open-folder_negative'))
+        documentsButton.setObjectName("BiBrowserDocumentsButton")
+        documentsButton.content = os.path.join(home_dir, 'Documents')
+        documentsButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        documentsButton.clickedContent.connect(self.buttonClicked)
+
+        downloadsButton = BiShortcutButton('Downloads', BiThemeAccess.instance().icon('download'))
+        downloadsButton.setObjectName("BiBrowserDownloadsButton")
+        downloadsButton.content = os.path.join(home_dir, 'Downloads')
+        downloadsButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        downloadsButton.clickedContent.connect(self.buttonClicked)
+
+        layout.addWidget(homeButton)
+        layout.addWidget(desktopButton)
+        layout.addWidget(documentsButton)
+        layout.addWidget(downloadsButton)
+        layout.setSpacing(2)
 
         bookmarkWidget = QWidget(self.wwidget)
         self.layout = QVBoxLayout()
@@ -187,36 +190,13 @@ class BiBrowserShortCutsComponent(BiComponent):
         layout.addWidget(bookmarkWidget, 0, PySide2.QtCore.Qt.AlignTop)
         layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop) 
 
-    def reloadBookmarks(self):
-
-        # free layout
-        for i in reversed(range(self.layout.count())): 
-            self.layout.itemAt(i).widget().deleteLater()
-
-        # load
-        for entry in self.container.bookmarks.bookmarks["bookmarks"]:
-
-            button = BiButton(entry['name'], self.widget)
-            button.setObjectName("BiBrowserShortCutsButton")
-            button.content = entry['url']
-            button.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
-            button.clickedContent.connect(self.buttonClicked)
-            self.layout.insertWidget(self.layout.count()-1, button, 0,
-                                     PySide2.QtCore.Qt.AlignTop)
 
     def update(self, action: BiAction):
-        if action.state == BiBrowserStates.BookmarksModified:
-            self.reloadBookmarks()
-
-    def openFinderClicked(self):
-        self.container.emit(BiBrowserStates.OpenFinderClicked)
-
-    def newExperimentClicked(self):
-        self.container.emit(BiBrowserStates.NewExperimentClicked)
+        pass
 
     def buttonClicked(self, path: str):
-        self.container.bookmarkPath = path
-        self.container.emit(BiBrowserStates.BookmarkOpenClicked)
+        self.container.currentPath = path
+        self.container.emit(BiBrowserStates.DirectoryModified)
 
     def get_widget(self): 
         return self.widget
@@ -224,7 +204,7 @@ class BiBrowserShortCutsComponent(BiComponent):
 
 class BiBrowserTableComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
-        super(BiBrowserTableComponent, self).__init__()
+        super().__init__()
         self._object_name = 'BiBrowserTableComponent'
         self.container = container
         self.container.register(self)
@@ -247,6 +227,7 @@ class BiBrowserTableComponent(BiComponent):
         self.tableWidget.setColumnCount(4)
         self.tableWidget.cellDoubleClicked.connect(self.cellDoubleClicked)
         self.tableWidget.cellClicked.connect(self.cellClicked)
+        self.tableWidget.verticalHeader().setDefaultSectionSize(12)
 
         labels = ['', 'Name', 'Date', 'Type']
         self.tableWidget.setHorizontalHeaderLabels(labels)
@@ -263,18 +244,8 @@ class BiBrowserTableComponent(BiComponent):
                 iconLabel = QLabel(self.tableWidget)
                 if fileInfo.type == "dir":
                     iconLabel.setObjectName("BiBrowserDirIcon")
-                elif fileInfo.type == "run":
-                    iconLabel.setObjectName("BiBrowserRunIcon")
                 elif fileInfo.type == "experiment":
                     iconLabel.setObjectName("BiBrowserExperimentIcon")
-                elif fileInfo.type == "rawdataset":
-                    iconLabel.setObjectName("BiBrowserRawDatSetIcon")
-                elif fileInfo.type == "processeddataset":
-                    iconLabel.setObjectName("BiBrowserProcessedDataSetIcon")
-                elif fileInfo.type == "rawdata":
-                    iconLabel.setObjectName("BiBrowserRawDatIcon")
-                elif fileInfo.type == "processeddata":
-                    iconLabel.setObjectName("BiBrowserProcessedDataIcon")
 
                 # icon
                 self.tableWidget.setCellWidget(i, 0, iconLabel)
@@ -297,9 +268,8 @@ class BiBrowserTableComponent(BiComponent):
         self.highlightLine(row)
 
     def highlightLine(self, row: int):
-        for col in range(4):
-            if self.tableWidget.item(row, col):
-                self.tableWidget.item(row, col).setSelected(True)    
+        for col in range(0, self.tableWidget.columnCount()):
+            self.tableWidget.setCurrentCell(row, col, PySide2.QtCore.QItemSelectionModel.Select)    
 
     def get_widget(self): 
         return self.widget   
