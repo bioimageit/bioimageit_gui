@@ -2,8 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 
-import PySide2.QtCore
-from PySide2.QtWidgets import (QApplication, QWidget, QVBoxLayout,
+import qtpy.QtCore
+from qtpy.QtWidgets import (QApplication, QWidget, QVBoxLayout,
                                QLabel, QTabWidget, QHBoxLayout)
 
 from bioimageit_core.config import ConfigAccess
@@ -52,7 +52,7 @@ class BiBrowserApp(BiComponent):
         # create the widget
         self.widget = QWidget()
         self.widget.setObjectName('bioImageApp')
-        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)

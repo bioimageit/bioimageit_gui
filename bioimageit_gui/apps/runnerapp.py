@@ -1,5 +1,5 @@
 import os
-from PySide2.QtWidgets import (QWidget, QVBoxLayout, QSplitter)
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSplitter)
 
 from bioimageit_gui.core.framework import BiAction, BiComponent
 from bioimageit_gui.runner.states import BiRunnerStates

@@ -1,5 +1,5 @@
-import PySide2.QtCore
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
+import qtpy.QtCore
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QGridLayout, QHBoxLayout,
                                QToolButton, QSplitter, QLineEdit, QPushButton,
@@ -29,7 +29,7 @@ class BiRawDataComponent(BiComponent):
         self.widget.setMinimumWidth(150)
 
         widget = QWidget()
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("BiSideBar")
         layout = QGridLayout()
         widget.setLayout(layout)
@@ -80,8 +80,8 @@ class BiRawDataComponent(BiComponent):
         layout.addWidget(tagsLabel, 6, 0, 1, 2)
         layout.addWidget(tagsWidget, 7, 0, 1, 2)
         layout.addWidget(saveButton, 8, 0, 1, 2)
-        layout.addWidget(QWidget(), 9, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        layout.setAlignment(PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 9, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
         self.container.rawdata.metadata.name = self.nameEdit.text()
@@ -138,7 +138,7 @@ class BiProcessedDataComponent(BiComponent):
         self.widget.setMinimumWidth(150)
 
         widget = QWidget()
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("BiSideBar")
         layout = QGridLayout()
         widget.setLayout(layout)
@@ -189,29 +189,29 @@ class BiProcessedDataComponent(BiComponent):
         self.tagsLayout.setContentsMargins(0,0,0,0)
         tagsWidget.setLayout(self.tagsLayout)
 
-        layout.addWidget(descLabel, 0, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(uriLabel, 1, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.uriEdit, 1, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(nameLabel, 2, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.nameEdit, 2, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(formatLabel, 3, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.formatEdit, 3, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(dateLabel, 4, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.dateEdit, 4, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(authorLabel, 5, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.authorEdit, 5, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(tagsLabel, 6, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(outlabelLabel, 7, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.outlabelEdit, 7, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(tagsWidget, 8, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(descLabel, 0, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(uriLabel, 1, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.uriEdit, 1, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(nameLabel, 2, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.nameEdit, 2, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(formatLabel, 3, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.formatEdit, 3, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(dateLabel, 4, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.dateEdit, 4, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(authorLabel, 5, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.authorEdit, 5, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(tagsLabel, 6, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(outlabelLabel, 7, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.outlabelEdit, 7, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(tagsWidget, 8, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
         layout.addWidget(originTitleLabel, 9, 0, 1, 2,
-                         PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(originLabel, 10, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(self.originEdit, 10, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(runLabel, 11, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(runButton, 11, 1, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(QWidget(), 12, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
-        layout.setAlignment(PySide2.QtCore.Qt.AlignTop)
+                         qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(originLabel, 10, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.originEdit, 10, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(runLabel, 11, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(runButton, 11, 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 12, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
 
     def emitRun(self):
         self.container.emit(BiProcessedDataStates.RunOpenClicked)
@@ -263,7 +263,7 @@ class BiMetadataExperimentComponent(BiComponent):
 
         self.widget = QWidget()
         self.widget.setObjectName('BiWidget')
-        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QGridLayout()
         self.widget.setLayout(layout)
@@ -296,7 +296,7 @@ class BiMetadataExperimentComponent(BiComponent):
         layout.addWidget(createddateLabel, 3, 0)
         layout.addWidget(self.createddateEdit, 3, 1)
         layout.addWidget(saveButton, 4, 0, 1, 2)
-        layout.addWidget(QWidget(), 5, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 5, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
         self.container.experiment.metadata.name = self.nameEdit.text()
@@ -332,7 +332,7 @@ class BiMetadataRunComponent(BiComponent):
         self.widget.setMinimumWidth(150)
 
         widget = QWidget()
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("BiSideBar")
         layout = QGridLayout()
         widget.setLayout(layout)
@@ -369,7 +369,7 @@ class BiMetadataRunComponent(BiComponent):
         layout.addWidget(self.parametersTable, 3, 0, 1, 2)
         layout.addWidget(inputsLabel, 4, 0, 1, 2)
         layout.addWidget(self.inputsTable, 5, 0, 1, 2)
-        layout.addWidget(QWidget(), 6, 0, 1, 2, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 6, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
 
     def update(self, action: BiAction):
         if action.state == BiRunStates.Loaded:

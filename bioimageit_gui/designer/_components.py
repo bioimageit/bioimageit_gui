@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import (QWidget, QVBoxLayout, QLabel)
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QLabel)
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 

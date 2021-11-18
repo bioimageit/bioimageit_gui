@@ -1173,6 +1173,10 @@ QLabel#BiExperimentTitleToolBarTitle{
 	font-weight: bold; 
 }
 
+QToolButton#BiReturnToolButton{
+  image: url(arrow-pointing-to-left.svg)
+}
+
 QWidget#BiProcessDataWidget{
   border-right: 2px solid #e1e1e1;
 }

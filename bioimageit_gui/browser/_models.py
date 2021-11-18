@@ -1,7 +1,7 @@
 import os
 import json
 
-from PySide2.QtCore import QDir
+from qtpy.QtCore import QDir
 
 from bioimageit_core.experiment import Experiment
 from bioimageit_core.metadata.run import Run

@@ -1,4 +1,4 @@
-from PySide2.QtCore import Signal, QObject, QThread
+from qtpy.QtCore import Signal, QObject, QThread
 
 from bioimageit_core.process import Process
 from bioimageit_core.runner import Runner

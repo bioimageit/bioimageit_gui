@@ -1,5 +1,5 @@
 from bioimageit_core.core.utils import ProgressObserver
-from PySide2.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal
 
 
 class BiGuiProgressObserver(QObject, ProgressObserver):

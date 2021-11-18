@@ -1,6 +1,6 @@
 import os
-import PySide2.QtCore
-from PySide2.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QTableWidget,
+import qtpy.QtCore
+from qtpy.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QTableWidget,
                                QTableWidgetItem, QLabel, QAbstractItemView)
                                
 from bioimageit_gui.core.framework import BiComponent, BiAction
@@ -43,11 +43,11 @@ class BiHomeComponent(BiComponent):
         openToolboxesTile.clickedSignal.connect(self.tileClicked)
         openBrowserTile.clickedSignal.connect(self.tileClicked)
         openSettingsTile.clickedSignal.connect(self.tileClicked)
-        btnsLayout.addWidget(openNewExperimentTile, 1, PySide2.QtCore.Qt.AlignRight)
-        btnsLayout.addWidget(openBrowserTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openDesignerTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openToolboxesTile,  0, PySide2.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openSettingsTile,  1, PySide2.QtCore.Qt.AlignLeft)
+        btnsLayout.addWidget(openNewExperimentTile, 1, qtpy.QtCore.Qt.AlignRight)
+        btnsLayout.addWidget(openBrowserTile,  0, qtpy.QtCore.Qt.AlignCenter)
+        btnsLayout.addWidget(openDesignerTile,  0, qtpy.QtCore.Qt.AlignCenter)
+        btnsLayout.addWidget(openToolboxesTile,  0, qtpy.QtCore.Qt.AlignCenter)
+        btnsLayout.addWidget(openSettingsTile,  1, qtpy.QtCore.Qt.AlignLeft)
 
         experimentsTitle = QLabel('Experiments')
         experimentsTitle.setObjectName('BiLabelFormHeader1')
@@ -69,7 +69,7 @@ class BiHomeComponent(BiComponent):
         layout.addWidget(btnsWidget, 0)
         layout.addWidget(experimentsTitle, 0)
         layout.addWidget(self.shortcutsWidget, 1)
-        layout.addWidget(self.emptyshortcutsWidget, 1, PySide2.QtCore.Qt.AlignCenter)
+        layout.addWidget(self.emptyshortcutsWidget, 1, qtpy.QtCore.Qt.AlignCenter)
 
         self.fill_experiments()
     
@@ -107,7 +107,7 @@ class BiHomeComponent(BiComponent):
 
     def cellClicked(self, row: int, col: int):
         for col in range(0, self.shortcutsWidget.columnCount()):
-            self.shortcutsWidget.setCurrentCell(row, col, PySide2.QtCore.QItemSelectionModel.Select) 
+            self.shortcutsWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select) 
 
     def cellDoubleClicked(self, row: int, col: int):
         self.container.clicked_experiment = self.container.experiments[row]['md_uri']

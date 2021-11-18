@@ -1,7 +1,7 @@
 import pathlib
 
-import PySide2.QtCore
-from PySide2.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter, 
+import qtpy.QtCore
+from qtpy.QtWidgets import (QTabWidget, QWidget, QVBoxLayout, QSplitter, 
                                QScrollArea, QLabel, QGridLayout, QComboBox,
                                QPushButton, QLineEdit, QCheckBox, QFileDialog,
                                QHBoxLayout, QProgressBar, QTextEdit)
@@ -91,7 +91,7 @@ class BiRunnerComponent(BiComponent):
         tabLayout.addWidget(self.folderButton)
         tabLayout.addWidget(self.experimentButton)
         tabWidget.setLayout(tabLayout)
-        self.execLayout.addWidget(tabWidget, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(tabWidget, 0, qtpy.QtCore.Qt.AlignTop)
 
         # inputs
         self.inputSingleWidget = BiRunnerInputSingleWidget(process_info)
@@ -102,36 +102,36 @@ class BiRunnerComponent(BiComponent):
 
         inputsLabel = QLabel('Inputs')
         inputsLabel.setObjectName('BiSideBarTitle')    
-        self.execLayout.addWidget(inputsLabel, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.inputSingleWidget, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.inputFolderWidget, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.inputExperimentWidget, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(inputsLabel, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.inputSingleWidget, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.inputFolderWidget, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.inputExperimentWidget, 0, qtpy.QtCore.Qt.AlignTop)
 
         # parameters
         parametersLabel = QLabel('Parameters')
         parametersLabel.setObjectName('BiSideBarTitle')  
         self.paramWidget = BiRunnerParamWidget(process_info)
-        self.execLayout.addWidget(parametersLabel, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.paramWidget, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(parametersLabel, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.paramWidget, 0, qtpy.QtCore.Qt.AlignTop)
 
         # exec
         execLabel = QLabel('Exec')
         execLabel.setObjectName('BiSideBarTitle') 
         self.execWidget = BiRunnerExecWidget()
-        self.execLayout.addWidget(execLabel, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.execWidget, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(execLabel, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.execWidget, 0, qtpy.QtCore.Qt.AlignTop)
         self.execWidget.runSignal.connect(self.run)
 
         # progess
         progressLabel = QLabel('Progress')
         progressLabel.setObjectName('BiSideBarTitle') 
         self.progressWidget = BiRunnerProgressWidget()
-        self.execLayout.addWidget(progressLabel, 0, PySide2.QtCore.Qt.AlignTop)
-        self.execLayout.addWidget(self.progressWidget, 0, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(progressLabel, 0, qtpy.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(self.progressWidget, 0, qtpy.QtCore.Qt.AlignTop)
 
         # fill
         fillWidget = QWidget()
-        self.execLayout.addWidget(fillWidget, 1, PySide2.QtCore.Qt.AlignTop)
+        self.execLayout.addWidget(fillWidget, 1, qtpy.QtCore.Qt.AlignTop)
 
         # hide parameters if there are no parameter
         if process_info.metadata.param_size() < 1:

@@ -17,14 +17,14 @@ BiSlidingStackedWidget
 
 """
 
-import PySide2.QtCore
-from PySide2.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
+import qtpy.QtCore
+from qtpy.QtCore import (QMimeData, QSize, QRect, QPoint, QPropertyAnimation, 
                             QEasingCurve, QParallelAnimationGroup)
-from PySide2.QtGui import QMouseEvent, QDrag, QCursor, QIcon
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton,
+from qtpy.QtGui import QMouseEvent, QDrag, QCursor, QIcon
+from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QToolButton,
                                QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout,
                                QLayout, QLayoutItem, QSizePolicy, QStyle, QStackedWidget)
-from PySide2.QtCore import Signal, Slot, QUrl 
+from qtpy.QtCore import Signal, Slot, QUrl 
 
 
 class BiButton(QPushButton):
@@ -33,7 +33,7 @@ class BiButton(QPushButton):
 
     def __init__(self, title: str, parent: QWidget = None):
         super(BiButton, self).__init__(title, parent)
-        #self.setCursor(QCursor(PySide2.QtCore.Qt.PointingHandCursor))
+        #self.setCursor(QCursor(qtpy.QtCore.Qt.PointingHandCursor))
         self.pressed.connect(self.emitClicked)
         self.id = 0
         self.content = ''
@@ -77,7 +77,7 @@ class BiFileSelectWidget(QWidget):
 
         browseButton = QPushButton("...")
         browseButton.setObjectName("BiBrowseButton")
-        layout.addWidget(browseButton, 0, PySide2.QtCore.Qt.AlignRight)
+        layout.addWidget(browseButton, 0, qtpy.QtCore.Qt.AlignRight)
         browseButton.released.connect(self.browseClicked)
 
     def setText(self, text: str):
@@ -110,7 +110,7 @@ class BiDragLabel(QLabel):
         self.mimeData = data
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == PySide2.QtCore.Qt.LeftButton:
+        if event.button() == qtpy.QtCore.Qt.LeftButton:
             drag = QDrag(self)
             mimeData = QMimeData()
             urlList = [QUrl(self.mimeData)]
@@ -139,7 +139,7 @@ class BiTagWidget(QWidget):
 
         removeButton = QPushButton(self.tr("Remove"))
         removeButton.setObjectName("btnDanger")
-        layout.addWidget(removeButton, 0, PySide2.QtCore.Qt.AlignRight)
+        layout.addWidget(removeButton, 0, qtpy.QtCore.Qt.AlignRight)
         removeButton.released.connect(self.emitRemove)
 
         self.setLayout(layout)
@@ -234,11 +234,11 @@ class BiFlowLayout(QLayout):
             spaceX = self.horizontalSpacing()
             if spaceX == -1:
                 spaceX = wid.style().layoutSpacing(
-                        QSizePolicy.PushButton, QSizePolicy.PushButton, PySide2.QtCore.Qt.Horizontal)
+                        QSizePolicy.PushButton, QSizePolicy.PushButton, qtpy.QtCore.Qt.Horizontal)
             spaceY = self.verticalSpacing()
             if spaceY == -1:
                 spaceY = wid.style().layoutSpacing(
-                        QSizePolicy.PushButton, QSizePolicy.PushButton, PySide2.QtCore.Qt.Vertical)
+                        QSizePolicy.PushButton, QSizePolicy.PushButton, qtpy.QtCore.Qt.Vertical)
             nextX = x + item.sizeHint().width() + spaceX
             if nextX - spaceX > effectiveRect.right() and lineHeight > 0:
                 x = effectiveRect.x()
@@ -254,7 +254,7 @@ class BiFlowLayout(QLayout):
         
         return y + lineHeight - rect.y() + bottom
 
-    def smartSpacing(self, pm: PySide2.QtWidgets.QStyle.PixelMetric) -> int:
+    def smartSpacing(self, pm: qtpy.QtWidgets.QStyle.PixelMetric) -> int:
         parent = self.parent()
         if not parent:
             return -1
@@ -282,7 +282,7 @@ class BiNavigationBar(QWidget):
         layout = QHBoxLayout()
         layout.setSpacing(2)
         widget.setLayout(layout)
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("BiToolBar")
 
         # previous
@@ -290,25 +290,25 @@ class BiNavigationBar(QWidget):
         previousButton.setObjectName("BiNavigationBarPreviousButton")
         previousButton.setToolTip(self.tr("Previous"))
         previousButton.released.connect(self.previousClicked)
-        layout.addWidget(previousButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(previousButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # next
         nextButton = QToolButton()
         nextButton.setObjectName("BiNavigationBarNextButton")
         nextButton.setToolTip(self.tr("Next"))
         nextButton.released.connect(self.nextClicked)
-        layout.addWidget(nextButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(nextButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # home
         homeButton = QToolButton()
         homeButton.setObjectName("BiNavigationBarHomeButton")
         homeButton.setToolTip(self.tr("Home"))
         homeButton.released.connect(self.homeClicked)
-        layout.addWidget(homeButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(homeButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # bar
         self.lineEdit = QLineEdit()
-        self.lineEdit.setAttribute(PySide2.QtCore.Qt.WA_MacShowFocusRect, False)
+        self.lineEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.lineEdit.returnPressed.connect(self.returnPressed)
         layout.addWidget(self.lineEdit, 1)
 
@@ -351,8 +351,8 @@ class BiHideableWidget(QWidget):
         titleLayout = QHBoxLayout()
         titleLayout.setContentsMargins(0,0,0,0)
         titleArea.setLayout(titleLayout)
-        titleLayout.addWidget(titleLabel, 1, PySide2.QtCore.Qt.AlignLeft)
-        titleLayout.addWidget(self.button, 0, PySide2.QtCore.Qt.AlignRight)
+        titleLayout.addWidget(titleLabel, 1, qtpy.QtCore.Qt.AlignLeft)
+        titleLayout.addWidget(self.button, 0, qtpy.QtCore.Qt.AlignRight)
 
         layout.addWidget(titleArea)
 
@@ -422,7 +422,7 @@ class BiClosableButton(QPushButton):
             closeButton = QPushButton()
             closeButton.setObjectName("BiCloseButton")
             closeButton.setFixedSize(12,12)
-            layout.addWidget(closeButton, 1, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignRight)
+            layout.addWidget(closeButton, 1, qtpy.QtCore.Qt.AlignTop | qtpy.QtCore.Qt.AlignRight)
             self.setLayout(layout)
             closeButton.pressed.connect(self.emitClosed)
 
@@ -645,20 +645,20 @@ class BiAppBar(QWidget):
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
+        self.layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop)
 
         # global
         layout = QHBoxLayout()
         w = QWidget()
         #w.setObjectName("BiHomeToolBar")
-        layout.addWidget(w, 1, PySide2.QtCore.Qt.AlignHCenter)
+        layout.addWidget(w, 1, qtpy.QtCore.Qt.AlignHCenter)
         layout.setContentsMargins(0, 7, 0, 0)
         w.setLayout(self.layout)
 
         # total
         tlayout = QHBoxLayout()
         wt = QWidget()
-        tlayout.addWidget(wt, 1, PySide2.QtCore.Qt.AlignHCenter)
+        tlayout.addWidget(wt, 1, qtpy.QtCore.Qt.AlignHCenter)
         tlayout.setContentsMargins(0, 0, 0, 0)
         wt.setLayout(layout)
         wt.setObjectName("BiHomeToolBar")
@@ -674,7 +674,7 @@ class BiAppBar(QWidget):
         if (toolTip != ""):
             button.setToolTip(toolTip)
         button.setId(id)
-        self.layout.insertWidget(self.layout.count() -1, button, 0, PySide2.QtCore.Qt.AlignHCenter)
+        self.layout.insertWidget(self.layout.count() -1, button, 0, qtpy.QtCore.Qt.AlignHCenter)
 
         button.clicked.connect(self.open)
         button.closed.connect(self.close)

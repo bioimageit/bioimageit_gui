@@ -1,7 +1,7 @@
-import PySide2.QtCore
-from PySide2.QtCore import Signal
-from PySide2.QtGui import QPixmap, QImage
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout)
+import qtpy.QtCore
+from qtpy.QtCore import Signal
+from qtpy.QtGui import QPixmap, QImage
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout)
 
 
 class BiHomeTile(QWidget):
@@ -12,14 +12,14 @@ class BiHomeTile(QWidget):
         super().__init__(parent)
         self.action = action
 
-        self.setCursor(PySide2.QtGui.QCursor(
-            PySide2.QtCore.Qt.PointingHandCursor))
+        self.setCursor(qtpy.QtGui.QCursor(
+            qtpy.QtCore.Qt.PointingHandCursor))
 
         glayout = QVBoxLayout()
         self.setLayout(glayout)
 
         widget = QWidget()
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         glayout.addWidget(widget)
         
         layout = QVBoxLayout()
@@ -28,16 +28,16 @@ class BiHomeTile(QWidget):
         # Title
         titleLabel = QLabel()
         titleLabel.setObjectName("BiHomeTileTitle")
-        titleLabel.setAlignment(PySide2.QtCore.Qt.AlignCenter)
+        titleLabel.setAlignment(qtpy.QtCore.Qt.AlignCenter)
         titleLabel.setText(title)
         
         # Image
         thumbnailLabel = QLabel()
         img = QImage(icon)
-        thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(40, 40, PySide2.QtCore.Qt.KeepAspectRatio)))
+        thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(40, 40, qtpy.QtCore.Qt.KeepAspectRatio)))
         
         # Fill layout
-        layout.addWidget(thumbnailLabel, 0, PySide2.QtCore.Qt.AlignHCenter)
+        layout.addWidget(thumbnailLabel, 0, qtpy.QtCore.Qt.AlignHCenter)
         layout.addWidget(titleLabel)
         widget.setObjectName("BiHomeTile")
 

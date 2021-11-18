@@ -1,8 +1,8 @@
 import os
-import PySide2.QtCore
-from PySide2.QtCore import Signal
-from PySide2.QtGui import QPixmap, QImage
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
+import qtpy.QtCore
+from qtpy.QtCore import Signal
+from qtpy.QtGui import QPixmap, QImage
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QHBoxLayout, QToolButton)
 
@@ -17,14 +17,14 @@ class BiProcessCategoryTile(QWidget):
         super().__init__(parent)
         self.category = category
 
-        self.setCursor(PySide2.QtGui.QCursor(
-            PySide2.QtCore.Qt.PointingHandCursor))
+        self.setCursor(qtpy.QtGui.QCursor(
+            qtpy.QtCore.Qt.PointingHandCursor))
 
         glayout = QVBoxLayout()
         self.setLayout(glayout)
 
         widget = QWidget()
-        widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("BiProcessCategoryTile")
         glayout.addWidget(widget)
         
@@ -33,18 +33,18 @@ class BiProcessCategoryTile(QWidget):
 
         titleLabel = QLabel()
         titleLabel.setObjectName("BiProcessCategoryTileTitle")
-        titleLabel.setAlignment(PySide2.QtCore.Qt.AlignCenter)
+        titleLabel.setAlignment(qtpy.QtCore.Qt.AlignCenter)
         titleLabel.setText(category.name)
-        layout.addWidget(titleLabel, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(titleLabel, 0, qtpy.QtCore.Qt.AlignTop)
 
         thumbnailLabel = QLabel()
 
         img = QImage(os.path.join(category.thumbnail))
         #print(os.path.join(category.thumbnail))
-        thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(200, 200, PySide2.QtCore.Qt.KeepAspectRatio)))
-        layout.addWidget(thumbnailLabel, 0, PySide2.QtCore.Qt.AlignTop | PySide2.QtCore.Qt.AlignHCenter)
+        thumbnailLabel.setPixmap(QPixmap.fromImage(img.scaled(200, 200, qtpy.QtCore.Qt.KeepAspectRatio)))
+        layout.addWidget(thumbnailLabel, 0, qtpy.QtCore.Qt.AlignTop | qtpy.QtCore.Qt.AlignHCenter)
 
-        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop)
         widget.setObjectName("BiProcessCategoryTile")
 
     def mousePressEvent(self, event):

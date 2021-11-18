@@ -1,5 +1,5 @@
-import PySide2.QtCore
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
+import qtpy.QtCore
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QHBoxLayout,
                                QToolButton, QSplitter, QPushButton)
@@ -36,11 +36,11 @@ class BiFinderComponent(BiComponent):
         self.navBar.previousSignal.connect(self.moveToPrevious)
         self.navBar.nextSignal.connect(self.moveToNext)
         self.navBar.homeSignal.connect(self.moveToHome)
-        layout.addWidget(self.navBar, 0, PySide2.QtCore.Qt.AlignTop)
+        layout.addWidget(self.navBar, 0, qtpy.QtCore.Qt.AlignTop)
 
         # Browse area
         browseWidget = QWidget()
-        browseWidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        browseWidget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         browseWidget.setObjectName("BiWidget")
         self.scrollWidget = QScrollArea()
         self.scrollWidget.setWidgetResizable(True)
@@ -52,7 +52,7 @@ class BiFinderComponent(BiComponent):
 
         # tools table
         self.toolsWidget = QWidget()
-        self.toolsWidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground,
+        self.toolsWidget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground,
                                       True)
         self.toolsWidget.setObjectName("BiWidget")
         toolsLayout = QVBoxLayout()

@@ -1,7 +1,7 @@
 import sys
 import os
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QApplication
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QApplication
 import subprocess
 
 from bioimageit_core.config import ConfigAccess

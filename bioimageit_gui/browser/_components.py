@@ -2,8 +2,8 @@ import os
 import getpass
 from pathlib import Path
 
-import PySide2.QtCore
-from PySide2.QtWidgets import (QWidget, QLabel, QVBoxLayout,
+import qtpy.QtCore
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QHBoxLayout,
                                QToolButton, QSplitter, QLineEdit)
@@ -28,7 +28,7 @@ class BiBrowserComponent(BiComponent):
 
         self.widget = QWidget()
         self.widget.setObjectName("BiWidget")
-        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0,0,0,0)
@@ -62,7 +62,7 @@ class BiBrowserToolBarComponent(BiComponent):
         # build widget
         self.widget = QWidget()
         self.widget.setObjectName("BiToolBar")
-        self.widget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QHBoxLayout()
         layout.setSpacing(1)
         layout.setContentsMargins(7,0,7,0)
@@ -73,32 +73,32 @@ class BiBrowserToolBarComponent(BiComponent):
         previousButton.setObjectName("BiBrowserToolBarPreviousButton")
         previousButton.setToolTip(self.widget.tr("Previous"))
         previousButton.released.connect(self.previousButtonClicked)
-        layout.addWidget(previousButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(previousButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # next
         nextButton = QToolButton()
         nextButton.setObjectName("BiBrowserToolBarNextButton")
         nextButton.setToolTip(self.widget.tr("Next"))
         nextButton.released.connect(self.nextButtonClicked)
-        layout.addWidget(nextButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(nextButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # up
         upButton = QToolButton()
         upButton.setObjectName("BiBrowserToolBarUpButton")
         upButton.setToolTip(self.widget.tr("Tags"))
         upButton.released.connect(self.upButtonClicked)
-        layout.addWidget(upButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(upButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # up
         refreshButton = QToolButton()
         refreshButton.setObjectName("BiBrowserToolBarRefreshButton")
         refreshButton.setToolTip(self.widget.tr("Tags"))
         refreshButton.released.connect(self.refreshButtonClicked)
-        layout.addWidget(refreshButton, 0, PySide2.QtCore.Qt.AlignLeft)
+        layout.addWidget(refreshButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # data selector
         self.pathLineEdit = QLineEdit(self.widget)
-        self.pathLineEdit.setAttribute(PySide2.QtCore.Qt.WA_MacShowFocusRect, False)
+        self.pathLineEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.pathLineEdit.returnPressed.connect(self.pathEditReturnPressed)
         layout.addWidget(self.pathLineEdit, 1)
 
@@ -143,7 +143,7 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.wwidget = QWidget()
         mainLayout.addWidget(self.wwidget)
         self.wwidget.setObjectName("BiLeftBar")
-        self.wwidget.setAttribute(PySide2.QtCore.Qt.WA_StyledBackground, True)
+        self.wwidget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
         self.wwidget.setLayout(layout)
@@ -154,25 +154,25 @@ class BiBrowserShortCutsComponent(BiComponent):
         homeButton = BiShortcutButton(username, BiThemeAccess.instance().icon('home'))
         homeButton.setObjectName("BiBrowserHomeButton")
         homeButton.content = os.path.join(home_dir)
-        homeButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        homeButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         homeButton.clickedContent.connect(self.buttonClicked)
 
         desktopButton = BiShortcutButton('Desktop', BiThemeAccess.instance().icon('desktop'))
         desktopButton.setObjectName("BiBrowserDesktopButton")
         desktopButton.content = os.path.join(home_dir, 'Desktop')
-        desktopButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        desktopButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         desktopButton.clickedContent.connect(self.buttonClicked)
 
         documentsButton = BiShortcutButton('Documents', BiThemeAccess.instance().icon('open-folder_negative'))
         documentsButton.setObjectName("BiBrowserDocumentsButton")
         documentsButton.content = os.path.join(home_dir, 'Documents')
-        documentsButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        documentsButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         documentsButton.clickedContent.connect(self.buttonClicked)
 
         downloadsButton = BiShortcutButton('Downloads', BiThemeAccess.instance().icon('download'))
         downloadsButton.setObjectName("BiBrowserDownloadsButton")
         downloadsButton.content = os.path.join(home_dir, 'Downloads')
-        downloadsButton.setCursor(PySide2.QtCore.Qt.PointingHandCursor)
+        downloadsButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         downloadsButton.clickedContent.connect(self.buttonClicked)
 
         layout.addWidget(homeButton)
@@ -187,8 +187,8 @@ class BiBrowserShortCutsComponent(BiComponent):
         self.layout.setSpacing(0)
         bookmarkWidget.setLayout(self.layout)
 
-        layout.addWidget(bookmarkWidget, 0, PySide2.QtCore.Qt.AlignTop)
-        layout.addWidget(QWidget(), 1, PySide2.QtCore.Qt.AlignTop) 
+        layout.addWidget(bookmarkWidget, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop) 
 
 
     def update(self, action: BiAction):
@@ -269,7 +269,7 @@ class BiBrowserTableComponent(BiComponent):
 
     def highlightLine(self, row: int):
         for col in range(0, self.tableWidget.columnCount()):
-            self.tableWidget.setCurrentCell(row, col, PySide2.QtCore.QItemSelectionModel.Select)    
+            self.tableWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select)    
 
     def get_widget(self): 
         return self.widget   

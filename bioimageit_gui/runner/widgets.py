@@ -1,7 +1,7 @@
 import os
-import PySide2.QtCore
-from PySide2.QtCore import Signal
-from PySide2.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox, 
+import qtpy.QtCore
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox, 
                                QPushButton, QVBoxLayout, QGridLayout, QLabel,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit)

@@ -1,6 +1,6 @@
 from pathlib import Path
 import subprocess
-from PySide2.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
+from qtpy.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
 
 from bioimageit_core.config import ConfigAccess
 
@@ -121,7 +121,7 @@ class BioImageITApp(BiComponent):
 
     def open_experiment(self, uri):
         # instantiate
-        experimentComponent = BiExperimentViewerComponent(uri, 1)
+        experimentComponent = BiExperimentViewerComponent(uri)
         experimentComponent.experimentContainer.register(self)
         tab_id = self.add_tab(experimentComponent.get_widget(), 
                               BiThemeAccess.instance().icon('database'), 

@@ -6,8 +6,8 @@ BiWebBrowser
 
 """
 
-from PySide2.QtWebEngineWidgets import QWebEngineView
-from PySide2.QtWidgets import (QWidget, QPushButton,
+from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWidgets import (QWidget, QPushButton,
                                QHBoxLayout, QVBoxLayout)
 
 class BiWebBrowser(QWidget):
