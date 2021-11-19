@@ -27,6 +27,7 @@ if __name__ == '__main__':
     component = BioImageITApp()
 
     component.get_widget().setWindowTitle("BioImageIT")
+    component.get_widget().resize(800, 600)
     component.get_widget().showMaximized()
     component.get_widget().show()
     

@@ -1478,7 +1478,7 @@ QToolButton#BiBrowserToolBarRefreshButton{
 }
 
 QLabel#BiBrowserDirIcon{
-  image: url(open-folder.svg);
+  image: url(folder.svg);
 }
 
 QLabel#BiBrowserExperimentIcon{

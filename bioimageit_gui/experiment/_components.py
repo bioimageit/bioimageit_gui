@@ -878,7 +878,7 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         self.container.emit(BiExperimentStates.NewImportFile)
 
     def browseDataButtonClicked(self):
-        fileName = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), 'Data (*.*)')
+        fileName = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), '*.*')
         self.dataPath.setText(fileName[0])
 
     def get_widget(self):
