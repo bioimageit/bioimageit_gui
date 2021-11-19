@@ -233,7 +233,7 @@ class BiExperimentComponent(BiComponent):
             msgBox = QMessageBox()
             msgBox.setText("Data imported")
             msgBox.exec() 
-            self.datasetListComponent.datasetClicked('data')
+            self.container.emit(BiExperimentStates.RefreshClicked)
             return
 
         if action.state == BiExperimentStates.TagClicked:
@@ -251,7 +251,7 @@ class BiExperimentComponent(BiComponent):
             msgBox = QMessageBox()
             msgBox.setText("Tags saved")
             msgBox.exec() 
-            self.datasetListComponent.datasetClicked('data')
+            self.container.emit(BiExperimentStates.RefreshClicked)
             return    
 
         if action.state == BiExperimentStates.DataSetClicked:
@@ -824,6 +824,7 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         formatLabel.setObjectName("BiWidget")
         self.formatCombox = QComboBox()
         self.formatCombox.addItems(FormatsAccess.instance().names())
+        self.formatCombox.setCurrentText('imagetiff')
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
@@ -932,6 +933,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         formatLabel.setObjectName("BiWidget")
         self.formatCombox = QComboBox()
         self.formatCombox.addItems(FormatsAccess.instance().names())
+        self.formatCombox.setCurrentText('imagetiff')
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")

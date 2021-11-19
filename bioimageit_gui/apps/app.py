@@ -37,6 +37,7 @@ class BioImageITApp(BiComponent):
         self.browser_tab_id = -1
         self.toolboxes_tab_id = -1
         self.settings_tab_id = -1
+        self.create_exp_tab_id = -1
 
         # containers    
         self.homeContainer = BiHomeContainer()
@@ -89,13 +90,19 @@ class BioImageITApp(BiComponent):
         self.stackedWidget.addWidget(self.homeComponent.get_widget())
         self.mainBar.setChecked(0, True)
 
-
     def update(self, action: BiAction):
         if action.state == BiHomeStates.OpenNewExperiment:
-            self.experimentCreateComponent.get_widget().setVisible(True)
-        elif action.state == BiExperimentCreateStates.CancelClicked:
-            self.experimentCreateComponent.get_widget().setVisible(False)   
-        if action.state == BiExperimentCreateStates.ExperimentCreated:
+            if self.create_exp_tab_id < 0:
+                self.stackedWidget.addWidget(self.experimentCreateComponent.get_widget())
+                self.create_exp_tab_id = self.stackedWidget.count()-1
+                self.mainBar.addButton(BiThemeAccess.instance().icon('plus-white-symbol'), 
+                                       "Create experiment", 
+                                       self.create_exp_tab_id, False)
+
+            self.stackedWidget.slideInIdx(self.create_exp_tab_id)
+            self.mainBar.setChecked(self.create_exp_tab_id, True)
+
+        elif action.state == BiExperimentCreateStates.ExperimentCreated:
             uri = self.experimentCreateContainer.experiment_dir
             print('open new experiment from:', uri)
             self.open_experiment(uri)
@@ -171,7 +178,6 @@ class BioImageITApp(BiComponent):
         self.mainBar.setChecked(self.browser_tab_id, True)
 
     def open_toolboxes(self):
-        print("open toolboxes:", self.toolboxes_tab_id)
         if self.toolboxes_tab_id < 0:
             self.stackedWidget.addWidget(self.finderComponent.get_widget())
             self.toolboxes_tab_id = self.stackedWidget.count()-1
