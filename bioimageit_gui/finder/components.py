@@ -1,10 +1,10 @@
+import webbrowser
 import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QTableWidget, QTableWidgetItem,
-                               QAbstractItemView, QHBoxLayout,
-                               QToolButton, QSplitter, QPushButton)
+                               QAbstractItemView,
+                               QSplitter, QPushButton)
 
-#from bioimageit_gui.core.web import BiWebBrowser
 from bioimageit_gui.core.widgets import (BiButton, BiFlowLayout,
                                          BiNavigationBar)
 
@@ -58,12 +58,10 @@ class BiFinderComponent(BiComponent):
         toolsLayout = QVBoxLayout()
         self.toolsWidget.setLayout(toolsLayout)
         layout.addWidget(self.toolsWidget, 1)
-
-        toolsSplitter = QSplitter() 
-        toolsLayout.addWidget(toolsSplitter)   
-
+         
         # table
         toolsListWidget = QWidget()
+        toolsLayout.addWidget(toolsListWidget)  
         toolsListLayout = QVBoxLayout()
         toolsListLayout.setContentsMargins(0, 0, 7, 0)
         toolsListWidget.setLayout(toolsListLayout)
@@ -76,24 +74,13 @@ class BiFinderComponent(BiComponent):
         self.tableWidget = QTableWidget()
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setColumnCount(3)
-        self.tableWidget.setMaximumWidth(300)
-        self.tableWidget.setMinimumWidth(300)
-        self.tableWidget.cellClicked.connect(self.showClickedDoc)
-        labels = ["", "Name", "Version"]
+        self.tableWidget.setSizeAdjustPolicy(qtpy.QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget.setColumnCount(4)
+        labels = ["", "Name", "Version", "Documentation"]
         self.tableWidget.setHorizontalHeaderLabels(labels)
         toolsListLayout.addWidget(self.tableWidget)
-        toolsSplitter.addWidget(toolsListWidget)
 
-        # doc viewer
-        self.docViewer = QLabel() #BiWebBrowser(self.toolsWidget)
-        self.docViewer.setObjectName("BiDocViewer")
-        #self.docViewer.setToolBarVisible(False)
-        toolsSplitter.addWidget(self.docViewer)
-    
         self.toolsWidget.setVisible(False)
-        toolsSplitter.setStretchFactor(0, 0)
-        toolsSplitter.setStretchFactor(1, 1)
 
     def moveToPrevious(self):
         self.container.movePrevious()
@@ -133,9 +120,15 @@ class BiFinderComponent(BiComponent):
 
             self.tableWidget.setItem(i, 1, QTableWidgetItem(info.name))
             self.tableWidget.setItem(i, 2, QTableWidgetItem(info.version))  
+            link = info.help
+
+            docLabel = QLabel()
+            docLabel.setOpenExternalLinks(True)
+            docLabel.setText(f'<span><p><a href="{link}">{link}</a></p></span>')
+            self.tableWidget.setCellWidget(i, 3, docLabel)
    
+        self.tableWidget.resizeColumnsToContents()
         self.tableWidget.setCurrentCell(0, 1)
-        self.showToolboxDoc()
 
     def browseCategories(self):
         # free layout
@@ -148,6 +141,10 @@ class BiFinderComponent(BiComponent):
             widget.clickedSignal.connect(self.clickedTile)
             self.layout.addWidget(widget)
 
+    def showToolboxDoc(self):
+        webbrowser.open(self.container.current_category_doc)
+        print("TODO, open the doc:", self.container.current_category_doc)
+
     def clickedTile(self, info):
         self.container.setCurrentCategory(info.id, info.name, info.doc)
         self.container.emit(BiFinderStates.Reload)  
@@ -155,49 +152,6 @@ class BiFinderComponent(BiComponent):
     def openClicked(self, id_: str):
         self.container.clicked_tool = id_
         self.container.emit(BiFinderStates.OpenProcess)   
-
-    def showToolboxDoc(self):
-        print(self.container.current_category_doc)
-        link = self.container.current_category_doc
-
-        if link != '':    
-            self.docViewer.setOpenExternalLinks(True)
-            self.docViewer.setText(f'<span>The documentation can not be displayed here. It is available at:</span><p><a href="{link}">{link}</a></p>')
-        else:
-            self.docViewer.setText("<span>This toolbox have no documentation</span>")
-
-        #if link.startswith('http') or link.startswith('www'):
-        #    self.docViewer.setHomePage(link, True)
-        #elif link.endswith('.html'):    
-        #    self.docViewer.setHomePage(link, False)
-        #else:
-        #    self.docViewer.setHomePageHtml("<span>This toolbox have no "
-        #                                   "documentation</span>")
-
-    def showClickedDoc(self, row, column):
-
-        if row >= len(self.container.tools): 
-            self.docViewer.setText("No tool available")  
-            return
-        tool = self.container.tools[row]  
-        link = tool.help  
-        if link != '':    
-            self.docViewer.setOpenExternalLinks(True)
-            self.docViewer.setText(f'<span>The documentation can not be displayed here. It is available at:</span><p><a href="{link}">{link}</a></p>')
-        else:
-            self.docViewer.setText("<span>This tool have no documentation</span>")  
-
-        #if row >= len(self.container.tools):
-        #    self.docViewer.setHomePageHtml("No tool available")
-        #    return
-        #tool = self.container.tools[row]  
-        #if tool.help.startswith('http') or tool.help.startswith('www'):
-        #    self.docViewer.setHomePage(tool.help, True)
-        #elif tool.help.endswith('.html'):    
-        #    self.docViewer.setHomePage(tool.help, False)
-        #else:
-        #    self.docViewer.setHomePageHtml("<span>This tool documentation "
-        #                                   "is not available</span>")
 
     def update(self, action: BiAction):
         if action.state == BiFinderStates.Reloaded:
