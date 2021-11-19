@@ -6,6 +6,8 @@ class BiRawDataStates(BiStates):
     Loaded = "BiRawDataStates.Loaded"
     SaveClicked = "BiRawDataStates.SaveClicked"
     Saved = "BiRawDataStates.Saved"
+    DeleteRawData = "BiRawDataStates.DeleteRawData"
+    RawDataDeleted = "BiRawDataStates.RawDataDeleted"
 
 
 class BiProcessedDataStates(BiStates):

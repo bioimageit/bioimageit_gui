@@ -77,7 +77,7 @@ class BiExperimentModel(BiModel):
                 self.container.tag_info.usingname_tag,
                 self.container.tag_info.usingname_search
             )
-            self.container.emit(BiExperimentStates.DataTagged)
+            self.container.emit(BiExperimentStates.DataTagged)    
 
 
 class BiExperimentCreateModel(BiModel):

@@ -264,6 +264,21 @@ class BiExperimentComponent(BiComponent):
         if action.state == BiRunStates.Loaded:    
             self.runComponent.get_widget().setVisible(True)   
 
+        if action.state == BiExperimentStates.DeleteRawClicked:
+            print('catch delete rawdata:', self.container.selected_data_info.md_uri)
+            msgbox = QMessageBox(QMessageBox.Question, "Confirm delete", f"Are you sure you want to delete: {self.container.selected_data_info.metadata.name}?")
+            msgbox.addButton(QMessageBox.Yes)
+            msgbox.addButton(QMessageBox.No)
+            msgbox.setDefaultButton(QMessageBox.No)
+
+            reply = msgbox.exec()
+            if reply == QMessageBox.Yes:
+                self.rawDataContainer.md_uri = self.container.selected_data_info.md_uri
+                self.rawDataContainer.emit(BiRawDataStates.DeleteRawData)
+
+        if action.state == BiRawDataStates.RawDataDeleted:
+            self.container.emit(BiExperimentStates.RefreshClicked)            
+
         if action.state == BiExperimentStates.MainPageClicked:
             self.metaToolbarComponent.get_widget().setVisible(False)
             self.tagComponent.get_widget().setVisible(False)
@@ -512,6 +527,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
 
         self.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.tableWidget.verticalHeader().setDefaultSectionSize(24)
+        self.tableWidget.setSizeAdjustPolicy(qtpy.QtWidgets.QAbstractScrollArea.AdjustToContents)
 
         self.tableWidget.cellClicked.connect(self.cellClicked)
 
@@ -528,8 +544,8 @@ class BiExperimentDataSetViewComponent(BiComponent):
     def drawRawDataset(self):
         # headers
         tags = self.container.experiment.metadata.tags
-        self.tableWidget.setColumnCount(6 + len(tags))
-        labels = ["", "", "Name"]
+        self.tableWidget.setColumnCount(7 + len(tags))
+        labels = ["", "", "", "Name"]
         for tag in tags:
             labels.append(tag)
         labels.append("Format")
@@ -563,6 +579,15 @@ class BiExperimentDataSetViewComponent(BiComponent):
             edit_btn.clickedId.connect(self.viewMetaDataClicked)
             self.tableWidget.setCellWidget(i, col_idx, edit_btn)
 
+            # delete button
+            col_idx += 1
+            del_btn = BiButton("X")
+            del_btn.setMaximumWidth(20)
+            del_btn.id = i
+            del_btn.setObjectName("btnTableDefault")
+            del_btn.clickedId.connect(self.deleteRawDataClicked)
+            self.tableWidget.setCellWidget(i, col_idx, del_btn)
+
             # name
             col_idx +=1
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.name))
@@ -580,6 +605,8 @@ class BiExperimentDataSetViewComponent(BiComponent):
             # created date
             col_idx += 1
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.date))
+
+        self.tableWidget.resizeColumnsToContents()    
 
     def cellClicked(self, row : int, col : int):
         self.container.clickedRow = row
@@ -599,8 +626,15 @@ class BiExperimentDataSetViewComponent(BiComponent):
         else:
             self.container.emit(BiExperimentStates.ViewProcessedMetaDataClicked)
 
+    def deleteRawDataClicked(self, row: int):
+        self.container.selected_data_info = self.container.current_dataset.get(row)
+        self.container.clickedRow = row
+        print('emit delete rawdata:', self.container.selected_data_info.metadata.uri)
+        if self.container.current_dataset_name == 'data':
+            self.container.emit(BiExperimentStates.DeleteRawClicked)
+
     def highlightLine(self, row: int):
-        for col in range(2, self.tableWidget.columnCount()):
+        for col in range(0, self.tableWidget.columnCount()):
             self.tableWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select)  
 
     def drawProcessedDataSet(self):

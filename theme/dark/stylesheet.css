@@ -665,7 +665,6 @@ QMessageBox QPushButton {
 ////////////////////////////////////////////////////////////////////////////*/
 QTableView {
   border-style: none;
-  selection-background-color: #262930;
   selection-color: #f0f1f2;
   gridline-color: #262930;
   alternate-background-color: #313339;
@@ -676,7 +675,7 @@ QTableView {
 
 QTableWidget::item:selected 
 {
-  background: #0071C3;
+  background: #3486c2;
   color: #f0f1f2;
 }
 

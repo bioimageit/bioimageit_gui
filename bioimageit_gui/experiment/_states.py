@@ -29,6 +29,7 @@ class BiExperimentStates(BiStates):
     ViewRawMetaDataClicked = "BiExperimentStates.ViewRawMetaDataClicked"
     ViewProcessedMetaDataClicked = "BiExperimentStates.ViewProcessedMetaDataClicked"
     MainPageClicked = "BiExperimentStates.BiExperimentStates.MainPageClicked"
+    DeleteRawClicked = "BiExperimentStates.DeleteRawClicked"
 
 
 class BiExperimentCreateStates(BiStates):

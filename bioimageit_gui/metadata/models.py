@@ -27,6 +27,11 @@ class BiRawDataModel(BiModel):
             self.container.emit(BiRawDataStates.Loaded)
             return
 
+        if action.state == BiRawDataStates.DeleteRawData:
+            data = RawData(self.container.md_uri)    
+            data.delete()
+            self.container.emit(BiRawDataStates.RawDataDeleted)   
+
         if action.state == BiRawDataStates.SaveClicked:
             self.container.rawdata.write()
             self.container.emit(BiRawDataStates.Saved)
