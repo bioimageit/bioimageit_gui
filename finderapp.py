@@ -4,11 +4,9 @@ from qtpy import QtCore
 from qtpy.QtGui import QIcon, QGuiApplication
 from qtpy.QtWidgets import QApplication, QStyle
 
-
-sys.path.append("../bioimagepy")
 from bioimageit_core.config import ConfigAccess
 from bioimageit_formats import FormatsAccess
-from bioimageit_gui.finderapp import BiFinderApp
+from bioimageit_gui.apps.finderapp import BiFinderApp
 
 if __name__ == '__main__':
     # Create the Qt Application

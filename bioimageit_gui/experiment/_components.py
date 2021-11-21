@@ -42,7 +42,7 @@ from bioimageit_gui.metadata.models import (BiRawDataModel,
                                             BiRunModel,
                                             BiMetadataExperimentModel)
 
-from bioimageit_viewer.viewer2 import BiMultiViewer
+from bioimageit_viewer.viewer import BiMultiViewer
 
 
 class BiExperimentViewerComponent(BiComponent):
@@ -90,6 +90,7 @@ class BiExperimentComponent(BiComponent):
     def __init__(self, container: BiExperimentContainer):
         super().__init__()
         self._object_name = 'BiExperimentComponent'
+        self.show_viewer = True
 
         # containers
         self.container = container

@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+from PySide2.QtWidgets import QSplitter
 from qtpy.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
 
 from bioimageit_core.config import ConfigAccess
@@ -19,7 +20,8 @@ from bioimageit_gui.browser import (BiBrowserComponent, BiBrowserStates,
                                      BiBrowserContainer, BiBrowserModel)
 
 from bioimageit_gui.experiment import (BiExperimentCreateContainer, 
-                                       BiExperimentViewerComponent, 
+                                       BiExperimentContainer,
+                                       BiExperimentComponent, 
                                        BiExperimentCreateComponent, 
                                        BiExperimentCreateModel,
                                        BiExperimentStates,
@@ -30,10 +32,15 @@ from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
 from bioimageit_gui.settings import BiSettingsComponent, BiSettingsContainer
 from bioimageit_gui.designer import BiDesignerComponent
 
+from bioimageit_viewer.viewer import BiMultiViewer
+
+
 class BioImageITApp(BiComponent):
     def __init__(self):
         super().__init__()
 
+        self.opened_components = []
+        self.experiment_containers = {}
         self.browser_tab_id = -1
         self.toolboxes_tab_id = -1
         self.settings_tab_id = -1
@@ -65,6 +72,10 @@ class BioImageITApp(BiComponent):
         self.browserContainer.register(self)
         self.experimentCreateContainer.register(self)
 
+        # viewer
+        self.viewer = BiMultiViewer()
+        self.viewer.setVisible(False)
+
         # init
         self.browserContainer.currentPath = str(Path.home())
         self.browserContainer.emit(BiBrowserStates.DirectoryModified)
@@ -76,18 +87,31 @@ class BioImageITApp(BiComponent):
         layout.setSpacing(0)
         self.widget.setLayout(layout)
         
+        central_widget = QWidget()
+        central_layout = QHBoxLayout()
+        central_layout.setContentsMargins(0, 0, 0, 0)
+        central_layout.setSpacing(0)
+        central_widget.setLayout(central_layout)
+
         self.mainBar = BiAppBar()
         self.mainBar.setStyleSheet('QLabel{background-color:#414851;}')
         self.mainBar.close.connect(self.remove_tab)
         self.stackedWidget = BiStaticStackedWidget(self.widget)
-        layout.addWidget(self.mainBar)
-        layout.addWidget(self.stackedWidget)
+        central_layout.addWidget(self.mainBar)
+        central_layout.addWidget(self.stackedWidget)
+
+        splitter = QSplitter()
+        splitter.addWidget(central_widget)
+        splitter.addWidget(self.viewer)
+
+        layout.addWidget(splitter)
 
         self.mainBar.open.connect(self.slide_to)
 
         # home component
         self.mainBar.addButton(BiThemeAccess.instance().icon('home'), "Home", 0, False)
         self.stackedWidget.addWidget(self.homeComponent.get_widget())
+        self.opened_components.append(self.homeComponent)
         self.mainBar.setChecked(0, True)
 
     def update(self, action: BiAction):
@@ -98,6 +122,7 @@ class BioImageITApp(BiComponent):
                 self.mainBar.addButton(BiThemeAccess.instance().icon('plus-white-symbol'), 
                                        "Create experiment", 
                                        self.create_exp_tab_id, False)
+                self.opened_components.append(self.experimentCreateComponent)                       
 
             self.stackedWidget.slideInIdx(self.create_exp_tab_id)
             self.mainBar.setChecked(self.create_exp_tab_id, True)
@@ -124,26 +149,39 @@ class BioImageITApp(BiComponent):
             tool_uri = self.finderContainer.clicked_tool
             self.open_process(tool_uri)  
         elif action.state == BiExperimentStates.ProcessClicked:
-            self.open_toolboxes()                                  
+            self.open_toolboxes()    
+        elif action.state == BiExperimentStates.ViewDataClicked:
+            container = self.experiment_containers[self.mainBar.current_tab_id]
+            self.viewer.add_data(container.selected_data_info.metadata.uri,
+                                 container.selected_data_info.metadata.name,
+                                 container.selected_data_info.metadata.format)
+            self.viewer.setVisible(True)                                  
 
     def open_experiment(self, uri):
         # instantiate
-        experimentComponent = BiExperimentViewerComponent(uri)
-        experimentComponent.experimentContainer.register(self)
+        experimentContainer = BiExperimentContainer()
+        experimentContainer.register(self)
+        experimentComponent = BiExperimentComponent(experimentContainer)
+        experimentContainer.experiment_uri = uri
+        experimentContainer.emit(BiExperimentStates.Load)
+        # add to tab
         tab_id = self.add_tab(experimentComponent.get_widget(), 
                               BiThemeAccess.instance().icon('database'), 
                               "Experiment", True)
-        experimentComponent.experimentComponent.parent_id = tab_id    
+        self.experiment_containers[tab_id] = experimentContainer 
+        self.opened_components.append(experimentComponent)       
 
     def open_designer(self):
         # instantiate
         designerComponent = BiDesignerComponent()
+        self.opened_components.append(designerComponent) 
         self.add_tab(designerComponent.get_widget(), 
                      BiThemeAccess.instance().icon('workflow'), 
                      "Designer", True)                      
 
     def open_process(self, uri):
         runner = BiRunnerViewApp(uri)
+        self.opened_components.append(runner) 
         self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner', True) 
 
     def add_tab(self, widget, icon, name, closable=False):
@@ -159,12 +197,19 @@ class BioImageITApp(BiComponent):
     def remove_tab(self, idx):
         self.mainBar.removeButton(idx)
         self.stackedWidget.remove(idx)
+        self.opened_components.pop(idx) 
         self.stackedWidget.slideInIdx(0)
         self.mainBar.setChecked(0, True)
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)
         self.mainBar.setChecked(id, False)
+        # Condition to show/hide the viewer
+        print(self.opened_components)
+        if self.opened_components[id].show_viewer:
+            self.viewer.setVisible(True)
+        else:
+            self.viewer.setVisible(False)     
 
     def open_browser(self):
         if self.browser_tab_id < 0:
@@ -176,6 +221,7 @@ class BioImageITApp(BiComponent):
 
         self.stackedWidget.slideInIdx(self.browser_tab_id)
         self.mainBar.setChecked(self.browser_tab_id, True)
+        self.opened_components.append(self.BrowserComponent)
 
     def open_toolboxes(self):
         if self.toolboxes_tab_id < 0:
@@ -187,6 +233,7 @@ class BioImageITApp(BiComponent):
 
         self.stackedWidget.slideInIdx(self.toolboxes_tab_id)
         self.mainBar.setChecked(self.toolboxes_tab_id, True)
+        self.opened_components.append(self.finderComponent)
 
     def open_settings(self):
         print("open settings:", self.settings_tab_id)
@@ -198,7 +245,8 @@ class BioImageITApp(BiComponent):
                                    self.settings_tab_id, False)
 
         self.stackedWidget.slideInIdx(self.settings_tab_id)
-        self.mainBar.setChecked(self.settings_tab_id, True)    
+        self.mainBar.setChecked(self.settings_tab_id, True) 
+        self.opened_components.append(self.settingsComponent)   
     
     def get_widget(self):
         return self.widget    

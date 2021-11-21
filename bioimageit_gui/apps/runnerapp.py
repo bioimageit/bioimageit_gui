@@ -8,7 +8,7 @@ from bioimageit_gui.runner.models import BiRunnerModel
 from bioimageit_gui.runner.components import BiRunnerComponent
 from bioimageit_gui.runner.observer import BiGuiProgressObserver
 
-from bioimageit_viewer.viewer2 import BiMultiViewer
+from bioimageit_viewer.viewer import BiMultiViewer
 
 
 class BiRunnerViewApp(BiComponent):

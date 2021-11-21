@@ -643,6 +643,7 @@ class BiAppBar(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.current_tab_id = -1
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop)
@@ -699,6 +700,7 @@ class BiAppBar(QWidget):
                         button.setId(button.id()-1)              
 
     def setChecked(self, id: int, update_current: bool):
+        self.current_tab_id = id
         for i in range(0, self.layout.count()):
             button = self.layout.itemAt(i).widget()
             if isinstance(button, BiClosableButton):

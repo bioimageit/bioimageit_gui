@@ -59,6 +59,7 @@ class BiComponent(BiActuator):
     def __init__(self):
         super(BiComponent, self).__init__()
         self._object_name = 'BiComponent'    
+        self.show_viewer = False
 
     def update(self, action: BiAction):
         raise NotImplementedError("Please implement ", self._object_name,
