@@ -1,14 +1,6 @@
 from bioimageit_gui.core.framework import BiContainer
 
 
-class BiExperimentViewContainer(BiContainer):
-    def __init__(self):
-        super().__init__()
-        self._object_name = 'BiExperimentViewContainer'    
-
-        self.experiment_uri = ''
-
-
 class BiExperimentContainer(BiContainer):
     def __init__(self):
         super().__init__()

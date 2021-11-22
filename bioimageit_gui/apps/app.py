@@ -20,8 +20,7 @@ from bioimageit_gui.browser import (BiBrowserComponent, BiBrowserStates,
                                      BiBrowserContainer, BiBrowserModel)
 
 from bioimageit_gui.experiment import (BiExperimentCreateContainer, 
-                                       BiExperimentContainer,
-                                       BiExperimentComponent, 
+                                       BiExperimentViewerComponent,
                                        BiExperimentCreateComponent, 
                                        BiExperimentCreateModel,
                                        BiExperimentStates,
@@ -40,7 +39,6 @@ class BioImageITApp(BiComponent):
         super().__init__()
 
         self.opened_components = []
-        self.experiment_containers = {}
         self.browser_tab_id = -1
         self.toolboxes_tab_id = -1
         self.settings_tab_id = -1
@@ -149,26 +147,15 @@ class BioImageITApp(BiComponent):
             tool_uri = self.finderContainer.clicked_tool
             self.open_process(tool_uri)  
         elif action.state == BiExperimentStates.ProcessClicked:
-            self.open_toolboxes()    
-        elif action.state == BiExperimentStates.ViewDataClicked:
-            container = self.experiment_containers[self.mainBar.current_tab_id]
-            self.viewer.add_data(container.selected_data_info.metadata.uri,
-                                 container.selected_data_info.metadata.name,
-                                 container.selected_data_info.metadata.format)
-            self.viewer.setVisible(True)                                               
+            self.open_toolboxes()                                                 
 
     def open_experiment(self, uri):
         # instantiate
-        experimentContainer = BiExperimentContainer()
-        experimentContainer.register(self)
-        experimentComponent = BiExperimentComponent(experimentContainer)
-        experimentContainer.experiment_uri = uri
-        experimentContainer.emit(BiExperimentStates.Load)
+        experimentComponent = BiExperimentViewerComponent(uri, self.viewer)
         # add to tab
-        tab_id = self.add_tab(experimentComponent.get_widget(), 
-                              BiThemeAccess.instance().icon('database'), 
-                              "Experiment", True)
-        self.experiment_containers[tab_id] = experimentContainer 
+        self.add_tab(experimentComponent.get_widget(), 
+                     BiThemeAccess.instance().icon('database'), 
+                     "Experiment", True)
         self.opened_components.append(experimentComponent)       
 
     def open_designer(self):
@@ -200,6 +187,7 @@ class BioImageITApp(BiComponent):
         self.opened_components.pop(idx) 
         self.stackedWidget.slideInIdx(0)
         self.mainBar.setChecked(0, True)
+        self.viewer.setVisible(False)
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)

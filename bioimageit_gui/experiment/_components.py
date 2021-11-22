@@ -19,8 +19,7 @@ from bioimageit_formats import FormatsAccess
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.core.widgets import BiTagWidget, BiButton
 from ._states import (BiExperimentStates, BiExperimentCreateStates)
-from ._containers import (BiExperimentViewContainer, 
-                          BiExperimentContainer,
+from ._containers import (BiExperimentContainer,
                           BiExperimentCreateContainer
                          )
 from ._models import BiExperimentModel
@@ -46,11 +45,12 @@ from bioimageit_viewer.viewer import BiMultiViewer
 
 
 class BiExperimentViewerComponent(BiComponent):
-    def __init__(self, experiment_uri):
+    def __init__(self, experiment_uri: str, viewer: BiMultiViewer):
         super().__init__()
-        self.container = BiExperimentViewContainer()
-        self.container.experiment_uri = experiment_uri
-        self.container.register(self)
+
+        self.show_viewer = True    
+        self.viewer = viewer
+        self.viewer.setVisible(False)
 
         # instantiate the expeirment component
         self.experimentContainer = BiExperimentContainer()
@@ -59,32 +59,23 @@ class BiExperimentViewerComponent(BiComponent):
         self.experimentComponent = BiExperimentComponent(self.experimentContainer)
         self.experimentContainer.emit(BiExperimentStates.Load)
 
-        # viewer component
-        self.viewerComponent = BiMultiViewer()
-
         # Widget
         self.widget = QWidget()
         self.widget.setObjectName('BiWidget')
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
-        splitter = QSplitter()
-        splitter.addWidget(self.experimentComponent.get_widget())
-        splitter.addWidget(self.viewerComponent)
-        layout.addWidget(splitter)
-
-        self.viewerComponent.setVisible(False)
+        layout.addWidget(self.experimentComponent.get_widget())
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.ViewDataClicked:
-            self.viewerComponent.add_data(self.experimentContainer.selected_data_info.metadata.uri,
+            self.viewer.add_data(self.experimentContainer.selected_data_info.metadata.uri,
                                           self.experimentContainer.selected_data_info.metadata.name,
                                           self.experimentContainer.selected_data_info.metadata.format)
-            self.viewerComponent.setVisible(True)
+            self.viewer.setVisible(True)
 
     def get_widget(self):
         return self.widget
-
 
 
 class BiExperimentComponent(BiComponent):
