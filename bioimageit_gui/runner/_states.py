@@ -7,3 +7,4 @@ class BiRunnerStates(BiStates):
     RunProcess = "BiRunnerStates::RunProcess"
     RunFinished = "BiRunnerStates::RunFinished"
     ClickedView = "BiRunnerStates::ClickedView"
+    ModeChanged = "BiRunnerStates::ModeChanged"

@@ -1,18 +1,74 @@
 import os
 import getpass
 from pathlib import Path
+from qtpy.QtWidgets import QPushButton, QMessageBox
 
 import qtpy.QtCore
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                                QTableWidget, QTableWidgetItem,
                                QAbstractItemView, QHBoxLayout,
                                QToolButton, QSplitter, QLineEdit)
+
+from bioimageit_core.config import ConfigAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.core.theme import BiThemeAccess
 from ._states import BiBrowserStates
 from ._containers import BiBrowserContainer
 from ._widgets import BiShortcutButton
+from ._models import BiBrowserModel
+
+
+class BiExperimentSelectorWidget(QWidget):
+    selected_experiment = Signal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.container = BiBrowserContainer()
+
+        # components
+        browser_component = BiBrowserComponent(self.container )
+
+        # model
+        self.browser_model = BiBrowserModel(self.container)
+
+        # init
+        workspace_path = ConfigAccess.instance().get('workspace')
+        self.container.currentPath = workspace_path
+        self.container.emit(BiBrowserStates.DirectoryModified)
+
+        # validation bar
+        validation_bar = QWidget()
+        validation_bar.setObjectName("BiToolBar")
+        validation_bar.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
+        bar_layout = QHBoxLayout()
+        validation_bar.setLayout(bar_layout)
+
+        validation_button = QPushButton('Open')
+        validation_button.setObjectName('btnPrimary')
+        validation_button.released.connect(self.validate_clicked)
+        bar_layout.addWidget(validation_button, 1, qtpy.QtCore.Qt.AlignRight)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
+        layout.addWidget(browser_component.get_widget(), 1)
+        layout.addWidget(validation_bar, 0, qtpy.QtCore.Qt.AlignBottom)
+
+    def validate_clicked(self):
+        path = os.path.join(self.container.currentPath, self.container.files[self.container.clickedRow].name)
+        experiment_uri = os.path.join(path, 'experiment.md.json')
+        if os.path.isfile(experiment_uri):
+            self.selected_experiment.emit(path)
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setInformativeText(f"The directory {path} is not an experiment")
+            msg.setWindowTitle("Browser error")
+            msg.exec_()
+
 
 
 class BiBrowserComponent(BiComponent):

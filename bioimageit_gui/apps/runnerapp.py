@@ -1,19 +1,17 @@
 import os
+import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSplitter)
 
 from bioimageit_gui.core.framework import BiAction, BiComponent
-from bioimageit_gui.runner.states import BiRunnerStates
-from bioimageit_gui.runner.containers import BiRunnerContainer
-from bioimageit_gui.runner.models import BiRunnerModel
-from bioimageit_gui.runner.components import BiRunnerComponent
-from bioimageit_gui.runner.observer import BiGuiProgressObserver
-
-from bioimageit_viewer.viewer import BiMultiViewer
+from bioimageit_gui.runner import (BiRunnerStates, BiRunnerContainer, 
+                                   BiRunnerModel, BiRunnerComponent, 
+                                   BiGuiProgressObserver)
 
 
 class BiRunnerViewApp(BiComponent):
-    def __init__(self, xml_file: str):
+    def __init__(self, xml_file: str, viewer):
         super().__init__()
+        self.viewer = viewer
 
         # components
         self.runnerContainer = BiRunnerContainer()
@@ -33,37 +31,31 @@ class BiRunnerViewApp(BiComponent):
         self.runnerContainer.process_uri = xml_file
         self.runnerContainer.emit(BiRunnerStates.ProcessUriChanged)
 
-        # viewer widget
-        self.viewerComponent = BiMultiViewer()
-        self.viewerComponent.setMinimumWidth(400)
-
         # Widget
         self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
-        splitter = QSplitter()
-        splitter.addWidget(self.runnerComponent.get_widget())
-        splitter.addWidget(self.viewerComponent)
-        layout.addWidget(splitter)
-
-        #self.viewerComponent.setVisible(False)
+        layout.addWidget(self.runnerComponent.get_widget())
 
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.RunFinished:
             for out in self.runnerContainer.genarated_outputs:
+                self.viewer.setVisible(True)
                 for fileinfo in out:
                     print('open output', fileinfo)
                     name = os.path.basename(fileinfo['uri'])
-                    self.viewerComponent.add_data(fileinfo['uri'], name, fileinfo['format'])
+                    self.viewer.add_data(fileinfo['uri'], name, fileinfo['format'])
         if action.state == BiRunnerStates.ClickedView:
+            self.viewer.setVisible(True)
             name = os.path.basename(self.runnerContainer.clicked_view_uri)
-
             print("view data with info:")
             print("name:", name)
             print("uri:", self.runnerContainer.clicked_view_uri)
             print("format:", self.runnerContainer.clicked_view_format)
-            self.viewerComponent.add_data(self.runnerContainer.clicked_view_uri, 
+            self.viewer.add_data(self.runnerContainer.clicked_view_uri, 
                                           name, 
                                           self.runnerContainer.clicked_view_format)  
 
@@ -74,6 +66,7 @@ class BiRunnerViewApp(BiComponent):
 class BiRunnerApp(BiComponent):
     def __init__(self, xml_file: str):
         super().__init__()
+        self.show_viewer = True
 
         # components
         self.runnerContainer = BiRunnerContainer()
@@ -92,16 +85,17 @@ class BiRunnerApp(BiComponent):
         self.runnerContainer.process_uri = xml_file
         self.runnerContainer.emit(BiRunnerStates.ProcessUriChanged)
 
+        # Widget
+        self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
+        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.widget.setLayout(layout)
+        layout.addWidget(self.runnerComponent.get_widget())
+
     def update(self, action: BiAction):
-        if action.state == BiRunnerStates.RunFinished:
-            for out in self.container.genarated_outputs:
-                for fileinfo in out:
-                    print('open output', fileinfo)
-                    viewer = BiDataView(fileinfo['uri'], fileinfo['format'])
-                    viewer.show()
-        if action.state == BiRunnerContainer.ClickedView:
-            viewer = BiDataView(self.clicked_view_uri, self.clicked_view_format)
-            viewer.show()          
+        pass
 
     def get_widget(self):
-        return self.runnerComponent.get_widget()
+        return self.widget

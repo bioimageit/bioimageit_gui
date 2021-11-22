@@ -6,7 +6,7 @@ from qtpy.QtWidgets import QApplication
 from bioimageit_core.config import ConfigAccess
 from bioimageit_formats import FormatsAccess
 
-from bioimageit_gui.runnerapp import BiRunnerApp
+from bioimageit_gui.apps.runnerapp import BiRunnerApp
 from bioimageit_gui.core.exceptions import CommandArgsError
 
 if __name__ == '__main__':

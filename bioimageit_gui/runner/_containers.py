@@ -1,10 +1,9 @@
 from bioimageit_gui.core.framework import BiContainer
-from bioimageit_gui.runner.states import BiRunnerStates
+from ._states import BiRunnerStates
 
 
 class BiRunnerContainer(BiContainer):
     MODE_FILE = 'file'
-    MODE_REP = 'rep'
     MODE_EXP = 'exp'
 
     def __init__(self):

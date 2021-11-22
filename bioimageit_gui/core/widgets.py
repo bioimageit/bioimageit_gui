@@ -73,6 +73,7 @@ class BiFileSelectWidget(QWidget):
         self.setLayout(layout)
 
         self.lineEdit = QLineEdit()
+        self.lineEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         layout.addWidget(self.lineEdit)
 
         browseButton = QPushButton("...")

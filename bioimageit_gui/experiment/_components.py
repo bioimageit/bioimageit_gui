@@ -64,6 +64,7 @@ class BiExperimentViewerComponent(BiComponent):
 
         # Widget
         self.widget = QWidget()
+        self.widget.setObjectName('BiWidget')
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
@@ -126,7 +127,7 @@ class BiExperimentComponent(BiComponent):
 
         # widget
         self.widget = QWidget()
-        self.widget.setObjectName('SgWidget')
+        self.widget.setObjectName('BiWidget')
         self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)

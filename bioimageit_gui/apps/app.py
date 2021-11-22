@@ -1,5 +1,5 @@
+import os
 from pathlib import Path
-import subprocess
 from PySide2.QtWidgets import QSplitter
 from qtpy.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
 
@@ -155,7 +155,7 @@ class BioImageITApp(BiComponent):
             self.viewer.add_data(container.selected_data_info.metadata.uri,
                                  container.selected_data_info.metadata.name,
                                  container.selected_data_info.metadata.format)
-            self.viewer.setVisible(True)                                  
+            self.viewer.setVisible(True)                                               
 
     def open_experiment(self, uri):
         # instantiate
@@ -180,9 +180,9 @@ class BioImageITApp(BiComponent):
                      "Designer", True)                      
 
     def open_process(self, uri):
-        runner = BiRunnerViewApp(uri)
+        runner = BiRunnerViewApp(uri, self.viewer)
         self.opened_components.append(runner) 
-        self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner', True) 
+        tab_idx = self.add_tab(runner.get_widget(), BiThemeAccess.instance().icon('play'), 'Runner', True) 
 
     def add_tab(self, widget, icon, name, closable=False):
         # fill tab and widget

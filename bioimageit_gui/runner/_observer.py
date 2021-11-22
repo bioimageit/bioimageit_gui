@@ -22,4 +22,4 @@ class BiGuiProgressObserver(QObject, ProgressObserver):
             #print('warning:', data['warning']) 
         if 'error' in data:
             self.messageSignal.emit('error:' + data['warning'])
-            #print('error:', data['error'])          
+            #print('error:', data['error'])   

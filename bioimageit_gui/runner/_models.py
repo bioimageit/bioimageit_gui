@@ -1,19 +1,19 @@
-from qtpy.QtCore import Signal, QObject, QThread
+from qtpy.QtCore import QThread
 
 from bioimageit_core.process import Process
 from bioimageit_core.runner import Runner
 from bioimageit_core.pipeline import PipelineRunner
 
 from bioimageit_gui.core.framework import BiModel, BiAction
-from bioimageit_gui.runner.states import BiRunnerStates
-from bioimageit_gui.runner.containers import BiRunnerContainer
+from ._states import BiRunnerStates
+from ._containers import BiRunnerContainer
 
 
 class BiRunnerModel(BiModel):
     def __init__(self, container: BiRunnerContainer):
         super().__init__()
         self.observer = None
-        self._object_name = 'BiProcessEditorModel'
+        self._object_name = 'BiRunnerModel'
         self.container = container
         self.container.register(self)  
         self.thread = BiRunnerThread()
@@ -36,8 +36,6 @@ class BiRunnerModel(BiModel):
         print('output uri', self.container.output_uri)
         if self.container.mode == BiRunnerContainer.MODE_FILE:
             self.run_file()
-        elif self.container.mode == BiRunnerContainer.MODE_REP:
-            self.run_rep() 
         elif self.container.mode == BiRunnerContainer.MODE_EXP:  
             self.run_exp()  
 
@@ -49,15 +47,6 @@ class BiRunnerModel(BiModel):
         self.thread.parameters = self.container.parameters
         self.thread.output_uri = self.container.output_uri
         self.thread.start()
-
-    def run_rep(self):
-        self.thread.observer = self.observer
-        self.thread.mode = BiRunnerContainer.MODE_REP
-        self.thread.process_info = self.container.process_info
-        self.thread.inputs = self.container.inputs
-        self.thread.parameters = self.container.parameters
-        self.thread.output_uri = self.container.output_uri
-        self.thread.start() 
 
     def run_exp(self):
         self.thread.observer = self.observer
@@ -99,15 +88,6 @@ class BiRunnerThread(QThread):
             runner.set_output(self.output_uri)
             runner.exec()   
             self.output_uris = runner.output_uris
-        elif self.mode == BiRunnerContainer.MODE_REP:  
-            runner = Runner(self.process_info)
-            runner.add_observer(self.observer)
-            for input in self.inputs: 
-                runner.add_inputs(input['name'], input['uri'], input['filter'])
-            runner.set_parameters(*self.parameters)
-            runner.set_output(self.output_uri)
-            runner.exec()  
-            #self.output_uris = runner.output_uris
         elif self.mode == BiRunnerContainer.MODE_EXP:  
             process = PipelineRunner(self.experiment, self.process_info)
             process.add_observer(self.observer)
@@ -116,4 +96,4 @@ class BiRunnerThread(QThread):
             for input_ in self.inputs:
                 process.add_input(input_['name'], input_['dataset'],
                                   input_['filter'], input_['origin_output_name'])
-            process.exec()                  
+            process.exec()  
