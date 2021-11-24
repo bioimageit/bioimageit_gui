@@ -1,5 +1,3 @@
-from ._components import BiSettingsComponent
-from ._containers import BiSettingsContainer
+from ._settings import BiSettingsComponent
 
-__all__ = ['BiSettingsComponent', 
-           'BiSettingsContainer']
+__all__ = ['BiSettingsComponent']

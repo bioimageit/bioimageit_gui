@@ -1,29 +1,44 @@
-from qtpy.QtWidgets import (QWidget, QVBoxLayout, QLabel)
+import qtpy.QtCore
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QMessageBox)
+
+from bioimageit_core.config import ConfigAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 
-from ._containers import BiSettingsContainer
+from ._containers import BiConfigContainer
+from ._widgets import BiConfigWidget
+from ._states import BiConfigStates
 
-
-class BiSettingsComponent(BiComponent):
-    def __init__(self, container: BiSettingsContainer):
-        super().__init__()
-        self._object_name = 'BiSettingsComponent'
+  
+class BiConfigComponent(BiComponent):
+    def __init__(self, container: BiConfigContainer):
+        self._object_name = 'BiConfigComponent'
         self.container = container
         self.container.register(self)  
 
         self.widget = QWidget()
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
-        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
 
-        label = QLabel('The settings page is not yet implemented')
-        label.setObjectName("BiWidget")
-        layout.addWidget(label)
+        self.config_widget = BiConfigWidget(ConfigAccess.instance().config)
+        self.config_widget.cancel.connect(self.reload)
+        self.config_widget.validate.connect(self.save)
+        self.config_widget.setMinimumWidth(500)
+        layout.addWidget(self.config_widget, 0, qtpy.QtCore.Qt.AlignHCenter)
+
+    def reload(self):
+        self.config_widget.reload(ConfigAccess.instance().config)
+
+    def save(self):
+        self.container.config = self.config_widget.get_config()
+        self.container.emit(BiConfigStates.ConfigEdited)        
 
     def update(self, action: BiAction):
-        pass 
+        if action.state == BiConfigStates.ConfigSaved:
+            msgBox = QMessageBox()
+            msgBox.setText("The new configuration has been saved. You may need to restart the application.")
+            msgBox.exec() 
 
-    def get_widget(self): 
-        return self.widget  
+    def get_widget(self):
+        return self.widget       

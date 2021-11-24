@@ -28,7 +28,7 @@ from bioimageit_gui.experiment import (BiExperimentCreateContainer,
 
 from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
 
-from bioimageit_gui.settings import BiSettingsComponent, BiSettingsContainer
+from bioimageit_gui.settings import BiSettingsComponent
 from bioimageit_gui.designer import BiDesignerComponent
 
 from bioimageit_viewer.viewer import BiMultiViewer
@@ -49,14 +49,13 @@ class BioImageITApp(BiComponent):
         self.finderContainer = BiFinderContainer()
         self.browserContainer = BiBrowserContainer()
         self.experimentCreateContainer = BiExperimentCreateContainer()
-        self.settingsContainer = BiSettingsContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
         self.finderComponent = BiFinderComponent(self.finderContainer)
         self.BrowserComponent = BiBrowserComponent(self.browserContainer)
         self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
-        self.settingsComponent = BiSettingsComponent(self.settingsContainer)
+        self.settingsComponent = BiSettingsComponent()
 
         # models
         self.finderModel = BiFinderModel(self.finderContainer)
