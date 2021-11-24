@@ -37,8 +37,10 @@ class BiUpdateThread(QThread):
         self.update_bioimageit = False
         self.update_toolboxes = False   
 
-    def run(self):    
-        subprocess.run(script_update_mac, check=True)           
+    def run(self):  
+        install_dir = ConfigAccess.instance().get('install_dir')
+        conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
+        subprocess.run([script_update_mac, install_dir, conda_dir], shell=True)           
 
 
 class BiConfigModel(BiModel):  
