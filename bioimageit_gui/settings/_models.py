@@ -1,3 +1,4 @@
+import os
 import subprocess
 from qtpy.QtCore import QThread
 from bioimageit_core.config import Config, ConfigAccess
@@ -6,7 +7,6 @@ from bioimageit_gui.core.framework import BiModel, BiAction
 
 from ._containers import BiUpdateContainer, BiConfigContainer
 from ._states import BiUpdateStates, BiConfigStates
-from .update_scripts import script_update_mac
 
 
 class BiUpdateModel(BiModel):  
@@ -40,7 +40,9 @@ class BiUpdateThread(QThread):
     def run(self):  
         install_dir = ConfigAccess.instance().get('install_dir')
         conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
-        p = subprocess.run([script_update_mac, install_dir, conda_dir], shell=True, capture_output=True)           
+
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.sh')
+        p = subprocess.run([script, install_dir, conda_dir], shell=True, capture_output=True)           
         print( 'exit status:', p.returncode )
         print( 'stdout:', p.stdout.decode() )
         print( 'stderr:', p.stderr.decode() )
