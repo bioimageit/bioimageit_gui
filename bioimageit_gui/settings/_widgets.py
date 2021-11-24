@@ -1,10 +1,11 @@
-from PySide2.QtWidgets import QGridLayout, QGroupBox, QHBoxLayout, QPushButton
+from qtpy.QtWidgets import QGridLayout, QGroupBox, QHBoxLayout, QPushButton
 import qtpy.QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QGridLayout, 
                             QGroupBox, QLabel, QLineEdit, 
                             QComboBox)
 
+from bioimageit_gui.core.widgets import BiButton
 
 class BiConfigWidget(QWidget):
     cancel = Signal()
@@ -107,7 +108,7 @@ class BiConfigWidget(QWidget):
         btn_validate.released.connect(self.emit_validate)
         btn_cancel = QPushButton('Cancel')
         btn_cancel.setObjectName('btnDefault')
-        btn_validate.released.connect(self.emit_cancel)
+        btn_cancel.released.connect(self.emit_cancel)
         btns_layout.addWidget(btn_cancel, 1, qtpy.QtCore.Qt.AlignRight)
         btns_layout.addWidget(btn_validate, 0, qtpy.QtCore.Qt.AlignRight)
 
@@ -152,3 +153,42 @@ class BiConfigWidget(QWidget):
                             'conda_dir': self.conda_dir_edit.text()
                            }                  
         return config                   
+
+
+class BiSettingsToolBar(QWidget):
+    open = Signal(int)
+
+    def __init__(self, items=[]):
+        super().__init__()
+
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(2, 7, 2, 7)
+        self.layout.setSpacing(2)
+        self.setLayout(self.layout)
+        self.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
+        self.setObjectName('BiVerticalBar')
+        self.layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop)
+        self.buttons = []
+
+        self.id_count = -1
+        for item in items:    
+            self.add_item(item)
+
+    def add_item(self, title: str):
+        btn_item = BiButton(title)
+        self.id_count += 1
+        btn_item.setCheckable(True)
+        btn_item.setAutoExclusive(True)
+        btn_item.id = self.id_count
+        btn_item.clickedId.connect(self.emit_clicked)
+        btn_item.setObjectName('BiVerticalBarButton')
+        self.buttons.append(btn_item)
+        self.layout.insertWidget(self.layout.count()-1, btn_item, 0, qtpy.QtCore.Qt.AlignTop)
+
+    def set_checked(self, id):
+        for btn in self.buttons:
+            if btn.id == id:
+                btn.setChecked(True)
+
+    def emit_clicked(self, id: int):
+        self.open.emit(id)        

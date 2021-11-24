@@ -1409,6 +1409,17 @@ QLabel#BiHomeEmpty{
   qproperty-alignment: AlignCenter;
 }
 
+QLabel#BiAbout{
+  min-height: 350px;
+  max-height: 350px;
+  max-width: 450px;
+  min-width: 450px;
+  background-color: #242830;
+  border-radius: 8px;
+  color: #f0f1f2;
+  qproperty-alignment: AlignCenter;
+}
+
 /* // ///////////////////////////////////////////////
  khMainWindowToolBar
 // /////////////////////////////////////////////// */
@@ -1620,4 +1631,37 @@ QLabel#BiDocViewer
   qproperty-alignment: AlignCenter;
 }
 
+/* ***************************************
+*         BiVerticalBarButton
+****************************************** */
+QPushButton#BiVerticalBarButton {
+  padding: 2px 12px;
+  /*margin: 2px 2px 2px 2px;*/
+  font-size: 12px;
+  color: #fff;
+  background-color: #5A626C;
+  border: none;
+}
 
+QPushButton#BiVerticalBarButton:hover {
+  color: #fff;
+  background-color: #6A727C;
+}
+
+QPushButton#BiVerticalBarButton:pressed {
+  background-color: #0577CA;
+}
+
+QPushButton#BiVerticalBarButton:disabled {
+  color : #fff;
+  background-color: #222222;
+}
+
+QPushButton#BiVerticalBarButton:checked {
+  color : #f0f1f2;
+  background-color: #0071C3;
+}
+
+QWidget#BiVerticalBar{
+  background-color: #414851;
+}
