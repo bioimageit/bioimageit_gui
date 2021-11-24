@@ -46,7 +46,7 @@ class BiUpdateThread(QThread):
         print( 'exit status:', p1.returncode )
         print( 'stdout:', p1.stdout.decode() )
         print( 'stderr:', p1.stderr.decode() )
-        p = subprocess.run([script, install_dir, conda_dir], shell=True, capture_output=True)           
+        p = subprocess.run(f'{script} {install_dir} {conda_dir}', shell=True, capture_output=True)           
         print( 'exit status:', p.returncode )
         print( 'stdout:', p.stdout.decode() )
         print( 'stderr:', p.stderr.decode() )
