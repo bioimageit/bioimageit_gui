@@ -40,8 +40,10 @@ class BiUpdateThread(QThread):
     def run(self):  
         install_dir = ConfigAccess.instance().get('install_dir')
         conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
-        subprocess.run([script_update_mac, install_dir, conda_dir], shell=True)           
-
+        p = subprocess.run([script_update_mac, install_dir, conda_dir], shell=True, capture_output=True)           
+        print( 'exit status:', p.returncode )
+        print( 'stdout:', p.stdout.decode() )
+        print( 'stderr:', p.stderr.decode() )
 
 class BiConfigModel(BiModel):  
     def __init__(self, container: BiConfigContainer):
