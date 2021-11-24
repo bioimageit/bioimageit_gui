@@ -42,7 +42,7 @@ class BiUpdateThread(QThread):
         conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
 
         script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.sh')
-        p1 = subprocess.run(['chmod', '+x', script], shell=True, capture_output=True)
+        p1 = subprocess.run(f'chmod +x {script}', shell=True, capture_output=True)
         print( 'exit status:', p1.returncode )
         print( 'stdout:', p1.stdout.decode() )
         print( 'stderr:', p1.stderr.decode() )
