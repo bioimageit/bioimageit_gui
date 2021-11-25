@@ -48,7 +48,7 @@ class BiUpdateComponent(BiComponent):
         self.checkbox_bioimageit.setChecked(True)
         self.checkbox_toolboxes = QCheckBox("Update Toolboxes")
         self.checkbox_toolboxes.setObjectName("BiCheckBoxNegative")
-        self.checkbox_toolboxes.setEnabled(False)
+        self.checkbox_toolboxes.setChecked(True)
 
         update_btn = QPushButton('Update')
         update_btn.setObjectName('btnPrimary')

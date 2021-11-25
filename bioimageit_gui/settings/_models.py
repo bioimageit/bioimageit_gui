@@ -1,6 +1,7 @@
 import os
 import subprocess
 from qtpy.QtCore import QThread
+from bioimageit_core.toolboxes import Toolboxes
 from bioimageit_core.config import Config, ConfigAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
@@ -38,11 +39,21 @@ class BiUpdateThread(QThread):
         self.update_toolboxes = False   
 
     def run(self):  
+        if self.update_bioimageit:
+            self.update_app()
+        if self.update_toolboxes:
+            self.update_tools()    
+
+    def update_app(self):    
         install_dir = ConfigAccess.instance().get('install_dir')
         conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
 
         if os.name == 'nt' :
-            print('update not yet implemented for windows')
+            script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.bat')
+            p = subprocess.run(f'{script} {install_dir} {conda_dir}', shell=True, capture_output=True)           
+            print( 'exit status:', p.returncode )
+            print( 'stdout:', p.stdout.decode() )
+            print( 'stderr:', p.stderr.decode() )
         else:    
             script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.sh')
             p1 = subprocess.run(f'chmod +x {script}', shell=True, capture_output=True)
@@ -53,6 +64,29 @@ class BiUpdateThread(QThread):
             print( 'exit status:', p.returncode )
             print( 'stdout:', p.stdout.decode() )
             print( 'stderr:', p.stderr.decode() )
+
+    def update_tools(self):
+        install_dir = ConfigAccess.instance().get('install_dir')
+        conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
+        if os.name == 'nt' :
+            script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update_tools.bat')
+            p = subprocess.run(f'{script} {install_dir} {conda_dir}', shell=True, capture_output=True)           
+            print( 'exit status:', p.returncode )
+            print( 'stdout:', p.stdout.decode() )
+            print( 'stderr:', p.stderr.decode() )
+        else:
+            script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update_tools.sh')
+            p1 = subprocess.run(f'chmod +x {script}', shell=True, capture_output=True)
+            print( 'exit status:', p1.returncode )
+            print( 'stdout:', p1.stdout.decode() )
+            print( 'stderr:', p1.stderr.decode() )
+            p = subprocess.run(f'{script} {install_dir}', shell=True, capture_output=True)           
+            print( 'exit status:', p.returncode )
+            print( 'stdout:', p.stdout.decode() )
+            print( 'stderr:', p.stderr.decode() )   
+        # run toolboxes build
+        builder = Toolboxes()
+        builder.build()             
 
 class BiConfigModel(BiModel):  
     def __init__(self, container: BiConfigContainer):

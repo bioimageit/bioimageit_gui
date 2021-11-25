@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 installdir=$1
 conda_dir=$2
 
