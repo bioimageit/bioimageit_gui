@@ -1,3 +1,4 @@
+from qtpy.QtCore import QThread
 from bioimageit_core.experiment import Experiment
 
 from bioimageit_gui.core.framework import BiModel, BiAction
@@ -13,6 +14,11 @@ class BiExperimentModel(BiModel):
         self._object_name = 'BiExperimentModel'
         self.container = container
         self.container.register(self)
+        self.thread = BiImportThread(container)
+        self.thread.finished.connect(self.import_finished)
+
+    def import_finished(self):
+        self.container.emit(BiExperimentStates.DataImported)
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Load or action.state == \
@@ -27,35 +33,32 @@ class BiExperimentModel(BiModel):
             self.container.emit(BiExperimentStates.DataSetLoaded)
 
         if action.state == BiExperimentStates.NewImportFile:
-            self.container.experiment.import_data(
-                data_path=self.container.import_info.file_data_path,
-                name=self.container.import_info.file_name,
-                author=self.container.import_info.author,
-                format_=self.container.import_info.format,
-                date=self.container.import_info.createddate,
-                tags={},
-                copy=self.container.import_info.file_copy_data
-            )
-            self.container.emit(BiExperimentStates.DataImported)
+            self.thread.mode = 'file'
+            self.thread.data_path=self.container.import_info.file_data_path
+            self.thread.name=self.container.import_info.file_name
+            self.thread.author=self.container.import_info.author
+            self.thread.format_=self.container.import_info.format
+            self.thread.date=self.container.import_info.createddate
+            self.thread.tags={}
+            self.thread.start()
 
         if action.state == BiExperimentStates.NewImportDir:
             filter_regexp = ''
             if self.container.import_info.dir_filter == 0:
-                filter_regexp = '\\' + self.container.import_info.dir_filter_value + '$'
+                filter_regexp = '.*\\' + self.container.import_info.dir_filter_value + '$'
             elif self.container.import_info.dir_filter == 1:
                 filter_regexp = self.container.import_info.dir_filter_value
             elif self.container.import_info.dir_filter == 2:
                 filter_regexp = '^' + self.container.import_info.dir_filter_value
 
-            self.container.experiment.import_dir(
-                dir_uri=self.container.import_info.dir_data_path,
-                filter_=filter_regexp,
-                author=self.container.import_info.author,
-                format_=self.container.import_info.format,
-                date=self.container.import_info.createddate,
-                copy_data=self.container.import_info.dir_copy_data)
-
-            self.container.emit(BiExperimentStates.DataImported)
+            self.thread.mode = 'folder'
+            self.thread.dir_uri = self.container.import_info.dir_data_path
+            self.thread.filter_ = filter_regexp
+            self.thread.author = self.container.import_info.author
+            self.thread.format_ = self.container.import_info.format
+            self.thread.date = self.container.import_info.createddate
+            self.thread.dir_tag_key = self.container.import_info.dir_tag_key
+            self.thread.start()
 
         if action.state == BiExperimentStates.TagsModified:
             self.container.experiment.set_tags(self.container.tag_info.tags)
@@ -78,6 +81,41 @@ class BiExperimentModel(BiModel):
                 self.container.tag_info.usingname_search
             )
             self.container.emit(BiExperimentStates.DataTagged)    
+
+
+class BiImportThread(QThread):
+    def __init__(self, container) -> None:
+        super().__init__()
+        self.container = container
+        self.mode = ''
+        self.data_path = '',
+        self.dir_uri = '',
+        self.filter_ = ''
+        self.name = '',
+        self.author = '',
+        self.format_ = '',
+        self.date = '',
+        self.tags = {},
+        self.dir_tag_key = ''
+
+    def run(self):
+        if self.mode == 'file':
+            self.container.experiment.import_data(
+                data_path=self.data_path,
+                name=self.name,
+                author=self.author,
+                format_=self.format_,
+                date=self.date,
+                tags=self.tags,
+            )
+        elif self.mode == 'folder':
+            self.container.experiment.import_dir(
+                dir_uri=self.dir_uri,
+                filter_ = self.filter_,
+                author = self.author,
+                format_ = self.format_,
+                date = self.date,
+                directory_tag_key = self.dir_tag_key)  
 
 
 class BiExperimentCreateModel(BiModel):

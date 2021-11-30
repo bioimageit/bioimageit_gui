@@ -1,5 +1,4 @@
-import os
-import subprocess
+from pathlib import Path
 from datetime import date
 
 import qtpy.QtCore
@@ -599,7 +598,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
             col_idx += 1
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.date))
 
-        self.tableWidget.resizeColumnsToContents()    
+        #self.tableWidget.resizeColumnsToContents()    
 
     def cellClicked(self, row : int, col : int):
         self.container.clickedRow = row
@@ -825,7 +824,6 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         self.widget.setObjectName("BiWidget")
 
         layout = QGridLayout()
-        #self.widget.setLayout(layout)
 
         # title
         title = QLabel(self.widget.tr("Import single data"))
@@ -834,33 +832,32 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         dataLabel = QLabel(self.widget.tr("Data"))
         dataLabel.setObjectName("BiWidget")
         self.dataPath = QLineEdit()
+        self.dataPath.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         browseDataButton = QPushButton(self.widget.tr("..."))
         browseDataButton.setObjectName("BiBrowseButton")
         browseDataButton.released.connect(self.browseDataButtonClicked)
 
-        copyDataLabel = QLabel(self.widget.tr("Copy data"))
-        copyDataLabel.setObjectName("BiWidget")
-        self.copyDataBox = QCheckBox()
-        self.copyDataBox.setChecked(True)
-
         nameLabel = QLabel(self.widget.tr("Name"))
         nameLabel.setObjectName("BiWidget")
         self.nameEdit = QLineEdit()
+        self.nameEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
 
         formatLabel = QLabel(self.widget.tr("Format"))
         formatLabel.setObjectName("BiWidget")
         self.formatCombox = QComboBox()
         self.formatCombox.addItems(FormatsAccess.instance().names())
-        self.formatCombox.setCurrentText('imagetiff')
+        self.formatCombox.setCurrentText('bioformat')
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
+        self.authorEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.authorEdit.setText(ConfigAccess.instance().get('user')['name'])
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
         createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
+        self.createddateEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.createddateEdit.setText(date.today().strftime("%Y-%m-%d"))
 
         importButton = QPushButton(self.widget.tr("import"))
@@ -871,17 +868,18 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         layout.addWidget(dataLabel, 1, 0)
         layout.addWidget(self.dataPath, 1, 1)
         layout.addWidget(browseDataButton, 1, 2)
-        layout.addWidget(copyDataLabel, 2, 0)
-        layout.addWidget(self.copyDataBox, 2, 1, 1, 2)
-        layout.addWidget(nameLabel, 3, 0)
-        layout.addWidget(self.nameEdit, 3, 1, 1, 2)
-        layout.addWidget(formatLabel, 4, 0)
-        layout.addWidget(self.formatCombox, 4, 1, 1, 2)
-        layout.addWidget(authorLabel, 5, 0)
-        layout.addWidget(self.authorEdit, 5, 1, 1, 2)
-        layout.addWidget(createddateLabel, 6, 0)
-        layout.addWidget(self.createddateEdit, 6, 1, 1, 2)
-        layout.addWidget(importButton, 7, 2, qtpy.QtCore.Qt.AlignRight)
+        layout.addWidget(nameLabel, 2, 0)
+        layout.addWidget(self.nameEdit, 2, 1, 1, 2)
+        layout.addWidget(formatLabel, 3, 0)
+        layout.addWidget(self.formatCombox, 3, 1, 1, 2)
+        layout.addWidget(authorLabel, 4, 0)
+        layout.addWidget(self.authorEdit, 4, 1, 1, 2)
+        layout.addWidget(createddateLabel, 5, 0)
+        layout.addWidget(self.createddateEdit, 5, 1, 1, 2)
+        layout.addWidget(importButton, 6, 2, qtpy.QtCore.Qt.AlignRight)
+
+        self.progressBar = QProgressBar()
+        self.progressBar.setVisible(False)
 
         totalLayout = QVBoxLayout()
         self.widget.setLayout(totalLayout)
@@ -889,24 +887,27 @@ class BiExperimentImportSingleDataComponent(BiComponent):
         thisWidget.setLayout(layout)
         totalLayout.addWidget(thisWidget, 0)
         totalLayout.addWidget(QWidget(), 1)
+        totalLayout.addWidget(self.progressBar, 0)
 
     def update(self, action: BiAction):
-        pass
+        if action.state == BiExperimentStates.DataImported:
+            self.progressBar.setRange(0, 100)
+            self.progressBar.setVisible(False)
 
     def importButtonClicked(self):
-        
-        #print('import clicked with format:', self.formatCombox.currentText())
         self.container.import_info.file_data_path = self.dataPath.text()
-        self.container.import_info.file_copy_data = self.copyDataBox.isChecked()
         self.container.import_info.file_name = self.nameEdit.text()
         self.container.import_info.format = self.formatCombox.currentText()
         self.container.import_info.author = self.authorEdit.text()
         self.container.import_info.createddate = self.createddateEdit.text()
         self.container.emit(BiExperimentStates.NewImportFile)
+        self.progressBar.setRange(0, 0)
+        self.progressBar.setVisible(True)
 
     def browseDataButtonClicked(self):
         fileName = QFileDialog.getOpenFileName(self.widget, self.widget.tr("Import file"), '*.*')
         self.dataPath.setText(fileName[0])
+        self.nameEdit.setText(Path(fileName[0]).stem)
 
     def get_widget(self):
         return self.widget  
@@ -933,14 +934,22 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         dataLabel = QLabel(self.widget.tr("Folder"))
         dataLabel.setObjectName("BiWidget")
         self.dataPath = QLineEdit()
+        self.dataPath.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         browseDataButton = QPushButton(self.widget.tr("..."))
         browseDataButton.setObjectName("BiBrowseButton")
         browseDataButton.released.connect(self.browseDataButtonClicked)
 
-        recursiveLabel = QLabel(self.widget.tr("Recursive"))
-        recursiveLabel.setObjectName("BiWidget")
-        self.recursiveBox = QCheckBox()
-        self.recursiveBox.setChecked(True)
+        key_value_label = QLabel(self.widget.tr("Key-Value pair"))
+        key_value_label.setObjectName("BiWidget")
+        self.key_value_box = QCheckBox("use folder name as value")
+        self.key_value_box.setChecked(False)
+        self.key_value_box.setObjectName("BiCheckBoxNegative")
+        self.key_value_box.stateChanged.connect(self.update_key_value_box)
+
+        self.key_value_title = QLabel('key')
+        self.key_value_title.setObjectName("BiWidget")
+        self.key_folder_edit = QLineEdit()
+        self.key_folder_edit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
 
         filterLabel = QLabel(self.widget.tr("Filter"))
         filterLabel.setObjectName("BiWidget")
@@ -949,27 +958,25 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         self.filterComboBox.addItem(self.widget.tr('Start With'))
         self.filterComboBox.addItem(self.widget.tr('Contains'))
         self.filterEdit = QLineEdit()
+        self.filterEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.filterEdit.setText('.tif')
-
-        copyDataLabel = QLabel(self.widget.tr("Copy data"))
-        copyDataLabel.setObjectName("BiWidget")
-        self.copyDataBox = QCheckBox()
-        self.copyDataBox.setChecked(True)
 
         formatLabel = QLabel(self.widget.tr("Format"))
         formatLabel.setObjectName("BiWidget")
         self.formatCombox = QComboBox()
         self.formatCombox.addItems(FormatsAccess.instance().names())
-        self.formatCombox.setCurrentText('imagetiff')
+        self.formatCombox.setCurrentText('bioformat')
 
         authorLabel = QLabel(self.widget.tr("Author"))
         authorLabel.setObjectName("BiWidget")
         self.authorEdit = QLineEdit()
+        self.authorEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.authorEdit.setText(ConfigAccess.instance().get('user')['name'])
 
         createddateLabel = QLabel(self.widget.tr("Created date"))
         createddateLabel.setObjectName("BiWidget")
         self.createddateEdit = QLineEdit()
+        self.createddateEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.createddateEdit.setText(date.today().strftime("%Y-%m-%d"))
 
         importButton = QPushButton(self.widget.tr("import"))
@@ -980,13 +987,14 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         layout.addWidget(dataLabel, 1, 0)
         layout.addWidget(self.dataPath, 1, 1, 1, 2)
         layout.addWidget(browseDataButton, 1, 3)
-        layout.addWidget(recursiveLabel, 2, 0)
-        layout.addWidget(self.recursiveBox, 2, 1, 1, 2)
-        layout.addWidget(filterLabel, 3, 0)
-        layout.addWidget(self.filterComboBox, 3, 1, 1, 1)
-        layout.addWidget(self.filterEdit, 3, 2, 1, 2)
-        layout.addWidget(copyDataLabel, 4, 0)
-        layout.addWidget(self.copyDataBox, 4, 1, 1, 2)
+        layout.addWidget(key_value_label, 2, 0)
+        layout.addWidget(self.key_value_box, 2, 1, 1, 2)
+        layout.addWidget(self.key_value_title, 3, 1)
+        layout.addWidget(self.key_folder_edit, 3, 2, 1, 1)
+
+        layout.addWidget(filterLabel, 4, 0)
+        layout.addWidget(self.filterComboBox, 4, 1, 1, 1)
+        layout.addWidget(self.filterEdit, 4, 2, 1, 1)
         layout.addWidget(formatLabel, 5, 0)
         layout.addWidget(self.formatCombox, 5, 1, 1, 2)
         layout.addWidget(authorLabel, 6, 0)
@@ -997,7 +1005,6 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
 
         self.progressBar = QProgressBar()
         self.progressBar.setVisible(False)
-        #layout.addWidget(self.progressBar, 8, 1, 1, 3)
 
         totalLayout = QVBoxLayout()
         self.widget.setLayout(totalLayout)
@@ -1006,6 +1013,7 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
         totalLayout.addWidget(thisWidget, 0)
         totalLayout.addWidget(QWidget(), 1)
         totalLayout.addWidget(self.progressBar, 0)
+        self.update_key_value_box(False)
 
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Progress:
@@ -1014,17 +1022,32 @@ class BiExperimentImportDirectoryDataComponent(BiComponent):
                 self.progressBar.setValue(self.container.progress)
                 if self.container.progress == 100:
                     self.progressBar.setVisible(False)
+        elif action.state == BiExperimentStates.DataImported:
+            self.progressBar.setRange(0, 100)
+            self.progressBar.setVisible(False)
+
+    def update_key_value_box(self, status):
+        if status:
+            self.key_value_title.setVisible(True)
+            self.key_folder_edit.setVisible(True)
+        else:  
+            self.key_value_title.setVisible(False)
+            self.key_folder_edit.setVisible(False)  
 
     def importButtonClicked(self):
         self.container.import_info.dir_data_path = self.dataPath.text()
-        self.container.import_info.dir_recursive = self.recursiveBox.isChecked()
+        if self.key_value_box.isChecked():
+            self.container.import_info.dir_tag_key = self.key_folder_edit.text()
+        else:
+            self.container.import_info.dir_tag_key = ''
         self.container.import_info.dir_filter = self.filterComboBox.currentIndex()
         self.container.import_info.dir_filter_value = self.filterEdit.text()
-        self.container.import_info.dir_copy_data = self.copyDataBox.isChecked()
         self.container.import_info.author = self.authorEdit.text()
         self.container.import_info.format = self.formatCombox.currentText()
         self.container.import_info.createddate = self.createddateEdit.text()
         self.container.emit(BiExperimentStates.NewImportDir)
+        self.progressBar.setVisible(True)
+        self.progressBar.setRange(0, 0)
 
     def browseDataButtonClicked(self):
         directory = QFileDialog.getExistingDirectory(self.widget, self.widget.tr("Select Directory"),
