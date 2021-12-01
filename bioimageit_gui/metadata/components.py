@@ -14,11 +14,13 @@ from bioimageit_gui.metadata.containers import (BiRawDataContainer,
                                                 BiProcessedDataContainer,
                                                 BiMetadataExperimentContainer)
 
+from bioimageit_gui.core.widgets import BiDictViewer
+
 
 class BiRawDataComponent(BiComponent):
     def __init__(self, container: BiRawDataContainer):
         super().__init__()
-        self._object_name = 'BiMetadataRawDataComponent'
+        self._object_name = 'BiRawDataComponent'
         self.container = container
         self.container.register(self)
 
@@ -30,7 +32,7 @@ class BiRawDataComponent(BiComponent):
 
         widget = QWidget()
         widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
-        widget.setObjectName("BiSideBar")
+        widget.setObjectName("BiWidget")
         layout = QGridLayout()
         widget.setLayout(layout)
         self.tagWidgets = {}
@@ -66,6 +68,10 @@ class BiRawDataComponent(BiComponent):
         tagsLabel = QLabel('Tags')
         tagsLabel.setObjectName('BiMetadataTitle')
 
+        metadataLabel = QLabel('Metadata')
+        metadataLabel.setObjectName('BiMetadataTitle')
+        self.metadataWidget = BiDictViewer()
+
         layout.addWidget(descLabel, 0, 0, 1, 2)
         layout.addWidget(uriLabel, 1, 0)
         layout.addWidget(self.uriEdit, 1, 1)
@@ -79,8 +85,10 @@ class BiRawDataComponent(BiComponent):
         layout.addWidget(self.authorEdit, 5, 1)
         layout.addWidget(tagsLabel, 6, 0, 1, 2)
         layout.addWidget(tagsWidget, 7, 0, 1, 2)
-        layout.addWidget(saveButton, 8, 0, 1, 2)
-        layout.addWidget(QWidget(), 9, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(metadataLabel, 8, 0, 1, 2)
+        layout.addWidget(self.metadataWidget, 9, 0, 1, 2)
+        layout.addWidget(saveButton, 10, 0, 1, 2)
+        layout.addWidget(QWidget(), 11, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
         layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
@@ -101,6 +109,8 @@ class BiRawDataComponent(BiComponent):
             self.dateEdit.setText(self.container.rawdata.metadata.date)
             self.authorEdit.setText(self.container.rawdata.metadata.author)
             self.uriEdit.setText(self.container.rawdata.metadata.uri)
+            # metadata
+            self.metadataWidget.import_data(self.container.rawdata.metadata.metadata)
 
             # tags
             for i in reversed(range(self.tagsLayout.count())): 

@@ -56,6 +56,42 @@ QWidget#BiLightGrayWidget{
 }
 
 /* ///////////////////////////////////////////////
+             QTreeView
+////////////////////////////////////////////////*/
+QTreeView {
+  background: #262930;
+  color: #f0f1f2;
+  alternate-background-color: #C6c6c6;
+}
+
+QTreeView {
+  show-decoration-selected: 1;
+}
+
+QTreeView::item {
+  border: 1px solid #414851;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+
+QTreeView::item:hover {
+  background: #577fbf;
+}
+
+QTreeView::item:selected {
+  border: 1px solid #567dbc;
+}
+
+QTreeView::item:selected:active{
+  background: #0071C3;
+}
+
+QTreeView::item:selected:!active {
+  background: #577fbf;
+}
+
+
+/* ///////////////////////////////////////////////
 			       Buttons
 ////////////////////////////////////////////////*/
 
