@@ -317,7 +317,7 @@ class BiExperimentToolbarComponent(BiComponent):
         # tags
         tagButton = QToolButton()
         tagButton.setObjectName("BiExperimentToolbarTagButton")
-        tagButton.setToolTip(self.widget.tr("Tag data"))
+        tagButton.setToolTip(self.widget.tr("Annotate data"))
         tagButton.released.connect(self.tagButtonClicked)
         layout.addWidget(tagButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
@@ -1080,9 +1080,9 @@ class BiExperimentTagComponent(BiComponent):
         tagUsingSeparatorComponent = BiExperimentTagsUsingSeparatorsComponent(self.container)
         tagUsingNameComponent = BiExperimentTagsUsingNameComponent(self.container)
 
-        tabWidget.addTab(tagsListComponent.get_widget(), self.widget.tr("Tags"))
-        tabWidget.addTab(tagUsingSeparatorComponent.get_widget(), self.widget.tr("Tag using separator"))
-        tabWidget.addTab(tagUsingNameComponent.get_widget(), self.widget.tr("Tag using name"))
+        tabWidget.addTab(tagsListComponent.get_widget(), self.widget.tr("Keys"))
+        tabWidget.addTab(tagUsingSeparatorComponent.get_widget(), self.widget.tr("Annotate using separator"))
+        tabWidget.addTab(tagUsingNameComponent.get_widget(), self.widget.tr("Annotate using name"))
 
     def update(self, action: BiAction):
         pass
@@ -1106,7 +1106,7 @@ class BiExperimentTagsListComponent(BiComponent):
         self.widget.setLayout(layout)
 
         # title
-        title = QLabel(self.widget.tr("Tags"))
+        title = QLabel(self.widget.tr("Keys"))
         title.setObjectName("BiLabelFormHeader1")
 
         # add widget
@@ -1224,14 +1224,14 @@ class BiExperimentTagsUsingSeparatorsComponent(BiComponent):
         #self.widget.setLayout(layout)
 
         # title
-        title = QLabel(self.widget.tr("Tag using separator"))
+        title = QLabel(self.widget.tr("Annotate using separator"))
         title.setObjectName("BiLabelFormHeader1")
 
         gridWidget = QWidget()
         self.gridLayout = QGridLayout()
         gridWidget.setLayout(self.gridLayout)
 
-        tagLabel = QLabel(self.widget.tr("Tag"))
+        tagLabel = QLabel(self.widget.tr("Key"))
         tagLabel.setObjectName("BiWidget")
         separatorLabel = QLabel(self.widget.tr("Separator"))
         separatorLabel.setObjectName("BiWidget")
@@ -1329,14 +1329,14 @@ class BiExperimentTagsUsingNameComponent(BiComponent):
         #self.widget.setLayout(layout)
 
         # title
-        title = QLabel(self.widget.tr("Tag using name"))
+        title = QLabel(self.widget.tr("Annotate using name"))
         title.setObjectName("BiLabelFormHeader1")
 
-        tagLabel = QLabel(self.widget.tr("Tag:"))
+        tagLabel = QLabel(self.widget.tr("Key:"))
         tagLabel.setObjectName("BiWidget")
         self.tagEdit = QLineEdit()
 
-        searchLabel = QLabel(self.widget.tr("Search names:"))
+        searchLabel = QLabel(self.widget.tr("Searched values:"))
         searchLabel.setObjectName("BiWidget")
         searchWidget = QWidget()
         self.searchLayout = QVBoxLayout()
@@ -1347,7 +1347,7 @@ class BiExperimentTagsUsingNameComponent(BiComponent):
         self._namesEdit.append(nameEdit)
         self.searchLayout.addWidget(nameEdit)
 
-        addLineButton = QPushButton(self.widget.tr("Add name"))
+        addLineButton = QPushButton(self.widget.tr("Add value"))
         addLineButton.setObjectName('btnDefault')
         addLineButton.released.connect(self.addLine)
 
