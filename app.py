@@ -35,6 +35,6 @@ if __name__ == '__main__':
     stylesheet_path = os.path.join(dir_path, 'theme', 'dark', 'stylesheet.css')
     print('stylesheet path=', stylesheet_path)
     app.setStyleSheet("file:///" + stylesheet_path)
-    icon_path = os.path.join(dir_path, "theme", "default", "icon.png")
+    icon_path = os.path.join(dir_path, "theme", "dark", "icon.png")
     app.setWindowIcon(QIcon(icon_path))
     sys.exit(app.exec_())
