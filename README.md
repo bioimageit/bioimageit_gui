@@ -1,11 +1,10 @@
-# BioImageApp
+# BioImageIT GUI
 
-BioImageApp is a GUI application for BioImagePy.
-BioImageApp is part of the BioImageIT project
+BioImageIT GUI is a GUI application for the BioImageIT project.
 
 # Documentation
 
-The documentation is available [here](https://bioimage-it.gitlabpages.inria.fr/bioimageapp/)
+The documentation is available [here](https://bioimageit.github.io/bioimageit_gui/)
 
 # Build the documentation
 
