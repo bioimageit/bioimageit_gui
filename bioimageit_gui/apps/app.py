@@ -3,31 +3,31 @@ from pathlib import Path
 from PySide2.QtWidgets import QSplitter
 from qtpy.QtWidgets import (QWidget, QHBoxLayout)
 
-from bioimageit_gui.core.theme import BiThemeAccess
+from bioimageit_framework.theme import BiThemeAccess
 
 from bioimageit_gui.core.widgets import BiAppBar, BiStaticStackedWidget
 from bioimageit_gui.core.framework import (BiAction, BiComponent)
 from bioimageit_gui.home import BiHomeComponent, BiHomeContainer, BiHomeStates
 
-from bioimageit_gui.finder.states import BiFinderStates
-from bioimageit_gui.finder.containers import BiFinderContainer
-from bioimageit_gui.finder.models import BiFinderModel
-from bioimageit_gui.finder.components import BiFinderComponent
+#from bioimageit_gui.finder.states import BiFinderStates
+#from bioimageit_gui.finder.containers import BiFinderContainer
+#from bioimageit_gui.finder.models import BiFinderModel
+#from bioimageit_gui.finder.components import BiFinderComponent
 
-from bioimageit_gui.browser import (BiBrowserComponent, BiBrowserStates,
-                                     BiBrowserContainer, BiBrowserModel)
+#from bioimageit_gui.browser import (BiBrowserComponent, BiBrowserStates,
+#                                     BiBrowserContainer, BiBrowserModel)
 
-from bioimageit_gui.experiment import (BiExperimentCreateContainer, 
-                                       BiExperimentViewerComponent,
-                                       BiExperimentCreateComponent, 
-                                       BiExperimentCreateModel,
-                                       BiExperimentStates,
-                                       BiExperimentCreateStates)
+#from bioimageit_gui.experiment import (BiExperimentCreateContainer, 
+#                                       BiExperimentViewerComponent,
+#                                       BiExperimentCreateComponent, 
+#                                       BiExperimentCreateModel,
+#                                       BiExperimentStates,
+#                                       BiExperimentCreateStates)
 
-from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
+#from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
 
-from bioimageit_gui.settings import BiSettingsComponent
-from bioimageit_gui.designer import BiDesignerComponent
+#from bioimageit_gui.settings import BiSettingsComponent
+#from bioimageit_gui.designer import BiDesignerComponent
 
 from bioimageit_viewer.viewer import BiMultiViewer
 
@@ -44,36 +44,36 @@ class BioImageITApp(BiComponent):
 
         # containers    
         self.homeContainer = BiHomeContainer()
-        self.finderContainer = BiFinderContainer()
-        self.browserContainer = BiBrowserContainer()
-        self.experimentCreateContainer = BiExperimentCreateContainer()
+        #self.finderContainer = BiFinderContainer()
+        #self.browserContainer = BiBrowserContainer()
+        #self.experimentCreateContainer = BiExperimentCreateContainer()
 
         # components
         self.homeComponent = BiHomeComponent(self.homeContainer)
-        self.finderComponent = BiFinderComponent(self.finderContainer)
-        self.BrowserComponent = BiBrowserComponent(self.browserContainer)
-        self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
-        self.settingsComponent = BiSettingsComponent()
+        #self.finderComponent = BiFinderComponent(self.finderContainer)
+        #self.BrowserComponent = BiBrowserComponent(self.browserContainer)
+        #self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
+        #self.settingsComponent = BiSettingsComponent()
 
         # models
-        self.finderModel = BiFinderModel(self.finderContainer)
-        self.browserModel = BiBrowserModel(self.browserContainer)
-        self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
+        #self.finderModel = BiFinderModel(self.finderContainer)
+        #self.browserModel = BiBrowserModel(self.browserContainer)
+        #self.experimentCreateModel = BiExperimentCreateModel(self.experimentCreateContainer)
 
         # register
         self.homeContainer.register(self)
-        self.finderContainer.emit(BiFinderStates.Reload)
-        self.finderContainer.register(self)
-        self.browserContainer.register(self)
-        self.experimentCreateContainer.register(self)
+        #self.finderContainer.emit(BiFinderStates.Reload)
+        #self.finderContainer.register(self)
+        #self.browserContainer.register(self)
+        #self.experimentCreateContainer.register(self)
 
         # viewer
         self.viewer = BiMultiViewer()
         self.viewer.set_visible(False)
 
         # init
-        self.browserContainer.currentPath = str(Path.home())
-        self.browserContainer.emit(BiBrowserStates.DirectoryModified)
+        #self.browserContainer.currentPath = str(Path.home())
+        #self.browserContainer.emit(BiBrowserStates.DirectoryModified)
 
         # widgets
         self.widget = QWidget()
