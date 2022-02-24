@@ -1,0 +1,55 @@
+/* ****************************************** */
+/*         	        bi-home                   */
+/* ****************************************** */
+QWidget#bi-home-tile{
+  background-color: #414851;
+  color: #e1e1e1;
+  min-height: 100px;
+  max-height: 100px;
+  max-width: 100px;
+  min-width: 100px;
+  border-radius: 4px;
+  border: 2px solid #414851;
+}
+
+QWidget#bi-home-tile:hover{
+  background-color: #5A626C;
+  border: 2px solid #262930;
+}
+
+QLabel#bi-home-tile-title{
+  color: #f0f1f2;
+  font-weight: bold;
+  /*margin-bottom: 7px;*/
+}
+
+QLabel#bi-home-empty{
+  min-height: 350px;
+  max-height: 350px;
+  max-width: 450px;
+  min-width: 450px;
+  background-color: #242830;
+  border-radius: 8px;
+  color: #5A626C;
+  qproperty-alignment: AlignCenter;
+}
+
+QLabel#bi-about{
+  min-height: 350px;
+  max-height: 350px;
+  max-width: 450px;
+  min-width: 450px;
+  background-color: #242830;
+  border-radius: 8px;
+  color: #f0f1f2;
+  qproperty-alignment: AlignCenter;
+}
+
+#bi-label-form-header1{
+    color: #c6c6c6;
+    font: bold;
+    border-top : 2px solid #c6c6c6;
+    text-transform: uppercase;
+    padding-left: 0px;
+    margin-left: 0px;
+}

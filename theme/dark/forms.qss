@@ -1,0 +1,144 @@
+/* ****************************************** */
+/*         	        QLineEdit                 */
+/* ****************************************** */
+QLineEdit{
+  color : #e1e1e1;
+  background: #5A626C;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  selection-background-color: #b2d6ff;
+}
+
+QLineEdit[readOnly="true"]{
+  color : #d1d1d1;
+  background-color: #262930;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-bottom: 0;
+}
+
+QLineEdit:disabled{
+  background-color: #262930;
+  border: 1px solid #262930;
+}
+
+QLineEdit:focus{
+  border: 1px solid #0071C3;
+}
+
+
+/* ****************************************** */
+/*         	        QSpinBox                  */
+/* ****************************************** */
+QSpinBox {
+  color : #e1e1e1;
+  background-color: #5A626C;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  selection-background-color: #b2d6ff;
+}
+
+QSpinBox::up-button {
+  border: none;
+}
+
+QSpinBox::down-button {
+  border: none;
+}
+
+QSpinBox::up-arrow {
+  image: url(%up-arrow.svg%);
+  width: 10px;
+  height: 10px;
+}
+
+QSpinBox::down-arrow {
+  image: url(%down-arrow.svg%);
+  width: 10px;
+  height: 10px;
+}
+
+/* ****************************************** */
+/*         	        QComboBox                 */
+/* ****************************************** */
+QComboBox {
+  color : #e1e1e1;
+  background-color: #5A626C;
+  border: 1px solid #5A626C;
+  border-radius: 4px;
+  padding: 6px 12px;
+  min-width: 6em;
+}
+
+QComboBox:editable {
+  background: #5A626C;
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+  background-color: #5A626C;
+}
+
+QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+  background-color: #5A626C;
+}
+
+QComboBox:on {
+  padding-top: 3px;
+  padding-left: 4px;
+}
+
+QComboBox::drop-down {
+  subcontrol-origin: padding;
+  subcontrol-position: top right;
+  width: 15px;
+  border-left-width: 1px;
+  border-left-color: #5A626C;
+  border-top-color: red;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+QComboBox::down-arrow {
+    image: url(%down-arrow.svg%);
+    width: 10px;
+    height: 10px;
+    padding-right: 4px;
+}
+
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+}
+
+QComboBox QAbstractItemView {
+  margin-top: 0px;
+  padding-top: 0px;
+  background-color: #414851;
+  selection-background-color: #414851;
+  color: #e1e1e1;
+  selection-color: #777777;
+}
+
+/* ****************************************** */
+/*         	        QGroupBox                 */
+/* ****************************************** */
+QGroupBox#bi-group-box {
+  border: 1px solid #414851;
+  border-radius: 5px;
+  margin-top: 1ex; /* leave space at the top for the title */
+  background-color: #414851;
+}
+
+QGroupBox#bi-group-box::title {
+  color: #f0f1f2;
+  border: 1px solid #262930;
+  border-radius: 5px;
+  margin-left: 12px;
+  subcontrol-origin: margin;
+  subcontrol-position: top left;
+  padding: 0 3px;
+  background-color: #414851;
+  font-weight: bold; 
+}

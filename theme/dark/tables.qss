@@ -1,0 +1,58 @@
+/* ****************************************** */
+/*         	        QTableView                */
+/* ****************************************** */
+QTableView {
+  border-style: none;
+  selection-color: #f0f1f2;
+  gridline-color: #262930;
+  alternate-background-color: #313339;
+  color: #d1d1d1;
+  background-color: #262930;
+  selection-background-color: #0071C3;
+}
+
+QTableWidget::item:selected 
+{
+  background: #3486c2;
+  color: #f0f1f2;
+}
+
+QHeaderView::section {
+  background-color: #262930;
+  color: #d1d1d1;
+  font-weight: bold; 
+  padding: 4px;
+  font-size: 14pt;
+  border-style: none;
+  min-height: 20px;
+  min-width: 10px;
+}
+
+QHeaderView::section:horizontal
+{
+  border-bottom: 2px solid #262930;
+  border-top: 1px solid #262930;
+  border-right: 1px solid #262930;
+  border-left: 1px solid #262930;
+}
+
+QHeaderView::section:vertical
+{
+  border-bottom: 0px solid #888888;
+  border-top: 0px solid #888888;
+  border-right: 0px solid #888888;
+  border-left: 0px solid #888888;
+}
+ 
+QTableView QTableCornerButton::section{
+  border-style: none;
+  background-color: #262930;		
+  border-right: 0px solid #888888;
+  border-left: 0px solid #888888;
+  border-top: 0px solid #888888;
+  border-bottom: 0px solid #888888;
+}
+
+QHeaderView {
+	background-color: #262930;
+}

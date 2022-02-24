@@ -5,7 +5,7 @@ from bioimageit_framework.widgets import BiVComposer
 from bioimageit_framework.theme import BiThemeAccess
 
 from bioimageit_gui.home.containers import BiHomeContainer
-from bioimageit_gui.home.states import BiHomeStates
+#from bioimageit_gui.home.states import BiHomeStates
 from bioimageit_gui.home.widgets import BiHomeTilesWidget, BiWorkspaceWidget
 
 
@@ -14,21 +14,20 @@ class BiHomeComponent(BiComponent):
         super().__init__()
         self._object_name = 'BiHomeComponent'
         self.container = container
-        self.container.register(self)  
-
+        #self.container.register(self)  
 
         self.home_widget = BiHomeTilesWidget()
         self.workspace_widget = BiWorkspaceWidget()
 
         self.composer = BiVComposer()
-        self.widget = self.composer.widget()
+        self.widget = self.composer.widget
         self.composer.add(self.home_widget)
         self.composer.add(self.workspace_widget)
 
-        self.home_widget.add_tile('New \n experiment', BiThemeAccess.instance().icon('plus-black-symbol'), 'OpenNewExperiment')
-        self.home_widget.add_tile('Browse \n experiments', BiThemeAccess.instance().icon('folder-gray'), 'OpenBrowser')
-        self.home_widget.add_tile('Toolboxes', BiThemeAccess.instance().icon('tools'), 'OpenToolboxes')
-        self.home_widget.add_tile('Settings', BiThemeAccess.instance().icon('cog-wheel-silhouette'), 'OpenSettings')
+        self.home_widget.add_tile('New \n experiment', BiThemeAccess.instance().icon('plus-dark'), 'OpenNewExperiment')
+        self.home_widget.add_tile('Browse \n experiments', BiThemeAccess.instance().icon('folder-dark'), 'OpenBrowser')
+        self.home_widget.add_tile('Toolboxes', BiThemeAccess.instance().icon('tools-dark'), 'OpenToolboxes')
+        self.home_widget.add_tile('Settings', BiThemeAccess.instance().icon('settings-dark'), 'OpenSettings')
         self.home_widget.connect(BiHomeTilesWidget.CLICKED_TILE, self.open_tile)
 
         self.workspace_widget.connect(BiWorkspaceWidget.CLICKED_EXP, self.open_eperiment)
@@ -44,7 +43,7 @@ class BiHomeComponent(BiComponent):
                 self.workspace_widget.set_item(i, exp) 
                
         
-    def tileClicked(self, origin: str):
+    def open_tile(self, origin: str):
         if origin.clicked_tile == 'OpenNewExperiment':
             self.container.emit(BiHomeStates.OpenNewExperiment)
         elif origin.clicked_tile == 'OpenBrowser':
@@ -56,6 +55,6 @@ class BiHomeComponent(BiComponent):
         elif origin.clicked_tile == 'OpenSettings':
             self.container.emit(BiHomeStates.OpenSettings)
 
-    def open_eperiment(self, origin):
+    def open_experiment(self, origin):
         self.container.clicked_experiment = origin.clicked_experiment
         self.container.emit(BiHomeStates.OpenExperiment)

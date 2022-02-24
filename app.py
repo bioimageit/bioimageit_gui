@@ -9,7 +9,7 @@ from bioimageit_core.api import APIAccess
 from bioimageit_core import ConfigAccess
 from bioimageit_formats import FormatsAccess
 
-from bioimageit_gui.core.theme import BiThemeAccess
+from bioimageit_framework.theme import BiThemeAccess, BiThemeSheets
 from bioimageit_gui.apps.app import BioImageITApp
 
 if __name__ == '__main__':
@@ -22,8 +22,10 @@ if __name__ == '__main__':
     APIAccess.instance(os.path.join(dir_path_parent, 'config.json')).connect()
     #ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+
+    # load and set the theme
     BiThemeAccess(os.path.join(dir_path, 'theme', 'dark'))
-    FormatsAccess(ConfigAccess.instance().get('formats')['file'])
+    BiThemeAccess.instance().set_stylesheet(app, BiThemeSheets.sheets())
 
     bookmark_file = os.path.join(dir_path_parent, 'bookmarks.json')
     component = BioImageITApp()
@@ -34,9 +36,6 @@ if __name__ == '__main__':
     component.get_widget().show()
     
     # Run the main Qt loop
-    stylesheet_path = os.path.join(dir_path, 'theme', 'dark', 'stylesheet.css')
-    print('stylesheet path=', stylesheet_path)
-    app.setStyleSheet("file:///" + stylesheet_path)
     icon_path = os.path.join(dir_path, "theme", "dark", "icon.png")
     app.setWindowIcon(QIcon(icon_path))
     sys.exit(app.exec_())

@@ -1,0 +1,118 @@
+/* ****************************************** */
+/*         	        bi-toolbar                */
+/* ****************************************** */
+QWidget#bi-toolbar{
+  background-color: #414851;
+  max-height: 50px;
+  min-height: 50px;
+  color: #f0f1f2;
+}
+
+QWidget#bi-toolbar-spacer{
+    background-color: #414851;
+}
+
+QToolBar {
+  background-color: #414851;
+  spacing: 1px; /* spacing between items in the tool bar */
+  height: 70px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-bottom: 1px solid #08080a;	
+}
+
+QToolBar::handle {
+
+}
+
+QToolButton {
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #f0f1f2;
+  background-color: #414851;
+  border-radius: 4px;
+}
+
+QToolButton:hover {
+  color: #d1d1d1;
+  background-color: #5A626C;
+  border-top: 1px solid #5A626C;
+}
+
+QToolButton:pressed {
+  background-color: #5A626C;
+  border: 1px solid #5A626C;
+}
+
+QToolButton:disabled {
+  color : #000;
+  background-color: #242424;
+  border: 1px solid #242424;
+}
+
+/* **************************************** */
+/*             bi-toolbar-button            */
+/* **************************************** */
+QPushButton#bi-toolbar-button {
+  padding: 3px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #f0f1f2;
+  background-color: #414851;
+  border-radius: 4px;
+}
+
+QPushButton#bi-toolbar-button:hover {
+  color: #f0f1f2;
+  background-color: #5A626C;
+}
+
+QPushButton#bi-toolbar-button:pressed {
+  background-color: #5A626C;
+}
+
+QPushButton#bi-toolbar-button:disabled {
+  color : #f0f1f2;
+  background-color: #262930;
+}
+
+QPushButton#bi-toolbar-button:checked {
+  color : #f0f1f2;
+  background-color: #0071C3;
+}
+
+/* ********************************************** */
+/*         	        bi-app-toolbar                */
+/* ********************************************** */
+#bi-app-toolbar{
+	background-color: #5A626C;
+}
+
+#bi-app-toolbar:handle{
+	background-color: #5A626C;
+}
+
+QPushButton#bi-app-toolbar-button{
+	border: none;
+  min-height: 30px;
+  max-height: 30px;
+  max-width: 26px;
+  min-width: 26px;
+	border-bottom-right-radius: 9px;
+  border-bottom-left-radius: 9px;
+  border-top-right-radius: 9px;
+  border-top-left-radius: 9px;
+}
+QPushButton#bi-app-toolbar-button:hover{
+	background-color: #414851;
+}
+QPushButton#bi-app-toolbar-button:pressed{
+	background-color: #5A626C;
+}
+QPushButton#bi-app-toolbar-button:checked{
+	background-color: #0071C3;
+}
+QPushButton#bi-app-toolbar-button:disabled{
+	background-color: #5A626C;
+}
