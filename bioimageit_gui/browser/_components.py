@@ -10,7 +10,7 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                                QAbstractItemView, QHBoxLayout,
                                QToolButton, QSplitter, QLineEdit)
 
-from bioimageit_core.config import ConfigAccess
+from bioimageit_core import ConfigAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 from bioimageit_gui.core.theme import BiThemeAccess

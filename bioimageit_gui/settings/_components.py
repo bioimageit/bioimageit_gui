@@ -3,7 +3,7 @@ import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
                             QMessageBox, QLabel, QGridLayout)
 
-from bioimageit_core.config import ConfigAccess
+from bioimageit_core import ConfigAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
 

@@ -3,9 +3,7 @@ import json
 
 from qtpy.QtCore import QDir
 
-from bioimageit_core.experiment import Experiment
-from bioimageit_core.metadata.run import Run
-from bioimageit_core.dataset import RawDataSet, ProcessedDataSet, RawData
+from bioimageit_core.api import APIAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 from ._states import BiBrowserStates
@@ -93,34 +91,34 @@ class BiBrowserModel(BiModel):
                     self.files.append(fileInfo)
 
                 elif files[i].fileName().endswith("experiment.md.json"):
-                    experiment = Experiment(files[i].absoluteFilePath())
+                    experiment = APIAccess.instance().get_experiment(files[i].absoluteFilePath())
 
                     fileInfo = BiBrowserFileInfo(files[i].fileName(),
                                             files[i].path(),
-                                            experiment.metadata.name,
+                                            experiment.name,
                                             "experiment",
-                                            experiment.metadata.date)
+                                            experiment.date)
                     self.files.append(fileInfo)
                     del experiment
         
                 elif files[i].fileName().endswith("run.md.json"):
-                    run = Run(files[i].absoluteFilePath())
+                    run = APIAccess.instance().get_run(files[i].absoluteFilePath())
     
                     fileInfo = BiBrowserFileInfo(files[i].fileName(),
                                             files[i].path(),
-                                            run.metadata.process_name,
+                                            run.process_name,
                                             "run",
                                             files[i].lastModified().toString(
                                                 "yyyy-MM-dd"))
                     self.files.append(fileInfo)
                     del run
                 
-                elif files[i].fileName().endswith("rawdataset.md.json"):
-                    rawDataSet = RawDataSet(files[i].absoluteFilePath())
+                elif files[i].fileName().endswith("raw_dataset.md.json"):
+                    rawDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
 
                     fileInfo = BiBrowserFileInfo(files[i].fileName(),
                                             files[i].path(),
-                                            rawDataSet.metadata.name,
+                                            rawDataSet.name,
                                             "rawdataset",
                                             files[i].lastModified().toString(
                                                 "yyyy-MM-dd"))
@@ -128,8 +126,7 @@ class BiBrowserModel(BiModel):
                     del rawDataSet
         
                 elif files[i].fileName().endswith("processeddataset.md.json"):
-                    processedDataSet = ProcessedDataSet(
-                        files[i].absoluteFilePath())
+                    processedDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
 
                     fileInfo = BiBrowserFileInfo(files[i].fileName(),
                                             files[i].path(),

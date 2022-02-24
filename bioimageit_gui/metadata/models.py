@@ -1,7 +1,6 @@
 import os
 
-from bioimageit_core.data import RawData, ProcessedData
-from bioimageit_core.metadata.run import Run
+from bioimageit_core.api import APIAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 from bioimageit_gui.metadata.states import (BiRawDataStates,
@@ -23,12 +22,12 @@ class BiRawDataModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiRawDataStates.URIChanged:
-            self.container.rawdata = RawData(self.container.md_uri)
+            self.container.rawdata = APIAccess.instance().get_raw_data(self.container.md_uri)
             self.container.emit(BiRawDataStates.Loaded)
             return
 
         if action.state == BiRawDataStates.DeleteRawData:
-            data = RawData(self.container.md_uri)    
+            data = APIAccess.instance().get_raw_data(self.container.md_uri)    
             data.delete()
             self.container.emit(BiRawDataStates.RawDataDeleted)   
 
@@ -47,7 +46,7 @@ class BiProcessedDataModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiProcessedDataStates.URIChanged:
-            self.container.processeddata = ProcessedData(self.container.md_uri)
+            self.container.processeddata = APIAccess.instance().get_processed_data(self.container.md_uri)
             self.container.emit(BiProcessedDataStates.Loaded)
             return    
 
@@ -61,7 +60,7 @@ class BiRunModel(BiModel):
 
     def update(self, action: BiAction):
         if action.state == BiRunStates.URIChanged:
-            self.container.run = Run(self.container.md_uri)
+            self.container.run = APIAccess.instance().get_run(self.container.md_uri)
             self.container.emit(BiRunStates.Loaded)
             return  
 

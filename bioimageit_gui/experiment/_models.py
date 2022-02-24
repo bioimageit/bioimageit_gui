@@ -1,5 +1,5 @@
 from qtpy.QtCore import QThread
-from bioimageit_core.experiment import Experiment
+from bioimageit_core.api import APIAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 from ._states import (BiExperimentCreateStates,
@@ -23,13 +23,12 @@ class BiExperimentModel(BiModel):
     def update(self, action: BiAction):
         if action.state == BiExperimentStates.Load or action.state == \
                 BiExperimentStates.RefreshClicked:
-            self.container.experiment = Experiment(
+            self.container.experiment = APIAccess.instance().get_experiment(
                 self.container.experiment_uri)
             self.container.emit(BiExperimentStates.Loaded)
 
         if action.state == BiExperimentStates.DataSetClicked:
-            self.container.current_dataset = self.container.experiment. \
-                get_dataset(self.container.current_dataset_name)
+            self.container.current_dataset = APIAccess.instance().get_dataset(self.container.experiment, self.container.current_dataset_name)
             self.container.emit(BiExperimentStates.DataSetLoaded)
 
         if action.state == BiExperimentStates.NewImportFile:
@@ -61,13 +60,14 @@ class BiExperimentModel(BiModel):
             self.thread.start()
 
         if action.state == BiExperimentStates.TagsModified:
-            self.container.experiment.set_tags(self.container.tag_info.tags)
+            APIAccess.instance().set_keys(self.container.experiment, self.container.tag_info.tags)
             self.container.emit(BiExperimentStates.TagsSaved)
 
         if action.state == BiExperimentStates.TagUsingSeparators:
             for i in range(len(self.container.tag_info.usingseparator_tags)):
-                self.container.experiment.tag_using_seperator(
-                    tag=self.container.tag_info.usingseparator_tags[i],
+                APIAccess.instance().annotate_using_seperator(
+                    self.container.experiment,
+                    key=self.container.tag_info.usingseparator_tags[i],
                     separator=self.container.tag_info.usingseparator_separator[
                         i],
                     value_position=
@@ -100,16 +100,17 @@ class BiImportThread(QThread):
 
     def run(self):
         if self.mode == 'file':
-            self.container.experiment.import_data(
-                data_path=self.data_path,
-                name=self.name,
-                author=self.author,
-                format_=self.format_,
-                date=self.date,
-                tags=self.tags,
-            )
+            APIAccess.instance().import_data(self.container.experiment,
+                                             data_path=self.data_path,
+                                             name=self.name,
+                                             author=self.author,
+                                             format_=self.format_,
+                                             date=self.date,
+                                             key_value_pairs=self.tags
+                                            )
         elif self.mode == 'folder':
-            self.container.experiment.import_dir(
+            APIAccess.instance().import_data(
+                self.container.experiment,
                 dir_uri=self.dir_uri,
                 filter_ = self.filter_,
                 author = self.author,
@@ -130,8 +131,8 @@ class BiExperimentCreateModel(BiModel):
 
         if action.state == BiExperimentCreateStates.CreateClicked:
             try:
-                experiment = Experiment()
-                experiment.create(self.container.experiment_name,
+                experiment = APIAccess.instance().create_experiment(
+                                  self.container.experiment_name,
                                   self.container.experiment_author,
                                   'now',
                                   self.container.experiment_destination_dir)

@@ -43,13 +43,13 @@ class BiRunnerViewApp(BiComponent):
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.RunFinished:
             for out in self.runnerContainer.genarated_outputs:
-                self.viewer.setVisible(True)
+                self.viewer.set_visible(True)
                 for fileinfo in out:
                     print('open output', fileinfo)
                     name = os.path.basename(fileinfo['uri'])
                     self.viewer.add_data(fileinfo['uri'], name, fileinfo['format'])
         if action.state == BiRunnerStates.ClickedView:
-            self.viewer.setVisible(True)
+            self.viewer.set_visible(True)
             name = os.path.basename(self.runnerContainer.clicked_view_uri)
             print("view data with info:")
             print("name:", name)

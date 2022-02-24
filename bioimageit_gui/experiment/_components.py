@@ -11,8 +11,8 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
                                QFileDialog, QTabWidget, QSpinBox, QCheckBox, 
                                QComboBox, QProgressBar, QHeaderView)
 
-from bioimageit_core.config import ConfigAccess
-from bioimageit_core.dataset import ProcessedDataSet
+from bioimageit_core import ConfigAccess
+from bioimageit_core.api import APIAccess
 from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.core.framework import BiComponent, BiAction
@@ -377,7 +377,7 @@ class BiExperimentToolbarComponent(BiComponent):
             self.dataset_box.currentIndexChanged.disconnect(
                 self.datasetBoxChanged)
             for pdataset_uri in self.container.experiment.metadata.processeddatasets:
-                pdataset = ProcessedDataSet(pdataset_uri)
+                pdataset = APIAccess.instance().get_dataset(pdataset_uri)
                 dataset_name = pdataset.metadata.name
                 self.dataset_box.addItem(dataset_name)
                 if dataset_name == current_text:
@@ -473,7 +473,7 @@ class BiExperimentDataSetListComponent(BiComponent):
         self.layout.addWidget(ProcessedLabel, 0, qtpy.QtCore.Qt.AlignTop)
 
         for pdataset_uri in self.container.experiment.metadata.processeddatasets:
-            pdataset = ProcessedDataSet(pdataset_uri)
+            pdataset = APIAccess.instance().get_dataset(pdataset_uri)
             datasetButton = BiButton(pdataset.metadata.name)
             datasetButton.content = pdataset.metadata.name
             datasetButton.setObjectName('BiBrowserShortCutsButton')

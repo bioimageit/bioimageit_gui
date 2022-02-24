@@ -5,7 +5,8 @@ from qtpy import QtCore
 from qtpy.QtGui import QIcon, QGuiApplication
 from qtpy.QtWidgets import QApplication, QStyle
 
-from bioimageit_core.config import ConfigAccess
+from bioimageit_core.api import APIAccess
+from bioimageit_core import ConfigAccess
 from bioimageit_formats import FormatsAccess
 
 from bioimageit_gui.core.theme import BiThemeAccess
@@ -18,7 +19,8 @@ if __name__ == '__main__':
     # Create and show the component
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dir_path_parent = os.path.abspath(os.path.join(dir_path, os.pardir))
-    ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
+    APIAccess.instance(os.path.join(dir_path_parent, 'config.json')).connect()
+    #ConfigAccess(os.path.join(dir_path_parent, 'config.json'))
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])
     BiThemeAccess(os.path.join(dir_path, 'theme', 'dark'))
     FormatsAccess(ConfigAccess.instance().get('formats')['file'])

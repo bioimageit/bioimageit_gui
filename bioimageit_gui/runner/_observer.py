@@ -1,25 +1,32 @@
-from bioimageit_core.core.utils import ProgressObserver
+from bioimageit_core.core.observer import Observer
 from qtpy.QtCore import QObject, Signal
 
 
-class BiGuiProgressObserver(QObject, ProgressObserver):
+class BiGuiProgressObserver(QObject, Observer):
     progressSignal = Signal(int)
     messageSignal = Signal(str)
 
     def __init__(self):
         super().__init__()
 
-    def notify(self, data: dict):
+    def notify(self, message: str, job_id: int = 0):
+        if job_id > 0:
+            self.messageSignal.emit(f"job{job_id}: {message}")
+        else:
+            self.messageSignal.emit(message)   
 
-        if 'progress' in data:
-            self.progressSignal.emit(data['progress'])
-            #print('progress:', data['progress'])
-        if 'message' in data:
-            self.messageSignal.emit(data['message'])
-            #print('message:', data['message'])   
-        if 'warning' in data:
-            self.messageSignal.emit('warning:' + data['warning'])
-            #print('warning:', data['warning']) 
-        if 'error' in data:
-            self.messageSignal.emit('error:' + data['warning'])
-            #print('error:', data['error'])   
+    def notify_warning(self, message: str, job_id: int = 0):
+        if job_id > 0:
+            self.messageSignal.emit(f"job{job_id} WARNING: {message}")
+        else:
+            self.messageSignal.emit(f"WARNING: {message}")         
+
+    def notify_error(self, message: str, job_id: int = 0):
+        if job_id > 0:
+            self.messageSignal.emit(f"job{job_id} ERROR: {message}")
+        else:
+            self.messageSignal.emit(f"ERROR: {message}") 
+            
+    def notify_progress(self, progress: int, message: int = '', job_id: int = 0):
+        self.progressSignal.emit(progress) 
+        self.messageSignal.emit(message)                

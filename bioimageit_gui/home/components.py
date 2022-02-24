@@ -4,14 +4,11 @@ from qtpy.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QTableWidget,
                                QTableWidgetItem, QLabel, QAbstractItemView)
                                
 from bioimageit_gui.core.framework import BiComponent, BiAction
-from bioimageit_gui.core.widgets import BiFlowLayout
 from bioimageit_gui.home.containers import BiHomeContainer
 from bioimageit_gui.home.states import BiHomeStates
 from bioimageit_gui.home.widgets import BiHomeTile
 from bioimageit_gui.core.theme import BiThemeAccess
-from bioimageit_core.config import ConfigAccess
-from bioimageit_core.experiment import Workspace
-
+from bioimageit_core.api import APIAccess
 
 class BiHomeComponent(BiComponent):
     def __init__(self, container: BiHomeContainer):
@@ -34,18 +31,18 @@ class BiHomeComponent(BiComponent):
         btnsWidget.setLayout(btnsLayout)
         openNewExperimentTile = BiHomeTile('New \n experiment', BiThemeAccess.instance().icon('plus-black-symbol'), 'OpenNewExperiment')
         openBrowserTile = BiHomeTile('Browse \n experiments', BiThemeAccess.instance().icon('folder-gray'), 'OpenBrowser')
-        openDesignerTile = BiHomeTile('Pipeline \n designer', BiThemeAccess.instance().icon('workflow'), 'OpenDesigner')
+        #openDesignerTile = BiHomeTile('Pipeline \n designer', BiThemeAccess.instance().icon('workflow'), 'OpenDesigner')
         openToolboxesTile = BiHomeTile('Toolboxes', BiThemeAccess.instance().icon('tools'), 'OpenToolboxes')
         openSettingsTile = BiHomeTile('Settings', BiThemeAccess.instance().icon('cog-wheel-silhouette'), 'OpenSettings')
 
         openNewExperimentTile.clickedSignal.connect(self.tileClicked)
-        openDesignerTile.clickedSignal.connect(self.tileClicked)
+        #openDesignerTile.clickedSignal.connect(self.tileClicked)
         openToolboxesTile.clickedSignal.connect(self.tileClicked)
         openBrowserTile.clickedSignal.connect(self.tileClicked)
         openSettingsTile.clickedSignal.connect(self.tileClicked)
         btnsLayout.addWidget(openNewExperimentTile, 1, qtpy.QtCore.Qt.AlignRight)
         btnsLayout.addWidget(openBrowserTile,  0, qtpy.QtCore.Qt.AlignCenter)
-        btnsLayout.addWidget(openDesignerTile,  0, qtpy.QtCore.Qt.AlignCenter)
+        #btnsLayout.addWidget(openDesignerTile,  0, qtpy.QtCore.Qt.AlignCenter)
         btnsLayout.addWidget(openToolboxesTile,  0, qtpy.QtCore.Qt.AlignCenter)
         btnsLayout.addWidget(openSettingsTile,  1, qtpy.QtCore.Qt.AlignLeft)
 
@@ -74,8 +71,7 @@ class BiHomeComponent(BiComponent):
         self.fill_experiments()
     
     def fill_experiments(self):
-        workspace = Workspace()  
-        self.container.experiments = workspace.experiments()
+        self.container.experiments = APIAccess.instance().get_workspace_experiments()
         if len(self.container.experiments) == 0:
             self.shortcutsWidget.setVisible(False)
             self.emptyshortcutsWidget.setVisible(True)

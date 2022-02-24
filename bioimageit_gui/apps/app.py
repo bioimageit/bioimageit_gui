@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
 from PySide2.QtWidgets import QSplitter
-from qtpy.QtWidgets import (QVBoxLayout, QWidget, QLabel, QHBoxLayout)
-
-from bioimageit_core.config import ConfigAccess
+from qtpy.QtWidgets import (QWidget, QHBoxLayout)
 
 from bioimageit_gui.core.theme import BiThemeAccess
 
@@ -71,7 +69,7 @@ class BioImageITApp(BiComponent):
 
         # viewer
         self.viewer = BiMultiViewer()
-        self.viewer.setVisible(False)
+        self.viewer.set_visible(False)
 
         # init
         self.browserContainer.currentPath = str(Path.home())
@@ -99,7 +97,7 @@ class BioImageITApp(BiComponent):
 
         splitter = QSplitter()
         splitter.addWidget(central_widget)
-        splitter.addWidget(self.viewer)
+        splitter.addWidget(self.viewer.widget)
 
         layout.addWidget(splitter)
 
@@ -186,7 +184,7 @@ class BioImageITApp(BiComponent):
         self.opened_components.pop(idx) 
         self.stackedWidget.slideInIdx(0)
         self.mainBar.setChecked(0, True)
-        self.viewer.setVisible(False)
+        self.viewer.set_visible(False)
 
     def slide_to(self, id: int):
         self.stackedWidget.slideInIdx(id)
@@ -194,9 +192,9 @@ class BioImageITApp(BiComponent):
         # Condition to show/hide the viewer
         print(self.opened_components)
         if self.opened_components[id].show_viewer:
-            self.viewer.setVisible(True)
+            self.viewer.set_visible(True)
         else:
-            self.viewer.setVisible(False)     
+            self.viewer.set_visible(False)     
 
     def open_browser(self):
         if self.browser_tab_id < 0:

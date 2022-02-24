@@ -4,7 +4,7 @@ from qtpy.QtWidgets import (QWidget, QHBoxLayout,
                             QLabel, QPushButton, 
                             QVBoxLayout, QScrollArea)
 
-from bioimageit_core.config import ConfigAccess
+from bioimageit_core import ConfigAccess
 from bioimageit_gui.core.framework import BiComponent, BiAction
 
 from ._containers import BiRunnerContainer
@@ -103,7 +103,7 @@ class BiRunnerToolbarCommponent(BiComponent):
 
     def update(self, action: BiAction):
         if action.state == BiRunnerStates.ProcessInfoLoaded:
-            self.title_label.setText(self.container.process_info.metadata.name)
+            self.title_label.setText(self.container.process_info.name)
 
     def get_widget(self):
         return self.widget          
@@ -196,7 +196,7 @@ class BiRunnerEditorComponent(BiComponent):
         self.execLayout.addWidget(fillWidget, 1, qtpy.QtCore.Qt.AlignTop)
 
         # hide parameters if there are no parameter
-        if process_info.metadata.param_size() < 1:
+        if process_info.param_size() < 1:
             self.paramWidget.setVisible(False)      
 
         self.swithMode(self.container.mode)     

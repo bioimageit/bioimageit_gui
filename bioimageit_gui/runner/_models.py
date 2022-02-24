@@ -1,8 +1,10 @@
+import os
+
+from bioimageit_formats import FormatsAccess
 from qtpy.QtCore import QThread
 
-from bioimageit_core.process import Process
-from bioimageit_core.runner import Runner
-from bioimageit_core.pipeline import PipelineRunner
+from bioimageit_core.api import APIAccess
+from bioimageit_core.containers import Job
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 from ._states import BiRunnerStates
@@ -60,7 +62,7 @@ class BiRunnerModel(BiModel):
         self.thread.start()     
 
     def getProcess(self):
-        process = Process(self.container.process_uri)
+        process = APIAccess.instance().get_tool_from_uri(self.container.process_uri)
         self.container.process_info = process
         self.container.emit(BiRunnerStates.ProcessInfoLoaded)
 
@@ -80,20 +82,22 @@ class BiRunnerThread(QThread):
     def run(self):
         self.output_uris = []
         if self.mode == BiRunnerContainer.MODE_FILE:
-            runner = Runner(self.process_info)
-            runner.add_observer(self.observer)
+            params = {}
             for input_ in self.inputs:
-                runner.add_input(input_['name'], input_['uri'])
-            runner.set_parameters(*self.parameters)
-            runner.set_output(self.output_uri)
-            runner.exec()   
-            self.output_uris = runner.output_uris
+                params[input_['name']] = input_['uri']
+            for output in self.process_info.outputs:
+                params[output.name] = os.path.join(self.output_uri, output.name, FormatsAccess.instance().get(output.format).extension)    
+            for i in range(0, len(self.parameters), 2):
+                params[self.parameters[i]] = self.parameters[i+1]
+            APIAccess.instance().exec(self.process_info, **params)
         elif self.mode == BiRunnerContainer.MODE_EXP:  
-            process = PipelineRunner(self.experiment, self.process_info)
-            process.add_observer(self.observer)
-            process.set_dataset_name(self.output_uri)
-            process.set_parameters(*self.parameters)
+            job = Job()
+            job.experiment = self.experiment
+            job.tool = self.process_info
             for input_ in self.inputs:
-                process.add_input(input_['name'], input_['dataset'],
-                                  input_['filter'], input_['origin_output_name'])
-            process.exec()  
+                job.set_input(input_['name'], input_['dataset'],
+                              input_['filter'], input_['origin_output_name'])
+            for i in range(0, len(self.parameters), 2):
+                job.set_param(self.parameters[i], self.parameters[i+1] )               
+            job.set_output_dataset_name(self.output_uri)
+            APIAccess.instance().run(job)

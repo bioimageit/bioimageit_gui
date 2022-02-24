@@ -6,9 +6,8 @@ from qtpy.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit, QSpinBox)
 
-from bioimageit_core.process import Process
-from bioimageit_core.experiment import Experiment
-from bioimageit_core.metadata.run import Run
+from bioimageit_core.containers import Tool
+from bioimageit_core.api import APIAccess
 
 from bioimageit_gui.core.widgets import BiButton, BiFileSelectWidget
 from bioimageit_gui.browser import BiExperimentSelectorWidget
@@ -18,9 +17,9 @@ from ._containers import BiRunnerContainer
 class BiRunnerInputSingleWidget(QWidget):
     openViewSignal = Signal(str, str)
 
-    def __init__(self, process_info: Process, parent: QWidget = None):
+    def __init__(self, process_info: Tool, parent: QWidget = None):
         super().__init__(parent)
-        self.info = process_info.metadata
+        self.info = process_info
         # create widget
         self.layout = QGridLayout()
         row = -1
@@ -153,7 +152,7 @@ class BiRunnerInputExperimentWidget(QWidget):
     def __init__(self, container: BiRunnerContainer, parent: QWidget = None):
         super().__init__(parent)
         self.container = container
-        self.info = container.process_info.metadata
+        self.info = container.process_info
 
         # experiment browser
         self.browser_widget = BiExperimentSelectorWidget()
@@ -219,21 +218,21 @@ class BiRunnerInputExperimentWidget(QWidget):
         datasets_origin = ['']
         tags = []
         if os.path.isfile(experiment_uri):
-            experiment = Experiment(experiment_uri)
+            experiment = APIAccess.instance().get_experiment(experiment_uri)
             self.container.experiment = experiment
-            tags = experiment.metadata.tags
+            tags = experiment.keys
             for i in range(experiment.get_processed_datasets_size()):
                 pdataset = experiment.get_processed_dataset_at(i)
                 # get run
                 run_uri = os.path.join(os.path.dirname(pdataset.md_uri),
                                        'run.md.json')
                 if os.path.isfile(run_uri):
-                    run = Run(run_uri)
-                    process = Process(run.metadata.process_uri)
-                    for output in process.metadata.outputs:
-                        datasets_text.append(pdataset.metadata.name + ":" +
+                    run = APIAccess.instance().get_run(run_uri)
+                    process = APIAccess.instance().get_tool_from_uri(run.process_uri)
+                    for output in process.outputs:
+                        datasets_text.append(pdataset.name + ":" +
                                              output.description)
-                        datasets_name.append(pdataset.metadata.name)
+                        datasets_name.append(pdataset.name)
                         datasets_origin.append(output.name)
         idx = 1
         for inp in self.info.inputs:
@@ -270,9 +269,9 @@ class BiRunnerInputExperimentWidget(QWidget):
     
 
 class BiRunnerParamWidget(QWidget):
-    def __init__(self, process_info: Process, parent: QWidget = None):
+    def __init__(self, process_info: Tool, parent: QWidget = None):
         super().__init__(parent) 
-        self.info = process_info.metadata
+        self.info = process_info
         self.labels = dict() # <str, QLabel>
         self.widgets = dict() # <str, BiProcessInputWidget>
 

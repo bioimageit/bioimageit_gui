@@ -2,17 +2,15 @@ import os
 import qtpy.QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtGui import QPixmap, QImage
-from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout, QScrollArea,
-                               QTableWidget, QTableWidgetItem,
-                               QAbstractItemView, QHBoxLayout, QToolButton)
+from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout)
 
-from bioimageit_core.processes.containers import ProcessCategoryContainer
+from bioimageit_core.containers.tools_containers import ToolsCategoryContainer
 
 
 class BiProcessCategoryTile(QWidget):
-    clickedSignal = Signal(ProcessCategoryContainer)
+    clickedSignal = Signal(ToolsCategoryContainer)
 
-    def __init__(self, category: ProcessCategoryContainer,
+    def __init__(self, category: ToolsCategoryContainer,
                  parent: QWidget = None):
         super().__init__(parent)
         self.category = category

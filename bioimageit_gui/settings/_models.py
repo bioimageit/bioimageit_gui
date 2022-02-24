@@ -1,8 +1,8 @@
 import os
 import subprocess
 from qtpy.QtCore import QThread
-from bioimageit_core.toolboxes import Toolboxes
-from bioimageit_core.config import Config, ConfigAccess
+from bioimageit_core.core.toolboxes import Toolboxes
+from bioimageit_core import Config, ConfigAccess
 
 from bioimageit_gui.core.framework import BiModel, BiAction
 
