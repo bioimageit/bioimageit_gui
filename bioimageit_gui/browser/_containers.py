@@ -1,4 +1,5 @@
 import os
+from qtpy.QtCore import QDir
 
 from bioimageit_gui.core.framework import BiContainer, BiObject
 
@@ -18,6 +19,8 @@ class BiBrowserFileInfo(BiObject):
 
 
 class BiBrowserContainer(BiContainer):
+    REFRESH = 'refresh'
+    OPEN_EXP = 'open_experiment'
 
     def __init__(self):
         super().__init__()
@@ -61,3 +64,31 @@ class BiBrowserContainer(BiContainer):
                 self.historyPaths.pop(i)
         self.addHistory(path)
         self.posHistory = len(self.historyPaths) - 1   
+
+    def action_previous(self, action):
+        self.moveToPrevious()
+        self._notify(BiBrowserContainer.REFRESH)
+
+    def action_next(self, action):
+        self.moveToNext()
+        self._notify(BiBrowserContainer.REFRESH)
+
+    def action_up(self, action):
+        dir = QDir(self.container.currentPath)
+        dir.cdUp()
+        upPath = dir.absolutePath()
+        self.setCurrentPath(upPath)
+        self._notify(BiBrowserContainer.REFRESH)
+
+    def action_change_dir(self, action, path):
+        self.setCurrentPath(path)
+        self._notify(BiBrowserContainer.REFRESH)
+
+    def action_open_experiment(self, action, experiment_uri):
+        self.openExperimentPath = experiment_uri
+        self._notify(BiBrowserContainer.OPEN_EXP)
+        
+    def init(self, workspace_path):
+        self.container.currentPath = workspace_path
+        self._notify(BiBrowserContainer.REFRESH)    
+   

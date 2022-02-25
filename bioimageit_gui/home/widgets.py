@@ -7,7 +7,6 @@ import qtpy.QtCore
 from qtpy.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QTableWidget,
                                QTableWidgetItem, QLabel, QAbstractItemView)
 
-from bioimageit_framework.theme import BiThemeAccess
 from bioimageit_framework.widgets import BiWidget                                
 
 
@@ -142,5 +141,5 @@ class BiWorkspaceWidget(BiWidget):
             self.shortcutsWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select) 
 
     def cell_double_clicked(self, row: int, col: int):
-        self.clicked_experiment = self.container.experiments[row]['md_uri']
+        self.clicked_experiment = row
         self.emit(BiWorkspaceWidget.CLICKED_EXP)    

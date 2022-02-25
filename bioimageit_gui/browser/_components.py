@@ -1,59 +1,64 @@
 import os
 import getpass
 from pathlib import Path
-from qtpy.QtWidgets import QPushButton, QMessageBox
 
 import qtpy.QtCore
 from qtpy.QtCore import Signal
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
-                               QTableWidget, QTableWidgetItem,
-                               QAbstractItemView, QHBoxLayout,
-                               QToolButton, QSplitter, QLineEdit)
+                            QTableWidget, QTableWidgetItem,
+                            QAbstractItemView, QHBoxLayout,
+                            QToolButton, QSplitter, QLineEdit,
+                            QPushButton, QMessageBox)
 
 from bioimageit_core import ConfigAccess
 
-from bioimageit_gui.core.framework import BiComponent, BiAction
-from bioimageit_gui.core.theme import BiThemeAccess
-from ._states import BiBrowserStates
+from bioimageit_framework.framework import BiComponent, BiConnectome
+from bioimageit_framework.widgets import BiWidget
+from bioimageit_framework.theme import BiThemeAccess
+
 from ._containers import BiBrowserContainer
 from ._widgets import BiShortcutButton
 from ._models import BiBrowserModel
 
 
-class BiExperimentSelectorWidget(QWidget):
-    selected_experiment = Signal(str)
+class BiExperimentSelectorWidget(BiComponent):
+    SELECTED_EXP = "selected_experiment"
 
     def __init__(self):
         super().__init__()
         self.container = BiBrowserContainer()
 
         # components
-        browser_component = BiBrowserComponent(self.container )
+        browser_component = BiBrowserComponent()
 
         # model
-        self.browser_model = BiBrowserModel(self.container)
+        self.browser_model = BiBrowserModel()
+
+        # connect
+        BiConnectome.connect(self.container, browser_component)
+        BiConnectome.connect(self.container, self.browser_model)
 
         # init
         workspace_path = ConfigAccess.instance().get('workspace')
-        self.container.currentPath = workspace_path
-        self.container.emit(BiBrowserStates.DirectoryModified)
+        self.container.init(workspace_path)
 
         # validation bar
         validation_bar = QWidget()
-        validation_bar.setObjectName("BiToolBar")
+        validation_bar.setObjectName("bi-toolbar")
         validation_bar.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         bar_layout = QHBoxLayout()
         validation_bar.setLayout(bar_layout)
 
         validation_button = QPushButton('Open')
-        validation_button.setObjectName('btnPrimary')
+        validation_button.setObjectName('btn-primary')
         validation_button.released.connect(self.validate_clicked)
         bar_layout.addWidget(validation_button, 1, qtpy.QtCore.Qt.AlignRight)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        self.setLayout(layout)
+        self.widget.setLayout(layout)
         layout.addWidget(browser_component.get_widget(), 1)
         layout.addWidget(validation_bar, 0, qtpy.QtCore.Qt.AlignBottom)
 
@@ -70,7 +75,6 @@ class BiExperimentSelectorWidget(QWidget):
             msg.exec_()
 
 
-
 class BiBrowserComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
         super().__init__()
@@ -83,7 +87,6 @@ class BiBrowserComponent(BiComponent):
         self.tableComponent = BiBrowserTableComponent(self.container)
 
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
         self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
@@ -101,23 +104,20 @@ class BiBrowserComponent(BiComponent):
         layout.addWidget(self.toolBarComponent.get_widget())
         layout.addWidget(splitter)
 
-    def update(self, action: BiAction):
-        pass 
-
-    def get_widget(self): 
-        return self.widget  
-
 
 class BiBrowserToolBarComponent(BiComponent):
-    def __init__(self, container: BiBrowserContainer):
+    PREVIOUS = 'previous'
+    NEXT = 'next'
+    UP = 'up'
+    CHANGE_DIR = 'change_dir'
+
+    def __init__(self):
         super().__init__()
         self._object_name = 'BiBrowserToolBarComponent'
-        self.container = container
-        self.container.register(self)
 
         # build widget
         self.widget = QWidget()
-        self.widget.setObjectName("BiToolBar")
+        self.widget.setObjectName("bi-toolbar")
         self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QHBoxLayout()
         layout.setSpacing(1)
@@ -126,6 +126,7 @@ class BiBrowserToolBarComponent(BiComponent):
 
         # previous
         previousButton = QToolButton()
+        previousButton.setIcon(QIcon(BiThemeAccess.instance().icon('arrow-left')))
         previousButton.setObjectName("BiBrowserToolBarPreviousButton")
         previousButton.setToolTip(self.widget.tr("Previous"))
         previousButton.released.connect(self.previousButtonClicked)
@@ -133,22 +134,22 @@ class BiBrowserToolBarComponent(BiComponent):
 
         # next
         nextButton = QToolButton()
-        nextButton.setObjectName("BiBrowserToolBarNextButton")
+        nextButton.setIcon(QIcon(BiThemeAccess.instance().icon('arrow-right')))
         nextButton.setToolTip(self.widget.tr("Next"))
         nextButton.released.connect(self.nextButtonClicked)
         layout.addWidget(nextButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # up
         upButton = QToolButton()
-        upButton.setObjectName("BiBrowserToolBarUpButton")
-        upButton.setToolTip(self.widget.tr("Tags"))
+        upButton.setIcon(QIcon(BiThemeAccess.instance().icon('arrow-up')))
+        upButton.setToolTip(self.widget.tr("Up"))
         upButton.released.connect(self.upButtonClicked)
         layout.addWidget(upButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
         # up
         refreshButton = QToolButton()
-        refreshButton.setObjectName("BiBrowserToolBarRefreshButton")
-        refreshButton.setToolTip(self.widget.tr("Tags"))
+        refreshButton.setIcon(QIcon(BiThemeAccess.instance().icon('arrow-refresh')))
+        refreshButton.setToolTip(self.widget.tr("Refresh"))
         refreshButton.released.connect(self.refreshButtonClicked)
         layout.addWidget(refreshButton, 0, qtpy.QtCore.Qt.AlignLeft)
 
@@ -158,37 +159,29 @@ class BiBrowserToolBarComponent(BiComponent):
         self.pathLineEdit.returnPressed.connect(self.pathEditReturnPressed)
         layout.addWidget(self.pathLineEdit, 1)
 
-    def update(self, action: BiAction):
-        if action.state == BiBrowserStates.FilesInfoLoaded:
-            self.pathLineEdit.setText(self.container.currentPath)
+    def callback_loaded(self, emitter):
+        self.pathLineEdit.setText(emitter.currentPath)            
 
     def previousButtonClicked(self):
-        self.container.emit(BiBrowserStates.PreviousClicked)
+        self._emit(BiBrowserToolBarComponent.PREVIOUS)
 
     def nextButtonClicked(self):
-        self.container.emit(BiBrowserStates.NextClicked)
+        self._emit(BiBrowserToolBarComponent.NEXT)
 
     def upButtonClicked(self):
-        self.container.emit(BiBrowserStates.UpClicked)
+        self._emit(BiBrowserToolBarComponent.UP)
 
     def pathEditReturnPressed(self):
-        self.container.setCurrentPath(self.pathLineEdit.text())
-        self.container.emit(BiBrowserStates.DirectoryModified)
+        self._emit(BiBrowserToolBarComponent.CHANGE_DIR, self.pathLineEdit.text())
 
     def refreshButtonClicked(self):
-        self.container.setCurrentPath(self.pathLineEdit.text())
-        self.container.emit(BiBrowserStates.RefreshClicked)
-
-    def get_widget(self): 
-        return self.widget            
+        self._emit(BiBrowserToolBarComponent.CHANGE_DIR, self.pathLineEdit.text())         
        
 
 class BiBrowserShortCutsComponent(BiComponent):
-    def __init__(self, container: BiBrowserContainer):
+    def __init__(self):
         super(BiBrowserShortCutsComponent, self).__init__()
         self._object_name = 'BiBrowserShortCutsComponent'
-        self.container = container
-        self.container.register(self)
 
         self.widget = QWidget()
         
@@ -198,7 +191,7 @@ class BiBrowserShortCutsComponent(BiComponent):
 
         self.wwidget = QWidget()
         mainLayout.addWidget(self.wwidget)
-        self.wwidget.setObjectName("BiLeftBar")
+        self.wwidget.setObjectName("bi-left-bar")
         self.wwidget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
@@ -245,10 +238,6 @@ class BiBrowserShortCutsComponent(BiComponent):
 
         layout.addWidget(bookmarkWidget, 0, qtpy.QtCore.Qt.AlignTop)
         layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop) 
-
-
-    def update(self, action: BiAction):
-        pass
 
     def buttonClicked(self, path: str):
         self.container.currentPath = path

@@ -4,66 +4,38 @@ import json
 from qtpy.QtCore import QDir
 
 from bioimageit_core.api import APIAccess
+from bioimageit_framework.framework import BiModel
 
-from bioimageit_gui.core.framework import BiModel, BiAction
-from ._states import BiBrowserStates
-from ._containers import (BiBrowserContainer,
-                          BiBrowserFileInfo)
+from ._containers import BiBrowserFileInfo
 
 
 class BiBrowserModel(BiModel):
-    def __init__(self, container: BiBrowserContainer):
+    OPEN_EXP = 'open_experiment'
+    CHANGE_DIR = 'change_dir'
+
+    def __init__(self):
         super().__init__()
         self._object_name = 'BiBrowserModel'
-        self.container = container
-        self.container.register(self)
         self.files = list
 
-    def update(self, action: BiAction):
-        if action.state == BiBrowserStates.DirectoryModified or \
-                action.state == BiBrowserStates.RefreshClicked:
-            self.loadFiles()
-            return
-    
-        if action.state == BiBrowserStates.ItemDoubleClicked:
-            row = self.container.doubleClickedRow
-            dcFile = self.container.files[row]
-            self.browse(dcFile)
-            return   
-
-        if action.state == BiBrowserStates.PreviousClicked:
-            self.container.moveToPrevious()
-            self.container.emit(BiBrowserStates.DirectoryModified)
-            return
-
-        if action.state == BiBrowserStates.NextClicked:
-            self.container.moveToNext()
-            self.container.emit(BiBrowserStates.DirectoryModified)
-            return
-
-        if action.state == BiBrowserStates.UpClicked:
-            dir = QDir(self.container.currentPath)
-            dir.cdUp()
-            upPath = dir.absolutePath()
-            self.container.setCurrentPath(upPath)
-            self.container.emit(BiBrowserStates.DirectoryModified)
-            return
-
+    def callback_browse(self, emitter):
+        row = emitter.doubleClickedRow
+        dcFile = emitter.files[row]
+        self.browse(dcFile)
 
     def browse(self, fileInfo: BiBrowserFileInfo):
         experiment_file = os.path.join(fileInfo.path, fileInfo.fileName,
                                       'experiment.md.json')
         if os.path.isfile(experiment_file):
-            self.container.openExperimentPath = os.path.join(fileInfo.path,
+            self._emit(BiBrowserModel.OPEN_EXP, os.path.join(fileInfo.path,
                                                              fileInfo.fileName,
-                                                             "experiment.md.json")
-            self.container.emit(BiBrowserStates.OpenExperiment)
-        elif fileInfo.type == "dir":    
-            self.container.setCurrentPath(os.path.join(fileInfo.path,
-                                                       fileInfo.fileName))
-            self.container.emit(BiBrowserStates.DirectoryModified)
+                                                             "experiment.md.json"))
+        elif fileInfo.type == "dir":  
+            self._emit(BiBrowserModel.CHANGE_DIR, os.path.join(fileInfo.path,
+                                                       fileInfo.fileName))  
+            
 
-    def loadFiles(self):
+    def callback_refresh(self, emitter):
         dir = QDir(self.container.currentPath)
         files = dir.entryInfoList()
         self.files = []

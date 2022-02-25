@@ -53,3 +53,33 @@ QLabel#bi-about{
     padding-left: 0px;
     margin-left: 0px;
 }
+
+/* ****************************************** */
+/*         	        bi-finder                   */
+/* ****************************************** */
+QWidget#bi-finder-category-tile{
+  background-color: #414851;
+  color: #e1e1e1;
+  min-height: 210px;
+  max-height: 210px;
+  max-width: 350px;
+  min-width: 300px;
+  border-radius: 4px;
+  border: 2px solid #414851;
+}
+
+QWidget#bi-finder-category-tile:hover{
+  background-color: #5A626C;
+  border: 2px solid #262930;
+}
+
+QLabel#bi-finder-category-tile-title{
+  color: #f0f1f2;
+  font-weight: bold;
+  margin-bottom: 7px;
+  background-color: transparent;
+}
+
+QLabel#bi-finder-category-tile-thumb{
+  background-color: transparent;
+}

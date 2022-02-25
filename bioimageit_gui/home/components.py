@@ -1,20 +1,20 @@
 from bioimageit_core.api import APIAccess
 
-from bioimageit_framework.framework import BiComponent, BiAction
+from bioimageit_framework.framework import BiComponent
 from bioimageit_framework.widgets import BiVComposer
 from bioimageit_framework.theme import BiThemeAccess
 
-from bioimageit_gui.home.containers import BiHomeContainer
-#from bioimageit_gui.home.states import BiHomeStates
 from bioimageit_gui.home.widgets import BiHomeTilesWidget, BiWorkspaceWidget
 
 
 class BiHomeComponent(BiComponent):
-    def __init__(self, container: BiHomeContainer):
+    CLICKED_EXP = 'open_experiment'
+    CLICKED_TILE = 'open_tile'
+    LOADED_EXP = 'load_experiments'
+
+    def __init__(self):
         super().__init__()
-        self._object_name = 'BiHomeComponent'
-        self.container = container
-        #self.container.register(self)  
+        self._object_name = 'BiHomeComponent' 
 
         self.home_widget = BiHomeTilesWidget()
         self.workspace_widget = BiWorkspaceWidget()
@@ -30,31 +30,25 @@ class BiHomeComponent(BiComponent):
         self.home_widget.add_tile('Settings', BiThemeAccess.instance().icon('settings-dark'), 'OpenSettings')
         self.home_widget.connect(BiHomeTilesWidget.CLICKED_TILE, self.open_tile)
 
-        self.workspace_widget.connect(BiWorkspaceWidget.CLICKED_EXP, self.open_eperiment)
+        self.workspace_widget.connect(BiWorkspaceWidget.CLICKED_EXP, self.open_experiment)
         self.fill_experiments()
     
     def fill_experiments(self):
-        self.container.experiments = APIAccess.instance().get_workspace_experiments()
-        if len(self.container.experiments) == 0:
+        experiments = APIAccess.instance().get_workspace_experiments()
+        if len(experiments) == 0:
             self.workspace_widget.free()
         else:
-            self.workspace_widget.set_row_count(len(self.container.experiments))
-            for i, exp in enumerate(self.container.experiments):
+            self.workspace_widget.set_row_count(len(experiments))
+            for i, exp in enumerate(experiments):
                 self.workspace_widget.set_item(i, exp) 
+        self._emit(BiHomeComponent.LOADED_EXP, experiments)        
                
         
     def open_tile(self, origin: str):
-        if origin.clicked_tile == 'OpenNewExperiment':
-            self.container.emit(BiHomeStates.OpenNewExperiment)
-        elif origin.clicked_tile == 'OpenBrowser':
-            self.container.emit(BiHomeStates.OpenBrowser) 
-        elif origin.clicked_tile == 'OpenDesigner':
-            self.container.emit(BiHomeStates.OpenDesigner) 
-        elif origin.clicked_tile == 'OpenToolboxes':
-            self.container.emit(BiHomeStates.OpenToolboxes)    
-        elif origin.clicked_tile == 'OpenSettings':
-            self.container.emit(BiHomeStates.OpenSettings)
+        print('clicked til=', origin.clicked_tile)
+        self._emit(BiHomeComponent.CLICKED_TILE, [origin.clicked_tile])
 
     def open_experiment(self, origin):
-        self.container.clicked_experiment = origin.clicked_experiment
-        self.container.emit(BiHomeStates.OpenExperiment)
+        experiment_uri = origin.experiments[origin.clicked_experiment]['md_uri']
+        print('clicked exp=', experiment_uri)
+        self._emit(BiHomeComponent.CLICKED_EXP, experiment_uri)

@@ -1,7 +1,7 @@
 from qtpy.QtCore import Signal
 import qtpy.QtCore
 from qtpy.QtGui import QPixmap, QImage
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout, )
+from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout, QPushButton, QMessageBox)
 
 
 class BiShortcutButton(QWidget):
