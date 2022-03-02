@@ -4,14 +4,15 @@ import json
 from qtpy.QtCore import QDir
 
 from bioimageit_core.api import APIAccess
-from bioimageit_framework.framework import BiModel
+from bioimageit_framework.framework import BiActuator
 
 from ._containers import BiBrowserFileInfo
 
 
-class BiBrowserModel(BiModel):
+class BiBrowserModel(BiActuator):
     OPEN_EXP = 'open_experiment'
     CHANGE_DIR = 'change_dir'
+    RELOAD = 'reload'
 
     def __init__(self):
         super().__init__()
@@ -34,9 +35,8 @@ class BiBrowserModel(BiModel):
             self._emit(BiBrowserModel.CHANGE_DIR, os.path.join(fileInfo.path,
                                                        fileInfo.fileName))  
             
-
     def callback_refresh(self, emitter):
-        dir = QDir(self.container.currentPath)
+        dir = QDir(emitter.currentPath)
         files = dir.entryInfoList()
         self.files = []
 
@@ -133,6 +133,4 @@ class BiBrowserModel(BiModel):
                                             files[i].lastModified().toString(
                                                 "yyyy-MM-dd"))
                     self.files.append(fileInfo)
-
-        self.container.files = self.files
-        self.container.emit(BiBrowserStates.FilesInfoLoaded)
+        self._emit(BiBrowserModel.RELOAD, tuple(self.files))

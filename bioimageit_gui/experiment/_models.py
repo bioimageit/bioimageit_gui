@@ -1,86 +1,90 @@
 from qtpy.QtCore import QThread
 from bioimageit_core.api import APIAccess
 
-from bioimageit_gui.core.framework import BiModel, BiAction
-from ._states import (BiExperimentCreateStates,
-                      BiExperimentStates)
+from bioimageit_framework.framework import BiActuator, BiConnectome
 from ._containers import (BiExperimentCreateContainer,
                           BiExperimentContainer)
 
 
-class BiExperimentModel(BiModel):
+class BiExperimentModel(BiActuator):
+    LOADED = 'loaded'
+    DataSetLoaded = 'dataset_loaded'
+    ImportFile = 'import_file'
+    TagsSaved = 'tags_saved'
+    DataTagged = 'data_tagged'
+    DataImported = 'data_imported'
+
     def __init__(self, container: BiExperimentContainer):
         super().__init__()
         self._object_name = 'BiExperimentModel'
-        self.container = container
-        self.container.register(self)
         self.thread = BiImportThread(container)
         self.thread.finished.connect(self.import_finished)
 
     def import_finished(self):
-        self.container.emit(BiExperimentStates.DataImported)
+        self._emit(BiExperimentModel.DataImported)
 
-    def update(self, action: BiAction):
-        if action.state == BiExperimentStates.Load or action.state == \
-                BiExperimentStates.RefreshClicked:
-            self.container.experiment = APIAccess.instance().get_experiment(
-                self.container.experiment_uri)
-            self.container.emit(BiExperimentStates.Loaded)
+    def callback_load(self, emitter):
+        experiment = APIAccess.instance().get_experiment(emitter.experiment_uri)
+        self._emit(BiExperimentModel.LOADED, experiment)
 
-        if action.state == BiExperimentStates.DataSetClicked:
-            self.container.current_dataset = APIAccess.instance().get_dataset(self.container.experiment, self.container.current_dataset_name)
-            self.container.emit(BiExperimentStates.DataSetLoaded)
+    def callback_refresh_clicked(self, emitter):
+        experiment = APIAccess.instance().get_experiment(emitter.experiment_uri)
+        self._emit(BiExperimentModel.LOADED, experiment)
 
-        if action.state == BiExperimentStates.NewImportFile:
-            self.thread.mode = 'file'
-            self.thread.data_path=self.container.import_info.file_data_path
-            self.thread.name=self.container.import_info.file_name
-            self.thread.author=self.container.import_info.author
-            self.thread.format_=self.container.import_info.format
-            self.thread.date=self.container.import_info.createddate
-            self.thread.tags={}
-            self.thread.start()
+    def callback_dataset_clicked(self, emitter):
+        current_dataset = APIAccess.instance().get_dataset(emitter.experiment, emitter.current_dataset_name)
+        self._emit(BiExperimentModel.DataSetLoaded, current_dataset)
 
-        if action.state == BiExperimentStates.NewImportDir:
-            filter_regexp = ''
-            if self.container.import_info.dir_filter == 0:
-                filter_regexp = '.*\\' + self.container.import_info.dir_filter_value + '$'
-            elif self.container.import_info.dir_filter == 1:
-                filter_regexp = self.container.import_info.dir_filter_value
-            elif self.container.import_info.dir_filter == 2:
-                filter_regexp = '^' + self.container.import_info.dir_filter_value
+    def callback_import_file(self, emitter):
+        self.thread.mode = 'file'
+        self.thread.data_path=emitter.import_info.file_data_path
+        self.thread.name=emitter.import_info.file_name
+        self.thread.author=emitter.import_info.author
+        self.thread.format_=emitter.import_info.format
+        self.thread.date=emitter.import_info.createddate
+        self.thread.tags={}
+        self.thread.start()
 
-            self.thread.mode = 'folder'
-            self.thread.dir_uri = self.container.import_info.dir_data_path
-            self.thread.filter_ = filter_regexp
-            self.thread.author = self.container.import_info.author
-            self.thread.format_ = self.container.import_info.format
-            self.thread.date = self.container.import_info.createddate
-            self.thread.dir_tag_key = self.container.import_info.dir_tag_key
-            self.thread.start()
+    def callback_import_dir(self, emitter):
+        filter_regexp = ''
+        if emitter.import_info.dir_filter == 0:
+            filter_regexp = '.*\\' + emitter.import_info.dir_filter_value + '$'
+        elif emitter.import_info.dir_filter == 1:
+            filter_regexp = emitter.import_info.dir_filter_value
+        elif emitter.import_info.dir_filter == 2:
+            filter_regexp = '^' + emitter.import_info.dir_filter_value
 
-        if action.state == BiExperimentStates.TagsModified:
-            APIAccess.instance().set_keys(self.container.experiment, self.container.tag_info.tags)
-            self.container.emit(BiExperimentStates.TagsSaved)
+        self.thread.mode = 'folder'
+        self.thread.dir_uri = emitter.import_info.dir_data_path
+        self.thread.filter_ = filter_regexp
+        self.thread.author = emitter.import_info.author
+        self.thread.format_ = emitter.import_info.format
+        self.thread.date =emitter.import_info.createddate
+        self.thread.dir_tag_key = emitter.import_info.dir_tag_key
+        self.thread.start()   
 
-        if action.state == BiExperimentStates.TagUsingSeparators:
-            for i in range(len(self.container.tag_info.usingseparator_tags)):
-                APIAccess.instance().annotate_using_seperator(
-                    self.container.experiment,
-                    key=self.container.tag_info.usingseparator_tags[i],
-                    separator=self.container.tag_info.usingseparator_separator[
-                        i],
-                    value_position=
-                    self.container.tag_info.usingseparator_position[i]
+    def callback_tags_modified(self, emitter):
+        APIAccess.instance().set_keys(emitter.experiment, emitter.tag_info.tags)
+        self._emit(BiExperimentModel.TagsSaved)       
+
+    def callback_tag_using_separators(self, emitter):
+        for i in range(len(emitter.tag_info.usingseparator_tags)):
+            APIAccess.instance().annotate_using_seperator(
+                emitter.experiment,
+                key=emitter.tag_info.usingseparator_tags[i],
+                separator=emitter.tag_info.usingseparator_separator[i],
+                value_position=emitter.tag_info.usingseparator_position[i]
                 )
-            self.container.emit(BiExperimentStates.DataTagged)
+        self._emit(BiExperimentModel.DataTagged)    
 
-        if action.state == BiExperimentStates.TagUsingName:
-            self.container.experiment.tag_from_name(
-                self.container.tag_info.usingname_tag,
-                self.container.tag_info.usingname_search
+    def callback_tag_using_names(self, emitter):
+        emitter.experiment.tag_from_name(
+                emitter.tag_info.usingname_tag,
+                emitter.tag_info.usingname_search
             )
-            self.container.emit(BiExperimentStates.DataTagged)    
+        self._emit(BiExperimentModel.DataTagged)
+
+                
 
 
 class BiImportThread(QThread):
@@ -119,27 +123,26 @@ class BiImportThread(QThread):
                 directory_tag_key = self.dir_tag_key)  
 
 
-class BiExperimentCreateModel(BiModel):
+class BiExperimentCreateModel(BiActuator):
+    ExperimentCreationError = 'experiment_creation_error'
+    ExperimentCreated = 'experiment_created'
 
     def __init__(self, container: BiExperimentCreateContainer):
         super().__init__()
         self._object_name = 'BiExperimentCreateModel'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect( self.container, self)
 
-    def update(self, action: BiAction):
+    def callback_create_experiment(self, emitter):
+        try:
+            print('create experiment to: ', emitter.experiment_destination_dir)
+            experiment = APIAccess.instance().create_experiment(
+                              emitter.experiment_name,
+                              emitter.experiment_author,
+                              'now',
+                              keys=None,
+                              destination=emitter.experiment_destination_dir)
 
-        if action.state == BiExperimentCreateStates.CreateClicked:
-            try:
-                experiment = APIAccess.instance().create_experiment(
-                                  self.container.experiment_name,
-                                  self.container.experiment_author,
-                                  'now',
-                                  self.container.experiment_destination_dir)
-
-                self.container.experiment_dir = experiment.md_uri
-                self.container.emit(BiExperimentCreateStates.ExperimentCreated)
-            except FileNotFoundError as err:
-                self.container.errorMessage = err
-                self.container.emit(
-                    BiExperimentCreateStates.ExperimentCreationError)
+            self._emit(BiExperimentCreateModel.ExperimentCreated, experiment.md_uri)
+        except FileNotFoundError as err:
+            self._emit(BiExperimentCreateModel.ExperimentCreationError, err)

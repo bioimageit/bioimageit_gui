@@ -27,7 +27,7 @@ class BiHomeComponent(BiComponent):
         self.home_widget.add_tile('New \n experiment', BiThemeAccess.instance().icon('plus-dark'), 'OpenNewExperiment')
         self.home_widget.add_tile('Browse \n experiments', BiThemeAccess.instance().icon('folder-dark'), 'OpenBrowser')
         self.home_widget.add_tile('Toolboxes', BiThemeAccess.instance().icon('tools-dark'), 'OpenToolboxes')
-        self.home_widget.add_tile('Settings', BiThemeAccess.instance().icon('settings-dark'), 'OpenSettings')
+        #self.home_widget.add_tile('Settings', BiThemeAccess.instance().icon('settings-dark'), 'OpenSettings')
         self.home_widget.connect(BiHomeTilesWidget.CLICKED_TILE, self.open_tile)
 
         self.workspace_widget.connect(BiWorkspaceWidget.CLICKED_EXP, self.open_experiment)

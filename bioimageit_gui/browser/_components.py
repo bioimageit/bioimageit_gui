@@ -3,8 +3,7 @@ import getpass
 from pathlib import Path
 
 import qtpy.QtCore
-from qtpy.QtCore import Signal
-from qtpy.QtGui import QIcon
+from qtpy.QtGui import QIcon, QPixmap, QImage
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                             QTableWidget, QTableWidgetItem,
                             QAbstractItemView, QHBoxLayout,
@@ -14,7 +13,6 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
 from bioimageit_core import ConfigAccess
 
 from bioimageit_framework.framework import BiComponent, BiConnectome
-from bioimageit_framework.widgets import BiWidget
 from bioimageit_framework.theme import BiThemeAccess
 
 from ._containers import BiBrowserContainer
@@ -79,12 +77,14 @@ class BiBrowserComponent(BiComponent):
     def __init__(self, container: BiBrowserContainer):
         super().__init__()
         self._object_name = 'BiBrowserComponent'
-        self.container = container
-        self.container.register(self)  
 
-        self.toolBarComponent = BiBrowserToolBarComponent(self.container)
-        self.shortCutComponent = BiBrowserShortCutsComponent(self.container)
-        self.tableComponent = BiBrowserTableComponent(self.container)
+        self.toolBarComponent = BiBrowserToolBarComponent()
+        self.shortCutComponent = BiBrowserShortCutsComponent()
+        self.tableComponent = BiBrowserTableComponent()
+
+        BiConnectome.connect(container, self.toolBarComponent)
+        BiConnectome.connect(container, self.shortCutComponent)
+        BiConnectome.connect(container, self.tableComponent)
 
         self.widget = QWidget()
         self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
@@ -159,7 +159,7 @@ class BiBrowserToolBarComponent(BiComponent):
         self.pathLineEdit.returnPressed.connect(self.pathEditReturnPressed)
         layout.addWidget(self.pathLineEdit, 1)
 
-    def callback_loaded(self, emitter):
+    def callback_reloaded(self, emitter):
         self.pathLineEdit.setText(emitter.currentPath)            
 
     def previousButtonClicked(self):
@@ -179,8 +179,10 @@ class BiBrowserToolBarComponent(BiComponent):
        
 
 class BiBrowserShortCutsComponent(BiComponent):
+    CHANGE_DIR = 'change_dir'
+
     def __init__(self):
-        super(BiBrowserShortCutsComponent, self).__init__()
+        super().__init__()
         self._object_name = 'BiBrowserShortCutsComponent'
 
         self.widget = QWidget()
@@ -201,25 +203,21 @@ class BiBrowserShortCutsComponent(BiComponent):
         username = getpass.getuser()
 
         homeButton = BiShortcutButton(username, BiThemeAccess.instance().icon('home'))
-        homeButton.setObjectName("BiBrowserHomeButton")
         homeButton.content = os.path.join(home_dir)
         homeButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         homeButton.clickedContent.connect(self.buttonClicked)
 
         desktopButton = BiShortcutButton('Desktop', BiThemeAccess.instance().icon('desktop'))
-        desktopButton.setObjectName("BiBrowserDesktopButton")
         desktopButton.content = os.path.join(home_dir, 'Desktop')
         desktopButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         desktopButton.clickedContent.connect(self.buttonClicked)
 
-        documentsButton = BiShortcutButton('Documents', BiThemeAccess.instance().icon('open-folder_negative'))
-        documentsButton.setObjectName("BiBrowserDocumentsButton")
+        documentsButton = BiShortcutButton('Documents', BiThemeAccess.instance().icon('open-folder-dark'))
         documentsButton.content = os.path.join(home_dir, 'Documents')
         documentsButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         documentsButton.clickedContent.connect(self.buttonClicked)
 
         downloadsButton = BiShortcutButton('Downloads', BiThemeAccess.instance().icon('download'))
-        downloadsButton.setObjectName("BiBrowserDownloadsButton")
         downloadsButton.content = os.path.join(home_dir, 'Downloads')
         downloadsButton.setCursor(qtpy.QtCore.Qt.PointingHandCursor)
         downloadsButton.clickedContent.connect(self.buttonClicked)
@@ -240,25 +238,23 @@ class BiBrowserShortCutsComponent(BiComponent):
         layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop) 
 
     def buttonClicked(self, path: str):
-        self.container.currentPath = path
-        self.container.emit(BiBrowserStates.DirectoryModified)
+        self._emit(BiBrowserShortCutsComponent.CHANGE_DIR, path)
 
     def get_widget(self): 
         return self.widget
 
 
 class BiBrowserTableComponent(BiComponent):
-    def __init__(self, container: BiBrowserContainer):
+    DOUBLE_CLICKED_ROW = 'double_clicked_row'
+    CLICKED_ROW = 'clicked_row'
+
+    def __init__(self):
         super().__init__()
         self._object_name = 'BiBrowserTableComponent'
-        self.container = container
-        self.container.register(self)
         self.buildWidget()
 
     def buildWidget(self):
-
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0,0,0,0)
@@ -279,42 +275,38 @@ class BiBrowserTableComponent(BiComponent):
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.verticalHeader().setVisible(False)
 
-    def update(self, action : BiAction):
-        if action.state == BiBrowserStates.FilesInfoLoaded:
-            i = -1
-            self.tableWidget.setRowCount(len(self.container.files))
-            for fileInfo in self.container.files:
-                i += 1
-                # icon depends on type
-                iconLabel = QLabel(self.tableWidget)
-                if fileInfo.type == "dir":
-                    iconLabel.setObjectName("BiBrowserDirIcon")
-                elif fileInfo.type == "experiment":
-                    iconLabel.setObjectName("BiBrowserExperimentIcon")
-
-                # icon
-                self.tableWidget.setCellWidget(i, 0, iconLabel)
-                # name
-                self.tableWidget.setItem(i, 1, QTableWidgetItem(fileInfo.name))
-                # date
-                self.tableWidget.setItem(i, 2, QTableWidgetItem(fileInfo.date))
-                # type
-                self.tableWidget.setItem(i, 3, QTableWidgetItem(fileInfo.type))
-            self.container.emit(BiBrowserStates.TableLoaded)    
+    def callback_reloaded(self, emitter):
+        i = -1
+        self.tableWidget.setRowCount(len(emitter.files))
+        for fileInfo in emitter.files:
+            i += 1
+            # icon depends on type
+            iconLabel = QLabel(self.tableWidget)
+            icon_file = ''
+            if fileInfo.type == "dir":
+                icon_file = BiThemeAccess.instance().icon('folder-dark')
+            elif fileInfo.type == "experiment":
+                icon_file = BiThemeAccess.instance().icon('database')
+            img = QImage(icon_file)
+            iconLabel.setPixmap(QPixmap.fromImage(img.scaled(15, 15, qtpy.QtCore.Qt.KeepAspectRatio)))
+            # icon
+            self.tableWidget.setCellWidget(i, 0, iconLabel)
+            # name
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(fileInfo.name))
+            # date
+            self.tableWidget.setItem(i, 2, QTableWidgetItem(fileInfo.date))
+            # type
+            self.tableWidget.setItem(i, 3, QTableWidgetItem(fileInfo.type))
+        #self.container.emit(BiBrowserStates.TableLoaded)    
             
     def cellDoubleClicked(self, row: int, col: int):
-        self.container.doubleClickedRow = row
-        self.container.emit(BiBrowserStates.ItemDoubleClicked)
+        self._emit(BiBrowserTableComponent.DOUBLE_CLICKED_ROW, row)
         self.highlightLine(row)
 
     def cellClicked(self, row : int, col : int):
-        self.container.clickedRow = row
-        self.container.emit(BiBrowserStates.ItemClicked)
+        self._emit(BiBrowserTableComponent.CLICKED_ROW, row)
         self.highlightLine(row)
 
     def highlightLine(self, row: int):
         for col in range(0, self.tableWidget.columnCount()):
-            self.tableWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select)    
-
-    def get_widget(self): 
-        return self.widget   
+            self.tableWidget.setCurrentCell(row, col, qtpy.QtCore.QItemSelectionModel.Select)     

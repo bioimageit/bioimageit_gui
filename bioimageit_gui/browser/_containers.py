@@ -1,10 +1,10 @@
 import os
 from qtpy.QtCore import QDir
 
-from bioimageit_gui.core.framework import BiContainer, BiObject
+from bioimageit_framework.framework import BiContainer
 
 
-class BiBrowserFileInfo(BiObject):     
+class BiBrowserFileInfo:     
     def __init__(self, fileName: str = '', path: str = '', name: str = '',
                  dtype: str = '', date: str = ''):
         super().__init__()
@@ -21,6 +21,9 @@ class BiBrowserFileInfo(BiObject):
 class BiBrowserContainer(BiContainer):
     REFRESH = 'refresh'
     OPEN_EXP = 'open_experiment'
+    CLICKED_ROW = 'clicked_row'
+    DOUBLE_CLICKED_ROW = 'double_clicked_row'
+    RELOADED = 'reloaded'
 
     def __init__(self):
         super().__init__()
@@ -33,7 +36,7 @@ class BiBrowserContainer(BiContainer):
         self.clickedRow = -1
         self.historyPaths = list()
         self.posHistory = 0
-        self.openExperimentPath = ''
+        self.experiment_uri = ''
         self.bookmarkPath = ''
 
     def clickedFileInfo(self):
@@ -74,7 +77,7 @@ class BiBrowserContainer(BiContainer):
         self._notify(BiBrowserContainer.REFRESH)
 
     def action_up(self, action):
-        dir = QDir(self.container.currentPath)
+        dir = QDir(self.currentPath)
         dir.cdUp()
         upPath = dir.absolutePath()
         self.setCurrentPath(upPath)
@@ -85,10 +88,27 @@ class BiBrowserContainer(BiContainer):
         self._notify(BiBrowserContainer.REFRESH)
 
     def action_open_experiment(self, action, experiment_uri):
-        self.openExperimentPath = experiment_uri
+        self.experiment_uri = experiment_uri
         self._notify(BiBrowserContainer.OPEN_EXP)
         
+    def action_clicked_row(self, action, row):
+        self.clickedRow = row
+        self._notify(BiBrowserContainer.CLICKED_ROW)   
+
+    def action_double_clicked_row(self, action, row):
+        self.doubleClickedRow = row
+        if self.files[row].type == 'experiment':
+            self.experiment_uri = os.path.join(self.files[row].filePath(), 'experiment.md.json')
+            self._notify(BiBrowserContainer.OPEN_EXP)
+        elif self.files[row].type == 'dir':   
+            self.setCurrentPath(self.files[row].filePath())
+            self._notify(BiBrowserContainer.REFRESH)       
+
+    def action_reload(self, action, files):
+        self.files = files
+        self._notify(BiBrowserContainer.RELOADED)
+
     def init(self, workspace_path):
-        self.container.currentPath = workspace_path
+        self.currentPath = workspace_path
         self._notify(BiBrowserContainer.REFRESH)    
    

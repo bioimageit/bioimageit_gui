@@ -1,4 +1,12 @@
 /* ****************************************** */
+/*         	          bars                    */
+/* ****************************************** */
+.QWidget#bi-left-bar{
+  border-top: 1px solid #5A626C;
+  background-color: #414851;
+}
+
+/* ****************************************** */
 /*         	        bi-home                   */
 /* ****************************************** */
 QWidget#bi-home-tile{
@@ -55,7 +63,7 @@ QLabel#bi-about{
 }
 
 /* ****************************************** */
-/*         	        bi-finder                   */
+/*         	        bi-finder                 */
 /* ****************************************** */
 QWidget#bi-finder-category-tile{
   background-color: #414851;
@@ -82,4 +90,20 @@ QLabel#bi-finder-category-tile-title{
 
 QLabel#bi-finder-category-tile-thumb{
   background-color: transparent;
+}
+
+/* ****************************************** */
+/*         	       bi-browser                 */
+/* ****************************************** */
+QPushButton#bi-browser-shortcut-button {
+  padding: 2px 4px;
+  font-size: 14px;
+  color: #f0f1f2;
+  background-color: #414851;
+  border-radius: 4px;
+  text-align: left;
+}
+
+QPushButton#bi-browser-shortcut-button:hover{
+  background-color: #5A626C;
 }
