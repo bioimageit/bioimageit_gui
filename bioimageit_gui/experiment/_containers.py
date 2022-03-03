@@ -19,6 +19,8 @@ class BiExperimentContainer(BiContainer):
     ImportDir = 'import_dir'
     TagUsingSeparator = 'tag_using_separator'
     TagUsingName = 'tag_using_name'
+    MainPage = 'main_page_clicked'
+    DataImported = 'data_imported'
 
     def __init__(self):
         super().__init__()
@@ -34,6 +36,14 @@ class BiExperimentContainer(BiContainer):
         self.clickedRow = -1
         self.selected_data_info = None
 
+    def init(self, uri):
+        self.experiment_uri = uri
+        self._notify(BiExperimentContainer.Load)
+
+    def action_loaded(self, action, experiment):
+        self.experiment = experiment
+        self._notify(BiExperimentContainer.Loaded)      
+
     def action_ask_refresh(self, action):
         self._notify(BiExperimentContainer.Load) 
 
@@ -41,16 +51,8 @@ class BiExperimentContainer(BiContainer):
         self.selected_data_info = data_info
         self._notify(BiExperimentContainer.ViewData)
 
-    def action_loaded(self, action, experiment):
-        self.experiment = experiment
-        self._notify(BiExperimentContainer.Loaded)
-
     def action_uri_change(self, action, uri):
-        self.init(uri)
-
-    def init(self, uri):
-        self.experiment_uri = uri
-        self._notify(BiExperimentContainer.Load)    
+        self.init(uri)  
 
     def action_edit_info_clicked(self, action):
         self._notify(BiExperimentContainer.EditInfoClicked)
@@ -66,6 +68,9 @@ class BiExperimentContainer(BiContainer):
 
     def action_refresh_clicked(self, action):
         self._notify(BiExperimentContainer.RefreshClicked)  
+
+    def action_main_page_clicked(self, action):
+        self._notify(BiExperimentContainer.MainPage)    
 
     def action_dataset_clicked(self, action, dataset_name):
         self.current_dataset_name = dataset_name
@@ -94,8 +99,8 @@ class BiExperimentContainer(BiContainer):
         self._notify(BiExperimentContainer.ImportFile)  
 
     def action_import_dir(self, action, dir_data_path, dir_tag_key, dir_filter, dir_filter_value, author, format, createddate):
-        self.container.import_info.dir_data_path = dir_data_path
-        self.container.import_info.dir_tag_key = dir_tag_key
+        self.import_info.dir_data_path = dir_data_path
+        self.import_info.dir_tag_key = dir_tag_key
         self.import_info.dir_filter = dir_filter
         self.import_info.dir_filter_value = dir_filter_value
         self.import_info.author = author
@@ -113,6 +118,10 @@ class BiExperimentContainer(BiContainer):
         self.container.tag_info.usingname_tag = tag
         self.container.tag_info.usingname_search = search
         self._notify(BiExperimentContainer.TagUsingName) 
+
+    def action_data_imported(self, action):
+        print('action data imported')
+        self._notify(BiExperimentContainer.RefreshClicked)    
 
 
 class BiExperimentImportContainer():

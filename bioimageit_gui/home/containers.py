@@ -12,12 +12,12 @@ class BiHomeContainer(BiContainer):
 
         # data
         self.experiments = []
-        self.clicked_experiment_uri = ''
+        self.experiment_uri = ''
         self.clicked_tile_action = ''
 
     def action_open_experiment(self, action, experiment_uri):
         """Action callback to open an experiment"""
-        self.clicked_experiment_uri = experiment_uri
+        self.experiment_uri = experiment_uri
         self._notify(BiHomeContainer.OPEN_EXP)     
 
     def action_open_tile(self, action, tile_action):

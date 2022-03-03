@@ -53,7 +53,6 @@ class BiExperimentModel(BiActuator):
             filter_regexp = emitter.import_info.dir_filter_value
         elif emitter.import_info.dir_filter == 2:
             filter_regexp = '^' + emitter.import_info.dir_filter_value
-
         self.thread.mode = 'folder'
         self.thread.dir_uri = emitter.import_info.dir_data_path
         self.thread.filter_ = filter_regexp
@@ -113,7 +112,7 @@ class BiImportThread(QThread):
                                              key_value_pairs=self.tags
                                             )
         elif self.mode == 'folder':
-            APIAccess.instance().import_data(
+            APIAccess.instance().import_dir(
                 self.container.experiment,
                 dir_uri=self.dir_uri,
                 filter_ = self.filter_,

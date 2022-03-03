@@ -74,10 +74,10 @@ class BiRunContainer(BiContainer):
 
 
 class BiMetadataExperimentContainer(BiContainer):
-    Save = 'save'
-    Saved = 'saved'
-    UriChanged = 'uri_changed'
-    Loaded = 'loaded'
+    Save = 'metadata_save'
+    Saved = 'metadata_saved'
+    UriChanged = 'metadata_uri_changed'
+    MetadataLoaded = 'metadata_loaded'
 
     def __init__(self):
         super().__init__()
@@ -87,18 +87,18 @@ class BiMetadataExperimentContainer(BiContainer):
         self.md_uri = '' 
         self.experiment = None           
 
-    def action_uri_changed(self, action, uri):
+    def action_metadata_uri_changed(self, action, uri):
         self.md_uri = uri
         self._notify(BiMetadataExperimentContainer.UriChanged)
 
-    def action_loaded(self, action, experiment):
+    def action_metadata_loaded(self, action, experiment):
         self.experiment = experiment
-        self._notify(BiMetadataExperimentContainer.Loaded)    
+        self._notify(BiMetadataExperimentContainer.MetadataLoaded)    
 
-    def action_saved(self, action):
+    def action_metadata_saved(self, action):
         self._notify(BiMetadataExperimentContainer.Saved)
 
-    def action_save_clicked(self, action, name, author, createddate):
+    def action_metadata_save_clicked(self, action, name, author, createddate):
         self.experiment.name = name
         self.experiment.author = author
         self.experiment.created_date = createddate

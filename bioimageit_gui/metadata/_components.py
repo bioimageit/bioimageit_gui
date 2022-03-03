@@ -252,7 +252,7 @@ class BiProcessedDataComponent(BiComponent):
 
 
 class BiMetadataExperimentComponent(BiComponent):
-    SaveClicked = 'save_clicked'
+    SaveClicked = 'metadata_save_clicked'
 
     def __init__(self):
         super().__init__()
@@ -295,22 +295,18 @@ class BiMetadataExperimentComponent(BiComponent):
         layout.addWidget(QWidget(), 5, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
-        #self.container.experiment.metadata.name = self.nameEdit.text()
-        #self.container.experiment.metadata.author = self.authorEdit.text()
-        #self.container.experiment.metadata.date = self.createddateEdit.text()
-        #self.container.emit(BiMetadataExperimentStates.SaveClicked)
         self._emit(BiMetadataExperimentComponent.SaveClicked,
-                   self.nameEdit.text(),
+                   [self.nameEdit.text(),
                    self.authorEdit.text(),
-                   self.createddateEdit.text()
+                   self.createddateEdit.text()]
                    )
 
-    def callback_loaded(self, emitter):
-        self.nameEdit.setText(emitter.experiment.metadata.name)
-        self.authorEdit.setText(emitter.experiment.metadata.author)
-        self.createddateEdit.setText(emitter.experiment.metadata.date)
+    def callback_metadata_loaded(self, emitter):
+        self.nameEdit.setText(emitter.experiment.name)
+        self.authorEdit.setText(emitter.experiment.author)
+        self.createddateEdit.setText(emitter.experiment.date)
 
-    def callback_saved(self, emitter):
+    def callback_metadata_saved(self, emitter):
         msgBox = QMessageBox()
         msgBox.setText("Information have been saved")
         msgBox.exec()          

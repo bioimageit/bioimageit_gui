@@ -50,5 +50,4 @@ class BiHomeComponent(BiComponent):
 
     def open_experiment(self, origin):
         experiment_uri = origin.experiments[origin.clicked_experiment]['md_uri']
-        print('clicked exp=', experiment_uri)
         self._emit(BiHomeComponent.CLICKED_EXP, experiment_uri)

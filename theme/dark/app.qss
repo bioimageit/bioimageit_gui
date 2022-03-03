@@ -6,6 +6,10 @@
   background-color: #414851;
 }
 
+QLabel#bi-label{
+  background-color: transparent;
+}
+
 /* ****************************************** */
 /*         	        bi-home                   */
 /* ****************************************** */

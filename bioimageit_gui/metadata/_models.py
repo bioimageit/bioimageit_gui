@@ -52,12 +52,12 @@ class BiRunModel(BiActuator):
 
 
 class BiMetadataExperimentModel(BiActuator): 
-    Saved = 'saved'
+    Saved = 'metadata_saved'
 
     def __init__(self):
         super().__init__()
         self._object_name = 'BiMetadataExperimentModel'
 
-    def callback_save_clicked(self, emitter):
-        APIAccess.instance().update_expeirment(emitter.experiment)
+    def callback_metadata_save(self, emitter):
+        APIAccess.instance().update_experiment(emitter.experiment)
         self._emit(BiMetadataExperimentModel.Saved)

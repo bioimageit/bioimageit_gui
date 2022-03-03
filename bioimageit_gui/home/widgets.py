@@ -96,6 +96,7 @@ class BiWorkspaceWidget(BiWidget):
 
     def __init__(self):
         super().__init__()
+        self.experiments = {}
         self.clicked_experiment = None
 
         experimentsTitle = QLabel('Experiments')
@@ -134,7 +135,8 @@ class BiWorkspaceWidget(BiWidget):
         self.shortcutsWidget.setItem(row, 1, QTableWidgetItem(experiment['info'].date))  
         self.shortcutsWidget.setItem(row, 2, QTableWidgetItem(experiment['info'].author))
         self.shortcutsWidget.setVisible(True)
-        self.emptyshortcutsWidget.setVisible(False)           
+        self.emptyshortcutsWidget.setVisible(False)   
+        self.experiments[row] = experiment        
 
     def cell_clicked(self, row: int, col: int):
         for col in range(0, self.shortcutsWidget.columnCount()):
