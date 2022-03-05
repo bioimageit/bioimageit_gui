@@ -56,3 +56,61 @@ QTableView QTableCornerButton::section{
 QHeaderView {
 	background-color: #262930;
 }
+
+/* ****************************************** */
+/*         	        table btn                 */
+/* ****************************************** */
+QPushButton#bi-table-btn-primary {
+
+  padding: 2px 12px;
+  margin: 2px 2px 2px 2px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #0071C3;
+  border: 1px solid #0071C3;
+  border-radius: 4px;
+}
+
+QPushButton#bi-table-btn-primary:hover {
+  color: #fff;
+  background-color: #0577CA;
+  border: 1px solid #0577CA;
+}
+
+QPushButton#bi-table-btn-primary:pressed {
+border: 3px solid #0577CA;
+}
+
+QPushButton#bi-table-btn-primary:disabled {
+color : #fff;
+background-color: #222222;
+border: 2px solid #222222;
+}
+
+QPushButton#bi-table-btn-default {
+
+  padding: 2px 12px;
+  margin: 2px 2px 2px 2px;
+  font-size: 12px;
+  color: #fff;
+  background-color: #414851;
+  border: 1px solid #414851;
+  border-radius: 4px;
+}
+
+QPushButton#bi-table-btn-default:hover {
+  color: #fff;
+  background-color: #5A626C;
+  border: 1px solid #5A626C;
+}
+
+QPushButton#bi-table-btn-default:pressed {
+  background-color: #5A626C;
+  border: 1px solid #5A626C;
+}
+
+QPushButton#bi-table-btn-default:disabled {
+color : #fff;
+background-color: #222222;
+border: 2px solid #222222;
+}

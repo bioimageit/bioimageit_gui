@@ -3,6 +3,7 @@ import getpass
 from pathlib import Path
 
 import qtpy.QtCore
+from qtpy.QtCore import Signal
 from qtpy.QtGui import QIcon, QPixmap, QImage
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                             QTableWidget, QTableWidgetItem,
@@ -13,6 +14,7 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
 from bioimageit_core import ConfigAccess
 
 from bioimageit_framework.framework import BiComponent, BiConnectome
+from bioimageit_framework.widgets import BiWidget
 from bioimageit_framework.theme import BiThemeAccess
 
 from ._containers import BiBrowserContainer
@@ -20,21 +22,21 @@ from ._widgets import BiShortcutButton
 from ._models import BiBrowserModel
 
 
-class BiExperimentSelectorWidget(BiComponent):
+class BiExperimentSelectorWidget(BiWidget):
     SELECTED_EXP = "selected_experiment"
 
     def __init__(self):
         super().__init__()
         self.container = BiBrowserContainer()
-
+        self.selected_path = ''
         # components
-        browser_component = BiBrowserComponent()
+        browser_component = BiBrowserComponent(self.container)
 
         # model
         self.browser_model = BiBrowserModel()
 
         # connect
-        BiConnectome.connect(self.container, browser_component)
+        #BiConnectome.connect(self.container, browser_component)
         BiConnectome.connect(self.container, self.browser_model)
 
         # init
@@ -56,6 +58,7 @@ class BiExperimentSelectorWidget(BiComponent):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        self.widget = QWidget()
         self.widget.setLayout(layout)
         layout.addWidget(browser_component.get_widget(), 1)
         layout.addWidget(validation_bar, 0, qtpy.QtCore.Qt.AlignBottom)
@@ -64,7 +67,9 @@ class BiExperimentSelectorWidget(BiComponent):
         path = os.path.join(self.container.currentPath, self.container.files[self.container.clickedRow].name)
         experiment_uri = os.path.join(path, 'experiment.md.json')
         if os.path.isfile(experiment_uri):
-            self.selected_experiment.emit(path)
+            self.selected_path = path
+            self.emit(BiExperimentSelectorWidget.SELECTED_EXP)
+            #self.selected_experiment.emit(path)
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)

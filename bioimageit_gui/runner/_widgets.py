@@ -9,7 +9,8 @@ from qtpy.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
 from bioimageit_core.containers import Tool
 from bioimageit_core.api import APIAccess
 
-from bioimageit_gui.core.widgets import BiButton, BiFileSelectWidget
+from bioimageit_framework.widgets import BiButtonPrimary
+from bioimageit_framework.widgets.qtwidgets import QtFileSelectWidget
 from bioimageit_gui.browser import BiExperimentSelectorWidget
 from ._containers import BiRunnerContainer
 
@@ -23,24 +24,25 @@ class BiRunnerInputSingleWidget(QWidget):
         # create widget
         self.layout = QGridLayout()
         row = -1
+        self.view_btns = []
         for inp in self.info.inputs:
             if inp.io == "input":
                 row += 1
                 nameLabel = QLabel(inp.name)
                 descLabel = QLabel(inp.description)
-                descLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
-                selectorWidget = BiFileSelectWidget(False, self)
+                descLabel.setObjectName("bi-label")
+                selectorWidget = QtFileSelectWidget(False, self)
                 selectorWidget.id = row
                 selectorWidget.TextChangedIdSignal.connect(self.showViewButton)
-                viewButton = BiButton('View')
-                viewButton.clickedContent.connect(self.openView)
-                viewButton.setObjectName('btnPrimary')
+                viewButton = BiButtonPrimary('View')
+                viewButton.connect('clicked', self.open_view)
                 viewButton.content = inp.name
-                viewButton.setVisible(False)
+                viewButton.set_visible(False)
+                self.view_btns.append(viewButton)
                 self.layout.addWidget(nameLabel, row, 0)
                 self.layout.addWidget(descLabel, row, 1)
                 self.layout.addWidget(selectorWidget, row, 2)
-                self.layout.addWidget(viewButton, row, 3)
+                self.layout.addWidget(viewButton.widget, row, 3)
                 nameLabel.setVisible(False)
         self.setLayout(self.layout)     
 
@@ -59,7 +61,7 @@ class BiRunnerInputSingleWidget(QWidget):
         if button:
             button.setVisible(True)
 
-    def openView(self, input_name):   
+    def open_view(self, emitter):   
         for row in range(self.layout.rowCount()):
             selectorWidget = self.layout.itemAtPosition(row, 2).widget()
             if selectorWidget:
@@ -76,9 +78,9 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
         layout.setContentsMargins(0,0,0,0)
         layout.setSpacing(0)
         filterButton = QPushButton(self.tr("Filter"))
-        filterButton.setObjectName('btnDefaultLeft')
+        filterButton.setObjectName('btn-default-left')
         self.statusLabel = QLabel('OFF')
-        self.statusLabel.setObjectName('BiProcessDataFilterWidgetStatus')
+        self.statusLabel.setObjectName('bi-tool-filter-status')
         layout.addWidget(filterButton)
         layout.addWidget(self.statusLabel)
         self.setLayout(layout)
@@ -88,7 +90,6 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
 
     def createFilterWidget(self):
         self.filterWidget = QWidget()
-        self.filterWidget.setObjectName('BiWidget')
         self.filterWidget.setVisible(False)
         filterLayout = QGridLayout()
         self.filterWidget.setLayout(filterLayout)
@@ -105,9 +106,9 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
         self.lineEdit = QLineEdit()
         
         cancelButton = QPushButton(self.tr("Cancel"))
-        cancelButton.setObjectName('btnDefault')
+        cancelButton.setObjectName('btn-default')
         validateButton = QPushButton(self.tr("Validate"))
-        validateButton.setObjectName('btnPrimary')
+        validateButton.setObjectName('btn-primary')
 
         cancelButton.released.connect(self.cancel)
         validateButton.released.connect(self.hideFilter)
@@ -156,18 +157,19 @@ class BiRunnerInputExperimentWidget(QWidget):
 
         # experiment browser
         self.browser_widget = BiExperimentSelectorWidget()
-        self.browser_widget.setVisible(False)
-        self.browser_widget.selected_experiment.connect(self.update_experiment_path)
+        self.browser_widget.widget.setVisible(False)
+        self.browser_widget.connect('selected_experiment', self.update_experiment_path)
 
         # create widget
         self.layout = QGridLayout()
         self.layout.setContentsMargins(0,0,0,0)
 
         experimentLabel = QLabel("Experiment")
+        experimentLabel.setObjectName('bi-label')
         self.experiment_dir_edit = QLineEdit()
         self.experiment_dir_edit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.experiment_browse_btn = QPushButton('...')
-        self.experiment_browse_btn.setObjectName('btnDefault')
+        self.experiment_browse_btn.setObjectName('btn-default')
         self.experiment_browse_btn.setMaximumWidth(40)
         self.experiment_browse_btn.released.connect(self.select_experiments)
 
@@ -176,6 +178,7 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.layout.addWidget(self.experiment_browse_btn, 0, 3, 1, 1)
 
         outputDatasetLabel = QLabel("Output dataset name")
+        outputDatasetLabel.setObjectName('bi-label')
         self.outputDatasetNameEdit = QLineEdit()
         self.outputDatasetNameEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.outputDatasetNameEdit.setText(self.info.id)
@@ -190,7 +193,7 @@ class BiRunnerInputExperimentWidget(QWidget):
                 self.inputs_count += 1
                 nameLabel = QLabel(inp.name)
                 descLabel = QLabel(inp.description)
-                descLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
+                descLabel.setObjectName("bi-label")
                 selectorWidget = QComboBox()
                 filterWidget = BiRunnerInputDatasetFilterWidget()
                 filterWidget.setMaximumWidth(100)
@@ -203,11 +206,11 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.setLayout(self.layout)    
 
     def select_experiments(self):
-        self.browser_widget.setVisible(True)   
+        self.browser_widget.widget.setVisible(True)   
 
-    def update_experiment_path(self, path):
-        self.experiment_dir_edit.setText(path)
-        self.browser_widget.setVisible(False)  
+    def update_experiment_path(self, emitter):
+        self.experiment_dir_edit.setText(emitter.selected_path)
+        self.browser_widget.widget.setVisible(False)  
         self.openExperiment()
 
     def openExperiment(self):
@@ -276,10 +279,9 @@ class BiRunnerParamWidget(QWidget):
         self.widgets = dict() # <str, BiProcessInputWidget>
 
         self.layout = QGridLayout()
-        self.setObjectName('BiWidget')
 
         advancedToggleButton = QCheckBox(self.tr("Advanced"), self)
-        advancedToggleButton.setObjectName("BiCheckBoxNegative")
+        advancedToggleButton.setObjectName("bi-checkbox")
         advancedToggleButton.stateChanged.connect(self.showHideAdvanced)
         self.advancedMode = False
         self.layout.addWidget(advancedToggleButton, 0, 0)
@@ -289,7 +291,7 @@ class BiRunnerParamWidget(QWidget):
             if parameter.io == "param":
                 row += 1
                 titleLabel = QLabel(parameter.description)
-                titleLabel.setObjectName("BiProcessDataSelectorWidgetLabel")
+                titleLabel.setObjectName("bi-label")
                 titleLabel.setWordWrap(True)
                 titleLabel.setMaximumWidth(150)
                 self.labels[parameter.name] = titleLabel
@@ -386,13 +388,12 @@ class BiRunnerProgressWidget(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)  
 
-        self.setObjectName('BiWidget')
         layout = QVBoxLayout()
         self.setLayout(layout)
 
         self.progressBar = QProgressBar() 
         self.toggle_btn = QCheckBox('Show run log')
-        self.toggle_btn.setObjectName("BiCheckBoxNegative")
+        self.toggle_btn.setObjectName("bi-checkbox")
         self.toggle_btn.released.connect(self._toggle_log)
         self.logWidget = QTextEdit()
         self.logWidget.setReadOnly(True)
@@ -439,7 +440,7 @@ class BiProcessInputWidget(QWidget):
     def build_help(self, help_text):
         help_btn = QPushButton('?')
         help_btn.setMaximumWidth(30)
-        help_btn.setObjectName('btnDefault')
+        help_btn.setObjectName('btn-default')
         self.help_label.setWordWrap(True)
         self.help_label.setText(help_text) 
         help_btn.released.connect(self.toggle_help)
@@ -555,7 +556,7 @@ class BiProcessInputBrowser(BiProcessInputWidget):
         self.pathEdit = QLineEdit(self)
         self.pathEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         button = QPushButton(self.tr("..."), self)
-        button.setObjectName("btnDefault")
+        button.setObjectName("btn-default")
         self.layout.insertWidget(0,self.pathEdit)
         self.layout.insertWidget(1,button)
 

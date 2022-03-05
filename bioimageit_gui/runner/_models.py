@@ -6,30 +6,28 @@ from qtpy.QtCore import QThread
 from bioimageit_core.api import APIAccess
 from bioimageit_core.containers import Job
 
-from bioimageit_gui.core.framework import BiModel, BiAction
-from ._states import BiRunnerStates
+from bioimageit_framework.framework import BiActuator, BiConnectome
 from ._containers import BiRunnerContainer
 
 
-class BiRunnerModel(BiModel):
+class BiRunnerModel(BiActuator):
     def __init__(self, container: BiRunnerContainer):
         super().__init__()
         self.observer = None
         self._object_name = 'BiRunnerModel'
         self.container = container
-        self.container.register(self)  
+        BiConnectome.connect(self.container, self)
         self.thread = BiRunnerThread()
         self.thread.finished.connect(self.copyOutputs)
 
-    def update(self, action: BiAction):
-        if action.state == BiRunnerStates.RunProcess:
-            self.runProcess()
-        if action.state == BiRunnerStates.ProcessUriChanged:
-            self.getProcess()    
+    def callback_run_process(self, emitter):
+        self.runProcess()
+
+    def callback_process_uri_changed(self, emitter):
+        self.getProcess()                
 
     def copyOutputs(self):
-        self.container.genarated_outputs = self.thread.output_uris
-        self.container.emit(BiRunnerStates.RunFinished)
+        self.container.action_run_finished(None, [self.thread.output_uris])
 
     def runProcess(self):
         print('in model, run with:') 
@@ -63,8 +61,7 @@ class BiRunnerModel(BiModel):
 
     def getProcess(self):
         process = APIAccess.instance().get_tool_from_uri(self.container.process_uri)
-        self.container.process_info = process
-        self.container.emit(BiRunnerStates.ProcessInfoLoaded)
+        self.container.action_process_info_loaded(None, process)
 
 
 class BiRunnerThread(QThread):
@@ -85,8 +82,9 @@ class BiRunnerThread(QThread):
             params = {}
             for input_ in self.inputs:
                 params[input_['name']] = input_['uri']
+            print('outputs info:', self.process_info.outputs)    
             for output in self.process_info.outputs:
-                params[output.name] = os.path.join(self.output_uri, output.name, FormatsAccess.instance().get(output.format).extension)    
+                params[output.name] = os.path.join(self.output_uri, output.name + '.' + FormatsAccess.instance().get(output.type).extension)    
             for i in range(0, len(self.parameters), 2):
                 params[self.parameters[i]] = self.parameters[i+1]
             APIAccess.instance().exec(self.process_info, **params)

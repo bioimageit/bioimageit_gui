@@ -7,7 +7,7 @@ from ._containers import (BiExperimentCreateContainer,
 
 
 class BiExperimentModel(BiActuator):
-    LOADED = 'loaded'
+    EXP_LOADED = 'experiment_loaded'
     DataSetLoaded = 'dataset_loaded'
     ImportFile = 'import_file'
     TagsSaved = 'tags_saved'
@@ -24,12 +24,17 @@ class BiExperimentModel(BiActuator):
         self._emit(BiExperimentModel.DataImported)
 
     def callback_load(self, emitter):
+        print('model load')
         experiment = APIAccess.instance().get_experiment(emitter.experiment_uri)
-        self._emit(BiExperimentModel.LOADED, experiment)
+        if emitter.current_dataset_name == '':
+            dataset_name = 'data'
+        else:
+            dataset_name = emitter.current_dataset_name
+        dataset = APIAccess.instance().get_dataset(experiment, dataset_name)    
+        self._emit(BiExperimentModel.EXP_LOADED, [experiment, dataset_name, dataset])
 
     def callback_refresh_clicked(self, emitter):
-        experiment = APIAccess.instance().get_experiment(emitter.experiment_uri)
-        self._emit(BiExperimentModel.LOADED, experiment)
+        self.callback_load(emitter)
 
     def callback_dataset_clicked(self, emitter):
         current_dataset = APIAccess.instance().get_dataset(emitter.experiment, emitter.current_dataset_name)
@@ -66,9 +71,9 @@ class BiExperimentModel(BiActuator):
         APIAccess.instance().set_keys(emitter.experiment, emitter.tag_info.tags)
         self._emit(BiExperimentModel.TagsSaved)       
 
-    def callback_tag_using_separators(self, emitter):
+    def callback_annotate_using_separator(self, emitter):
         for i in range(len(emitter.tag_info.usingseparator_tags)):
-            APIAccess.instance().annotate_using_seperator(
+            APIAccess.instance().annotate_using_separator(
                 emitter.experiment,
                 key=emitter.tag_info.usingseparator_tags[i],
                 separator=emitter.tag_info.usingseparator_separator[i],
@@ -76,11 +81,11 @@ class BiExperimentModel(BiActuator):
                 )
         self._emit(BiExperimentModel.DataTagged)    
 
-    def callback_tag_using_names(self, emitter):
-        emitter.experiment.tag_from_name(
-                emitter.tag_info.usingname_tag,
-                emitter.tag_info.usingname_search
-            )
+    def callback_annotate_using_name(self, emitter):
+        APIAccess.instance().annotate_from_name(emitter.experiment, 
+                                                emitter.tag_info.usingname_tag,
+                                                emitter.tag_info.usingname_search
+                                                )
         self._emit(BiExperimentModel.DataTagged)
 
                 

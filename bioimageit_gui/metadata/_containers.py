@@ -2,9 +2,11 @@ from bioimageit_framework.framework import BiContainer
 
 
 class BiRawDataContainer(BiContainer):
-    URIChanged = 'uri_changed'
-    Loaded = 'loaded'
-    Deleted = 'deleted'
+    URIChanged = 'raw_data_uri_changed'
+    Loaded = 'raw_data_loaded'
+    Deleted = 'raw_data_deleted'
+    ASK_SAVE = 'raw_data_save'
+    SAVED = 'raw_data_saved'
 
     def __init__(self):
         super().__init__()
@@ -18,18 +20,30 @@ class BiRawDataContainer(BiContainer):
         self.md_uri = uri
         self._notify(BiRawDataContainer.URIChanged)
 
-    def action_loaded(self, action, rawdata):
+    def action_raw_data_loaded(self, action, rawdata):
         self.rawdata = rawdata   
         self._notify(BiRawDataContainer.Loaded)  
 
-    def action_delete(self, action, uri):
+    def action_raw_data_delete(self, action, uri):
         self.md_uri = uri
         self._notify(BiRawDataContainer.Delete)  
 
-    def action_deleted(self, action):
+    def action_raw_data_deleted(self, action):
         self.md_uri = '' 
         self.rawdata = None   
-        self._notify(BiRawDataContainer.Deleted)         
+        self._notify(BiRawDataContainer.Deleted)   
+
+    def action_raw_data_save(self, action, name, format, date, author, key_value_pairs):
+        self.rawdata.name = name
+        self.rawdata.format = format
+        self.rawdata.date = date
+        self.rawdata.author = author
+        self.rawdata.key_value_pairs = key_value_pairs
+        self._notify(BiRawDataContainer.ASK_SAVE) 
+
+    def action_raw_data_saved(self, action):
+        self._notify(BiRawDataContainer.SAVED)     
+
 
 
 class BiProcessedDataContainer(BiContainer):

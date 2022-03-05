@@ -3,6 +3,7 @@ from qtpy.QtWidgets import (QWidget, QLabel, QScrollArea,
                             QTableWidget, QTableWidgetItem,
                             QGridLayout, QLineEdit, QPushButton,
                             QMessageBox)
+from bioimageit_core.containers import RawData
 
 from bioimageit_framework.framework import BiComponent
 
@@ -10,7 +11,7 @@ from bioimageit_framework.widgets import BiDictViewer
 
 
 class BiRawDataComponent(BiComponent):
-    SaveClicked = 'save_clicked'
+    SaveClicked = 'raw_data_save'
 
     def __init__(self):
         super().__init__()
@@ -53,12 +54,12 @@ class BiRawDataComponent(BiComponent):
         saveButton.released.connect(self.saveButtonClicked)
 
         descLabel = QLabel('Description')
-        descLabel.setObjectName('BiMetadataTitle')
+        descLabel.setObjectName('bi-metadata-title')
         tagsLabel = QLabel('Tags')
-        tagsLabel.setObjectName('BiMetadataTitle')
+        tagsLabel.setObjectName('bi-metadata-title')
 
         metadataLabel = QLabel('Metadata')
-        metadataLabel.setObjectName('BiMetadataTitle')
+        metadataLabel.setObjectName('bi-metadata-title')
         self.metadataWidget = BiDictViewer()
 
         layout.addWidget(descLabel, 0, 0, 1, 2)
@@ -81,46 +82,38 @@ class BiRawDataComponent(BiComponent):
         layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
 
     def saveButtonClicked(self):
-        #self.container.rawdata.metadata.name = self.nameEdit.text()
-        #self.container.rawdata.metadata.format = self.formatEdit.text()
-        #self.container.rawdata.metadata.date = self.dateEdit.text()
-        #self.container.rawdata.metadata.author = self.authorEdit.text()
-        #
         key_value_pairs = {}
         for key in self.tagWidgets:
             key_value_pairs[key] = self.tagWidgets[key].text()
-        #
-        #self.container.emit(BiRawDataStates.SaveClicked)
-
         self._emit(BiRawDataComponent.SaveClicked,
-                   self.nameEdit.text(),
-                   self.formatEdit.text(),
-                   self.dateEdit.text(),
-                   self.authorEdit.text(),
-                   key_value_pairs)
+                   [self.nameEdit.text(),
+                    self.formatEdit.text(),
+                    self.dateEdit.text(),
+                    self.authorEdit.text(),
+                    key_value_pairs])
 
-    def callback_loaded(self, emitter):
-        self.nameEdit.setText(emitter.rawdata.metadata.name)
-        self.formatEdit.setText(emitter.rawdata.metadata.format)
-        self.dateEdit.setText(emitter.rawdata.metadata.date)
-        self.authorEdit.setText(emitter.rawdata.metadata.author)
-        self.uriEdit.setText(emitter.rawdata.metadata.uri)
+    def callback_raw_data_loaded(self, emitter):
+        self.nameEdit.setText(emitter.rawdata.name)
+        self.formatEdit.setText(emitter.rawdata.format)
+        self.dateEdit.setText(emitter.rawdata.date)
+        self.authorEdit.setText(emitter.rawdata.author)
+        self.uriEdit.setText(emitter.rawdata.uri)
         # metadata
-        self.metadataWidget.import_data(emitter.rawdata.metadata.metadata)
+        self.metadataWidget.import_data(emitter.rawdata.metadata)
         # tags
         for i in reversed(range(self.tagsLayout.count())): 
             self.tagsLayout.itemAt(i).widget().deleteLater()
         self.tagWidgets = {}
         row_idx = -1    
-        for key in emitter.rawdata.metadata.tags:
+        for key in emitter.rawdata.key_value_pairs:
             label = QLabel(key)
-            edit = QLineEdit(emitter.rawdata.metadata.tags[key])
+            edit = QLineEdit(emitter.rawdata.key_value_pairs[key])
             row_idx += 1
             self.tagsLayout.addWidget(label, row_idx, 0) 
             self.tagsLayout.addWidget(edit, row_idx, 1)
             self.tagWidgets[key] = edit
 
-    def callback_saved(self, emitter):
+    def callback_raw_data_saved(self, emitter):
         msgBox = QMessageBox()
         msgBox.setText("Metadata have been saved")
         msgBox.exec()  
@@ -179,11 +172,11 @@ class BiProcessedDataComponent(BiComponent):
         runButton.released.connect(self.emit_run)
 
         descLabel = QLabel('Description')
-        descLabel.setObjectName('BiMetadataTitle')
+        descLabel.setObjectName('bi-metadata-title')
         tagsLabel = QLabel('Tags')
-        tagsLabel.setObjectName('BiMetadataTitle')
+        tagsLabel.setObjectName('bi-metadata-title')
         originTitleLabel = QLabel('Origin')
-        originTitleLabel.setObjectName('BiMetadataTitle')
+        originTitleLabel.setObjectName('bi-metadata-title')
 
         tagsWidget = QWidget()
         self.tagsLayout = QGridLayout()
@@ -337,12 +330,12 @@ class BiMetadataRunComponent(BiComponent):
         self.tooluriEdit.setEnabled(False)
 
         parametersLabel = QLabel('Parameters')
-        parametersLabel.setObjectName('BiMetadataTitle')
+        parametersLabel.setObjectName('bi-metadata-title')
 
         self.parametersTable = QTableWidget()
 
         inputsLabel = QLabel('Inputs')
-        inputsLabel.setObjectName('BiMetadataTitle')
+        inputsLabel.setObjectName('bi-metadata-title')
 
         self.inputsTable = QTableWidget()
 

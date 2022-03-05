@@ -2,7 +2,7 @@ from bioimageit_core import ConfigAccess
 
 from bioimageit_framework.theme import BiThemeAccess
 from bioimageit_framework.framework import BiConnectome, BiComponent
-from bioimageit_framework.widgets import BiAppMainWidget
+from bioimageit_framework.widgets import BiAppMainWidget, BiSplittercomposer
 from bioimageit_viewer.viewer import BiMultiViewer
 
 from bioimageit_gui.home import BiHomeComponent, BiHomeContainer
@@ -12,6 +12,7 @@ from bioimageit_gui.experiment import (BiExperimentCreateContainer,
                                        BiExperimentCreateComponent, 
                                        BiExperimentCreateModel,
                                        BiExperimentViewerComponent)
+from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
 
 class BioImageITApp(BiComponent):
     def __init__(self):
@@ -22,8 +23,10 @@ class BioImageITApp(BiComponent):
         self.create_exp_tab_id = None
         # widgets
         self.main_widget = BiAppMainWidget()
-        self.widget = self.main_widget.widget
 
+        self.composer = BiSplittercomposer()
+        self.widget = self.composer.widget 
+        
         # containers    
         self.homeContainer = BiHomeContainer()
         self.finderContainer = BiFinderContainer()
@@ -61,11 +64,15 @@ class BioImageITApp(BiComponent):
         self.viewer = BiMultiViewer()
         self.viewer.set_visible(False)
 
+        self.composer.add(self.main_widget)
+        self.composer.add(self.viewer)
+
     def callback_open_experiment(self, emitter):
         self._open_experiment(emitter.experiment_uri)  
 
     def callback_open_tool(self, emitter):
-        print('app open tool:', emitter.clicked_tool)           
+        print('app open tool:', emitter.clicked_tool)  
+        self._open_tool(emitter.clicked_tool)         
 
     def callback_open_tile(self, emitter):
         if emitter.clicked_tile_action == 'OpenToolboxes':
@@ -78,6 +85,11 @@ class BioImageITApp(BiComponent):
     def callback_experiment_created(self, emitter):
         self._open_experiment(emitter.experiment_uri)
         self.experimentCreateComponent.get_widget().setVisible(False)
+
+    def callback_ask_view_data(self, emitter):
+        print('show viewer with new data')
+        self.viewer.add_data(emitter.selected_data_info.uri, emitter.selected_data_info.name, emitter.selected_data_info.format)
+        self.viewer.set_visible(True)
 
     def _open_new_experiment(self):
         if self.create_exp_tab_id is None:
@@ -113,3 +125,11 @@ class BioImageITApp(BiComponent):
                              BiThemeAccess.instance().icon('database'), 
                              "Experiment", 
                              True)      
+
+    def _open_tool(self, uri):
+        runner = BiRunnerViewApp(uri, self.viewer)
+        #self.opened_components.append(runner) 
+        self.main_widget.add(runner, 
+                             BiThemeAccess.instance().icon('play'), 
+                             "Runner", 
+                             True)

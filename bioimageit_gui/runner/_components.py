@@ -5,10 +5,9 @@ from qtpy.QtWidgets import (QWidget, QHBoxLayout,
                             QVBoxLayout, QScrollArea)
 
 from bioimageit_core import ConfigAccess
-from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_framework.framework import BiComponent, BiConnectome
 
 from ._containers import BiRunnerContainer
-from ._states import BiRunnerStates
 from ._widgets import (BiRunnerInputSingleWidget,
                        BiRunnerInputExperimentWidget,
                        BiRunnerParamWidget,
@@ -21,7 +20,7 @@ class BiRunnerComponent(BiComponent):
         super().__init__()
         self._object_name = 'BiRunnerComponent'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect(self.container, self)
 
         # components    
         toolbar_component = BiRunnerToolbarCommponent(self.container)
@@ -29,8 +28,6 @@ class BiRunnerComponent(BiComponent):
 
         # widget
         self.widget = QWidget()
-        self.widget.setObjectName('BiWidget')
-
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
@@ -43,31 +40,27 @@ class BiRunnerComponent(BiComponent):
     def progressMessage(self, message: str):
         self.editor_component.progressMessage(message)
 
-    def update(self, action: BiAction):
-        pass
-
-    def get_widget(self):
-        return self.widget  
-
 
 class BiRunnerToolbarCommponent(BiComponent):    
     def __init__(self, container: BiRunnerContainer):
         super().__init__()
         self._object_name = 'BiRunnerToolbarCommponent'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect(self.container, self)
 
         # widget
         self.widget = QWidget()
-        self.widget.setObjectName('BiToolBar')
+        self.widget.setObjectName('bi-toolbar')
 
         layout = QHBoxLayout()
         layout.setContentsMargins(7, 0, 7, 0)
         self.widget.setLayout(layout)
 
         self.title_label = QLabel()
+        self.title_label.setObjectName('bi-label')
 
         btn_widget = QWidget()
+        btn_widget.setObjectName('bi-transparent')
         btn_widget.setMaximumWidth(200)
         btn_layout = QHBoxLayout()
         btn_layout.setContentsMargins(0, 0, 0, 0)
@@ -75,11 +68,11 @@ class BiRunnerToolbarCommponent(BiComponent):
         btn_widget.setLayout(btn_layout)
         self.btn_file = QPushButton('File')
         self.btn_file.setCheckable(True)
-        self.btn_file.setObjectName('btnDefaultLeft')
+        self.btn_file.setObjectName('btn-default-left')
         self.btn_file.released.connect(self.switch_to_file_mode)
         self.btn_experiment = QPushButton('Experiment')
         self.btn_experiment.setCheckable(True)
-        self.btn_experiment.setObjectName('btnDefaultRight')
+        self.btn_experiment.setObjectName('btn-default-right')
         self.btn_experiment.released.connect(self.switch_to_exp_mode)
         btn_layout.addWidget(self.btn_file)
         btn_layout.addWidget(self.btn_experiment)
@@ -92,21 +85,15 @@ class BiRunnerToolbarCommponent(BiComponent):
     def switch_to_file_mode(self):
         self.btn_file.setChecked(True)
         self.btn_experiment.setChecked(False)
-        self.container.mode = BiRunnerContainer.MODE_FILE
-        self.container.emit(BiRunnerStates.ModeChanged)
+        self.container.action_mode_changed(None, BiRunnerContainer.MODE_FILE)
 
     def switch_to_exp_mode(self):
         self.btn_file.setChecked(False)
         self.btn_experiment.setChecked(True)
-        self.container.mode = BiRunnerContainer.MODE_EXP
-        self.container.emit(BiRunnerStates.ModeChanged)        
-
-    def update(self, action: BiAction):
-        if action.state == BiRunnerStates.ProcessInfoLoaded:
-            self.title_label.setText(self.container.process_info.name)
-
-    def get_widget(self):
-        return self.widget          
+        self.container.action_mode_changed(None, BiRunnerContainer.MODE_EXP)
+      
+    def callback_process_info_loaded(self, emitter):
+        self.title_label.setText(emitter.process_info.name)                    
 
 
 class BiRunnerEditorComponent(BiComponent):
@@ -114,22 +101,19 @@ class BiRunnerEditorComponent(BiComponent):
         super().__init__()
         self._object_name = 'BiRunnerEditorComponent'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect(self.container, self)
 
         # widget
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
         self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(layout)
         execWidget = QWidget()
-        execWidget.setObjectName("BiWidget")
         execWidget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         
         
         execScrollArea = QScrollArea()
-        execScrollArea.setObjectName("BiWidget")
         execScrollArea.setMinimumWidth(300)
         execScrollArea.setWidgetResizable(True)
         execScrollArea.setWidget(execWidget)
@@ -137,15 +121,14 @@ class BiRunnerEditorComponent(BiComponent):
         self.execLayout = QVBoxLayout()
         execWidget.setLayout(self.execLayout)
 
-    def update(self, action: BiAction):
-        if action.state == BiRunnerStates.ProcessInfoLoaded:
-            self.buildExecWidget() 
-        if action.state == BiRunnerStates.ModeChanged:
-            self.swithMode(self.container.mode)    
+    def callback_process_info_loaded(self, emitter):
+        self.buildExecWidget() 
+
+    def callback_mode_changed(self, emitter):
+        self.swithMode(emitter.mode)      
 
     def buildExecWidget(self):
         process_info = self.container.process_info
-        
         # inputs
         inputs_group = QGroupBox('Inputs')
         inputs_layout = QVBoxLayout()
@@ -204,10 +187,7 @@ class BiRunnerEditorComponent(BiComponent):
     def showData(self, uri: str, format_: str):
         print("open data", uri)
         print("format", format_)
-
-        self.container.clicked_view_uri = uri
-        self.container.clicked_view_format = format_
-        self.container.emit(BiRunnerStates.ClickedView)
+        self.container.action_clicked_view(None, uri, format_)
 
     def swithMode(self, mode: str):
         self.container.mode = mode
@@ -239,7 +219,7 @@ class BiRunnerEditorComponent(BiComponent):
         print('parameters:', self.container.parameters)
         print('output:', self.container.output_uri)
         
-        self.container.emit(BiRunnerStates.RunProcess) 
+        self.container.action_run_process(None) 
 
     def progressValue(self, progress: int):
         self.progressWidget.setProgress(progress)
@@ -247,7 +227,4 @@ class BiRunnerEditorComponent(BiComponent):
             self.progressWidget.set_range(0, 100)
 
     def progressMessage(self, message: str):
-        self.progressWidget.setMessage(message)
-
-    def get_widget(self):
-        return self.widget                
+        self.progressWidget.setMessage(message)              

@@ -3,7 +3,7 @@ from bioimageit_framework.framework import BiContainer
 
 class BiExperimentContainer(BiContainer):
     Load = 'load'
-    Loaded = 'loaded'
+    ExperimentLoaded = 'experiment_loaded'
     EditInfoClicked = 'edit_info_clicked'
     ImportClicked = 'import_clicked'
     TagClicked = 'tag_clicked'
@@ -11,16 +11,19 @@ class BiExperimentContainer(BiContainer):
     RefreshClicked = 'refresh_clicked'
     DataSetClicked = 'dataset_clicked'
     CloseClicked = 'close_clicked'
-    ViewData = 'view_data_clicked'
+    ViewData = 'ask_view_data'
     ViewRawMetaDataClicked = 'view_raw_metadata_clicked'
     ViewProcessedMetaDataClicked = 'view_processed_metadata_clicked'
     DeleteRawData = 'delete_raw_data'
     ImportFile = 'import_file'
     ImportDir = 'import_dir'
-    TagUsingSeparator = 'tag_using_separator'
-    TagUsingName = 'tag_using_name'
+    AnnotateUsingSeparator = 'annotate_using_separator'
+    AnnotateUsingName = 'annotate_using_name'
     MainPage = 'main_page_clicked'
     DataImported = 'data_imported'
+    DataTagged = 'data_tagged'
+    TagsModified = 'tags_modified'
+    TagsSaved = 'tags_saved'
 
     def __init__(self):
         super().__init__()
@@ -40,14 +43,25 @@ class BiExperimentContainer(BiContainer):
         self.experiment_uri = uri
         self._notify(BiExperimentContainer.Load)
 
-    def action_loaded(self, action, experiment):
+    def action_tags_modified(self, action, keys):
+        self.tag_info.tags = keys
+        self._notify(BiExperimentContainer.TagsModified)
+
+    def action_tags_saved(self, action):
+        self._notify(BiExperimentContainer.DataTagged)
+
+    def action_experiment_loaded(self, action, experiment, dataset_name, dataset):
         self.experiment = experiment
-        self._notify(BiExperimentContainer.Loaded)      
+        self.current_dataset_name = dataset_name
+        self.current_dataset = dataset
+        self._notify(BiExperimentContainer.ExperimentLoaded)      
 
     def action_ask_refresh(self, action):
+        print('container emit ask refresh')
         self._notify(BiExperimentContainer.Load) 
 
     def action_view_data_clicked(self, action, data_info):
+        print('container emit veiw data')
         self.selected_data_info = data_info
         self._notify(BiExperimentContainer.ViewData)
 
@@ -108,20 +122,24 @@ class BiExperimentContainer(BiContainer):
         self.import_info.createddate = createddate
         self._notify(BiExperimentContainer.ImportDir)  
 
-    def action_tag_using_separator(self, aciton, keys, separator, position):
+    def action_annotate_using_separator(self, action, keys, separator, position):
         self.tag_info.usingseparator_tags = keys
         self.tag_info.usingseparator_separator = separator
         self.tag_info.usingseparator_position = position  
-        self._notify(BiExperimentContainer.TagUsingSeparator)                
+        self._notify(BiExperimentContainer.AnnotateUsingSeparator)                
 
-    def action_tag_using_name(self, action, tag, search):
-        self.container.tag_info.usingname_tag = tag
-        self.container.tag_info.usingname_search = search
-        self._notify(BiExperimentContainer.TagUsingName) 
+    def action_annotate_using_name(self, action, tag, search):
+        self.tag_info.usingname_tag = tag
+        self.tag_info.usingname_search = search
+        self._notify(BiExperimentContainer.AnnotateUsingName) 
 
     def action_data_imported(self, action):
         print('action data imported')
-        self._notify(BiExperimentContainer.RefreshClicked)    
+        self._notify(BiExperimentContainer.DataImported)  
+
+    def action_data_tagged(self, action):
+        print('action data imported')
+        self._notify(BiExperimentContainer.DataTagged)           
 
 
 class BiExperimentImportContainer():

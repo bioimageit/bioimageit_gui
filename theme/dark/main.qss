@@ -6,6 +6,12 @@ QWidget{
     background-color: #262930;
 }
 
+QWidget#bi-transparent{
+    color: #f0f1f2;
+    background-color: transparent;
+}
+
+
 /* ****************************************** */
 /*         	        QMessageBox               */
 /* ****************************************** */
@@ -166,4 +172,27 @@ QTabWidget::tab-bar {
 QCheckBox{
   background-color: #414851;
   color: #f0f1f2;
+}
+
+/* ****************************************** */
+/*         	        QSplitter                 */
+/* ****************************************** */
+QSplitter{
+  background-color: #262930;
+}
+
+QSplitter::handle {
+    background-color:#414851;
+}
+
+QSplitter::handle:horizontal {
+    width: 2px;
+}
+
+QSplitter::handle:vertical {
+    height: 2px;
+}
+
+QSplitter::handle:pressed {
+    background-color:#0071C3;
 }
