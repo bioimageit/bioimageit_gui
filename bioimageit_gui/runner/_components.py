@@ -197,7 +197,11 @@ class BiRunnerEditorComponent(BiComponent):
         elif mode == BiRunnerContainer.MODE_EXP:
             self.inputSingleWidget.setVisible(False)
             self.inputExperimentWidget.setVisible(True)
-                
+
+    def callback_run_finished(self, emitter):
+        self.progressWidget.set_range(0, 100)    
+        self.progressWidget.setProgress(100)            
+
     def run(self):
         # create the input datalist
         if self.container.mode == BiRunnerContainer.MODE_FILE:

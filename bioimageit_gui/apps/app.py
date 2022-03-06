@@ -23,6 +23,7 @@ class BioImageITApp(BiComponent):
         self.create_exp_tab_id = None
         # widgets
         self.main_widget = BiAppMainWidget()
+        self.main_widget.connect('app_tab_changed', self.app_tab_changed)
 
         self.composer = BiSplittercomposer()
         self.widget = self.composer.widget 
@@ -57,12 +58,12 @@ class BioImageITApp(BiComponent):
         self.finderContainer.init()
         self.browserContainer.init(ConfigAccess.instance().config["workspace"])
 
-        # home tab
-        self.main_widget.add(self.homeComponent, BiThemeAccess.instance().icon('home'), "Home", False)
-
         # viewer
         self.viewer = BiMultiViewer()
         self.viewer.set_visible(False)
+
+        # home tab
+        self.main_widget.add(self.homeComponent, BiThemeAccess.instance().icon('home'), "Home", False)
 
         self.composer.add(self.main_widget)
         self.composer.add(self.viewer)
@@ -133,3 +134,6 @@ class BioImageITApp(BiComponent):
                              BiThemeAccess.instance().icon('play'), 
                              "Runner", 
                              True)
+
+    def app_tab_changed(self, origin):
+        self.viewer.set_visible(False)

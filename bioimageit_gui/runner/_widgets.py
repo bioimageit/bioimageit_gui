@@ -224,8 +224,8 @@ class BiRunnerInputExperimentWidget(QWidget):
             experiment = APIAccess.instance().get_experiment(experiment_uri)
             self.container.experiment = experiment
             tags = experiment.keys
-            for i in range(experiment.get_processed_datasets_size()):
-                pdataset = experiment.get_processed_dataset_at(i)
+            for i in range(len(experiment.processed_datasets)):
+                pdataset = APIAccess.instance().get_dataset_from_uri( experiment.processed_datasets[i].url)
                 # get run
                 run_uri = os.path.join(os.path.dirname(pdataset.md_uri),
                                        'run.md.json')

@@ -146,7 +146,7 @@ class BiExperimentCreateModel(BiActuator):
                               'now',
                               keys=None,
                               destination=emitter.experiment_destination_dir)
-
-            self._emit(BiExperimentCreateModel.ExperimentCreated, experiment.md_uri)
+            if experiment is not None:
+                self._emit(BiExperimentCreateModel.ExperimentCreated, experiment.md_uri)
         except FileNotFoundError as err:
             self._emit(BiExperimentCreateModel.ExperimentCreationError, err)

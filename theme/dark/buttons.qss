@@ -229,3 +229,33 @@ QPushButton#btn-default-right:checked {
   color : #fff;
   background-color: #0071C3;
 }
+
+/* **************************************** */
+/*             bi-close-button              */
+/* **************************************** */
+QPushButton#bi-close-button {
+
+  margin-bottom: 0;
+  font-size: 10px;
+  color: #fff;
+  background-color: #d9534f;
+  border: 1px solid #d9534f;
+  border-radius: 4px;
+
+}
+
+QPushButton#bi-close-button:hover {
+  color: #fff;
+  background-color: #c9302c;
+  border: 1px solid #c9302c;
+}
+
+QPushButton#bi-close-button:pressed {
+  border: 3px solid #c9302c;
+}
+
+QPushButton#bi-close-button:disabled {
+  color : #fff;
+  background-color: #c9302c;
+  border: 2px solid #c9302c;
+}

@@ -24,6 +24,7 @@ class BiExperimentContainer(BiContainer):
     DataTagged = 'data_tagged'
     TagsModified = 'tags_modified'
     TagsSaved = 'tags_saved'
+    DatasetLoaded = 'dataset_loaded'
 
     def __init__(self):
         super().__init__()
@@ -87,8 +88,14 @@ class BiExperimentContainer(BiContainer):
         self._notify(BiExperimentContainer.MainPage)    
 
     def action_dataset_clicked(self, action, dataset_name):
+        print('the toolbar list change the dataset name to:', dataset_name)
         self.current_dataset_name = dataset_name
         self._notify(BiExperimentContainer.DataSetClicked)
+
+    def action_dataset_loaded(self, action, dataset):
+        self.current_dataset = dataset
+        self.current_dataset_name = dataset.name
+        self._notify(BiExperimentContainer.DatasetLoaded)
 
     def action_close_clicked(self, action):
         self._notify(BiExperimentContainer.CloseClicked) 

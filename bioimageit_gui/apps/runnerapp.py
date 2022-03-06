@@ -2,6 +2,7 @@ import os
 import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QVBoxLayout)
 
+from bioimageit_core.api import APIAccess
 from bioimageit_framework.framework import BiComponent, BiConnectome
 from bioimageit_gui.runner import (BiRunnerContainer, 
                                    BiRunnerModel, BiRunnerComponent, 
@@ -25,7 +26,7 @@ class BiRunnerViewApp(BiComponent):
         progressObserver.progressSignal.connect(
             self.runnerComponent.progressValue)
         progressObserver.messageSignal.connect(
-            self.runnerComponent.progressMessage)
+            self.runnerComponent.progressMessage)   
 
         # initialization
         self.runnerContainer.action_process_uri_changed(None, xml_file)
@@ -40,12 +41,12 @@ class BiRunnerViewApp(BiComponent):
         layout.addWidget(self.runnerComponent.get_widget())
 
     def callback_run_finished(self, emitter):
-        for out in self.runnerContainer.genarated_outputs:
+        print('callback open output:', emitter.genarated_outputs)
+        for out_info in emitter.genarated_outputs:
             self.viewer.set_visible(True)
-            for fileinfo in out:
-                print('open output', fileinfo)
-                name = os.path.basename(fileinfo['uri'])
-                self.viewer.add_data(fileinfo['uri'], name, fileinfo['format'])
+            print('open output', out_info)
+            name = os.path.basename(out_info['uri'])
+            self.viewer.add_data(out_info['uri'], name, out_info['format'])
 
     def callback_clicked_view(self, emitter):
         self.viewer.set_visible(True)
@@ -57,34 +58,3 @@ class BiRunnerViewApp(BiComponent):
         self.viewer.add_data(self.runnerContainer.clicked_view_uri, 
                              name, 
                              self.runnerContainer.clicked_view_format) 
-
-
-class BiRunnerApp(BiComponent):
-    def __init__(self, xml_file: str):
-        super().__init__()
-        self.show_viewer = True
-
-        # components
-        self.runnerContainer = BiRunnerContainer()
-        self.runnerModel = BiRunnerModel(self.runnerContainer)
-        self.runnerComponent = BiRunnerComponent(self.runnerContainer)
-
-        # connect observer
-        progressObserver = BiGuiProgressObserver()
-        self.runnerModel.observer = progressObserver
-        progressObserver.progressSignal.connect(
-            self.runnerComponent.progressValue)
-        progressObserver.messageSignal.connect(
-            self.runnerComponent.progressMessage)
-
-        # initialization
-        self.runnerContainer.process_uri = xml_file
-        self.runnerContainer.emit(BiRunnerStates.ProcessUriChanged)
-
-        # Widget
-        self.widget = QWidget()
-        self.widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.widget.setLayout(layout)
-        layout.addWidget(self.runnerComponent.get_widget())

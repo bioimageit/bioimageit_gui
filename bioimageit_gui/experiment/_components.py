@@ -362,7 +362,8 @@ class BiExperimentToolbarComponent(BiComponent):
         self.dataset_box.currentIndexChanged.disconnect(
             self.datasetBoxChanged)
         for pdataset_uri in emitter.experiment.processed_datasets:
-            pdataset = APIAccess.instance().get_dataset(pdataset_uri)
+            print('pdataset_uri=', pdataset_uri.url)
+            pdataset = APIAccess.instance().get_dataset_from_uri(pdataset_uri.url)
             dataset_name = pdataset.name
             self.dataset_box.addItem(dataset_name)
             if dataset_name == current_text:
@@ -499,12 +500,25 @@ class BiExperimentDataSetViewComponent(BiComponent):
 
         layout.addWidget(self.tableWidget) 
 
-    def callback_experiment_loaded(self, emitter):
-        print('table view reload dataset')
-        if emitter.current_dataset_name == "data":
-            self.drawRawDataset()
 
     def callback_dataset_loaded(self, emitter):
+        print('table view reload dataset: ', emitter.current_dataset_name)
+        if emitter.current_dataset_name == "data":
+            self.drawRawDataset()
+        else:
+            if emitter.current_dataset:
+                self.drawProcessedDataSet()  
+
+    def callback_experiment_loaded(self, emitter):
+        print('table view reload dataset: ', emitter.current_dataset_name)
+        if emitter.current_dataset_name == "data":
+            self.drawRawDataset()
+        else:
+            if emitter.current_dataset:
+                self.drawProcessedDataSet()    
+
+    def callback_dataset_loaded(self, emitter):
+        print('show dataset ', emitter.current_dataset_name)
         if emitter.current_dataset_name == "data":
             self.drawRawDataset()
         else:
@@ -631,30 +645,31 @@ class BiExperimentDataSetViewComponent(BiComponent):
         self.tableWidget.setRowCount(0)
         self.tableWidget.setRowCount(exp_size)
 
-        data_list = self.container.current_dataset.get_data_list()
+        data_list = APIAccess.instance().get_data(self.container.current_dataset)
         
+        self.btns.clear()
         for i in range(len(data_list)):
             raw_metadata = data_list[i]
-            parent_metadata = data_list[i].get_parent()
-            origin_metadata = None
-            if data_list[i].get_origin():
-                origin_metadata = data_list[i].get_origin()
+            parent_metadata = APIAccess.instance().get_parent(data_list[i])
+            origin_metadata = APIAccess.instance().get_origin(data_list[i])
 
             # view button
             col_idx = 0
             view_btn = BiButtonDefault("View")
             view_btn.id = i
-            view_btn.setObjectName("btnTablePrimary")
-            view_btn.clickedId.connect(self.viewDataClicked)
-            self.tableWidget.setCellWidget(i, col_idx, view_btn)
+            view_btn.widget.setObjectName("bi-table-btn-primary")
+            view_btn.connect('clicked', self.viewDataClicked)
+            self.btns.append(view_btn)
+            self.tableWidget.setCellWidget(i, col_idx, view_btn.widget)
 
             # metadata button
             col_idx += 1
             edit_btn = BiButtonDefault("Metadata")
             edit_btn.id = i
-            edit_btn.setObjectName("btnTableDefault")
-            edit_btn.clickedId.connect(self.viewMetaDataClicked)
-            self.tableWidget.setCellWidget(i, col_idx, edit_btn)
+            edit_btn.widget.setObjectName("bi-table-btn-default")
+            self.btns.append(edit_btn)
+            edit_btn.connect('clicked', self.viewMetaDataClicked)
+            self.tableWidget.setCellWidget(i, col_idx, edit_btn.widget)
 
             # name
             col_idx += 1
@@ -670,8 +685,8 @@ class BiExperimentDataSetViewComponent(BiComponent):
                 # tags
                 for tag in tags:
                     col_idx += 1
-                    if tag in origin_metadata.tags:
-                        self.tableWidget.setItem(i, col_idx, QTableWidgetItem(origin_metadata.tags[tag])) 
+                    if tag in origin_metadata.key_value_pairs:
+                        self.tableWidget.setItem(i, col_idx, QTableWidgetItem(origin_metadata.key_value_pairs[tag])) 
             else:
                 for tag in tags:
                     col_idx += 1
@@ -695,7 +710,6 @@ class BiExperimentCreateComponent(BiComponent):
         BiConnectome.connect(self.container, self)
 
         self.widget = QWidget()
-        self.widget.setObjectName("BiWidget")
         layout = QGridLayout()
         self.widget.setLayout(layout)
 
