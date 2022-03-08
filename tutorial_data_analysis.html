@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial: data analysis &mdash; BioImageIT User documentation 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial: data management" href="tutorial_data_management.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> BioImageIT User documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_data_management.html">Tutorial: data management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: data analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-tutorial-project">The tutorial project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#image-deconvolution">Image deconvolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spot-detection">Spot detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistical-testing">Statistical testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BioImageIT User documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial: data analysis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial_data_analysis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-data-analysis">
+<h1>Tutorial: data analysis<a class="headerlink" href="#tutorial-data-analysis" title="Permalink to this headline"></a></h1>
+<p>In this tutorial, we are going to create a pipeline for processing data stored in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
+<section id="the-tutorial-project">
+<h2>The tutorial project<a class="headerlink" href="#the-tutorial-project" title="Permalink to this headline"></a></h2>
+<p>In this tutorial we use the same dataset as in the first tutorial
+(see <a class="reference internal" href="tutorial_data_management.html#tutorial-data-management"><span class="std std-ref">Tutorial: data management</span></a>). We then suppose that we already have a created experiment
+with the imported and annotated data.</p>
+<p>In the following of this tutorial, we are going to process the data in 3 steps.</p>
+<ul class="simple">
+<li><p>Image deconvolution on each image to ease the spot segmentation</p></li>
+<li><p>Auto thresholding and particle analysis on the deblurred and denoised images</p></li>
+<li><p>Statistical testing with the Wilcoxon test to conclude if the two populations have significantly different number of spots</p></li>
+</ul>
+<p>The 3 proposed steps are just one possible way to analyse the data. The purpose here is just to
+illustrate how to use the BioImageIT app. Many other processing pipeline are possible to analyse
+this dataset, but it is not the purpose of this tutorial.</p>
+<p>First, we open the <em>BioImageIT</em> application:</p>
+<figure class="align-center">
+<img alt="_images/home.png" src="_images/home.png" />
+</figure>
+</section>
+<section id="image-deconvolution">
+<h2>Image deconvolution<a class="headerlink" href="#image-deconvolution" title="Permalink to this headline"></a></h2>
+<p>To ease the spot segmentation, we chose to preprocess the data with a deconvolution algorithm. The
+selected algorithm is the Spitfire2D. It is a c++ implementation of a sparse variation deconvolution
+method.</p>
+<p>Click on the <em>Toolboxes</em> button main application top bar:</p>
+<figure class="align-center">
+<img alt="_images/image1.png" src="_images/image1.png" />
+</figure>
+<p>Then click on the <em>Deconvolution</em> toolbox:</p>
+<figure class="align-center">
+<img alt="_images/image2.png" src="_images/image2.png" />
+</figure>
+<p>And click on the <em>Spitfire 2D</em> tool open button:</p>
+<figure class="align-center">
+<img alt="_images/image3.png" src="_images/image3.png" />
+</figure>
+<p>We can now run the tool on the tutorial Experiment. Select the tutorial experiment in the
+“Experiment” field. When the experiment is recognised, the field <code class="docutils literal notranslate"><span class="pre">Input</span> <span class="pre">image</span></code> is automatically
+filed with the <code class="docutils literal notranslate"><span class="pre">data</span></code> dataset which is the only dataset we have in our experiment.</p>
+<p>Then we need to setup the deconvolution parameters. This task can be done by trial and error. In
+this example we previously selected the best parameters as:</p>
+<figure class="align-center">
+<img alt="_images/image4.png" src="_images/image4.png" />
+</figure>
+<p>Press <code class="docutils literal notranslate"><span class="pre">Run</span></code> and wait the process to finish:</p>
+<figure class="align-center">
+<img alt="_images/image5.png" src="_images/image5.png" />
+</figure>
+<p>We can now open the experiment from the home page:</p>
+<figure class="align-center">
+<img alt="_images/image6.png" src="_images/image6.png" />
+</figure>
+<p>And select the <code class="docutils literal notranslate"><span class="pre">spitfiredeconv2d</span></code> dataset</p>
+<figure class="align-center">
+<img alt="_images/image7.png" src="_images/image7.png" />
+</figure>
+<p>We can visualize the obtained result by clicking the <code class="docutils literal notranslate"><span class="pre">View</span></code> button of an image:</p>
+<figure class="align-center">
+<img alt="_images/image8.png" src="_images/image8.png" />
+</figure>
+<p>we can see that the sports are now easy to distinguish from the background. The metadata button of
+each image show the metadata of the image and the details of it origin (raw data annotations and
+run information).</p>
+</section>
+<section id="spot-detection">
+<h2>Spot detection<a class="headerlink" href="#spot-detection" title="Permalink to this headline"></a></h2>
+<p>After deconvolution, the spots are easy to detect on the images. We can simply threshold the image
+and count the number of independent component in the binary map. BioImageIT wrap a Fiji macro that
+runs an auto-threshold and the analyse particles tool. This is exactly what we need here.</p>
+<p>Open the <em>Toolboxes</em>:</p>
+<figure class="align-center">
+<img alt="_images/image9.png" src="_images/image9.png" />
+</figure>
+<p>Click on the <em>Spots detection</em> toolbox.</p>
+<figure class="align-center">
+<img alt="_images/image10.png" src="_images/image10.png" />
+</figure>
+<p>Open the <em>Count particles</em> tool:</p>
+<figure class="align-center">
+<img alt="_images/image11.png" src="_images/image11.png" />
+</figure>
+<p>In the <code class="docutils literal notranslate"><span class="pre">experiment</span></code> field, select the tutorial experiment, and for the <code class="docutils literal notranslate"><span class="pre">input</span> <span class="pre">image</span></code> field
+select the deconvolution image from the previous process: <code class="docutils literal notranslate"><span class="pre">spitfiredeconv2d:Denoised</span> <span class="pre">image</span></code></p>
+<p>Press <code class="docutils literal notranslate"><span class="pre">Run</span></code> and wait for the process to finish:</p>
+<figure class="align-center">
+<img alt="_images/image12.png" src="_images/image12.png" />
+</figure>
+<p>We can now go back to the experiment editor tab, and press the refresh button for the new dataset
+<code class="docutils literal notranslate"><span class="pre">threshold</span> <span class="pre">particles</span></code> to appear.</p>
+<figure class="align-center">
+<img alt="_images/image13.png" src="_images/image13.png" />
+</figure>
+<p>We can see that we have 3 new data per image: <code class="docutils literal notranslate"><span class="pre">count</span></code>, <code class="docutils literal notranslate"><span class="pre">measure</span></code>, <code class="docutils literal notranslate"><span class="pre">draw</span></code>. <code class="docutils literal notranslate"><span class="pre">count</span></code> is the
+number of spot in the image. It is the output of interest for our problem. <code class="docutils literal notranslate"><span class="pre">measure</span></code> is a table
+with properties of the spots and <code class="docutils literal notranslate"><span class="pre">draw</span></code> is a representation of the spot localisation.</p>
+<p>If we click on the <code class="docutils literal notranslate"><span class="pre">view</span></code> button of the <code class="docutils literal notranslate"><span class="pre">count</span></code> data, the viewer shows the number of spot for
+this image:</p>
+<figure class="align-center">
+<img alt="_images/image14.png" src="_images/image14.png" />
+</figure>
+<p>And clicking on the <code class="docutils literal notranslate"><span class="pre">view</span></code> button of the <code class="docutils literal notranslate"><span class="pre">count</span></code> data shows the localization of the detected
+spots:</p>
+<figure class="align-center">
+<img alt="_images/image15.png" src="_images/image15.png" />
+</figure>
+</section>
+<section id="statistical-testing">
+<h2>Statistical testing<a class="headerlink" href="#statistical-testing" title="Permalink to this headline"></a></h2>
+<p>In the previous processing step, we extracted the number of spots for each image. This number is
+contained in the <code class="docutils literal notranslate"><span class="pre">count</span></code> data file for each image. In this step we are going to run a statistical
+testing on these number in order to measure if the <em>Population1</em> and <em>Population2</em> data have
+significant different numbers of spots.</p>
+<p>To illustrate the use of statistical testing with BioImageIT, we chose in this tutorial to run a
+Wilcoxon rank test. This is not the best test for such statistical analysis, but the purpose of the
+tutorial is to show how to run tools, and Wilcoxon rank test is a simple easy to use example.</p>
+<p>Go back to the <em>toolboxes</em> tab of the BioImageIT app,</p>
+<figure class="align-center">
+<img alt="_images/image9.png" src="_images/image9.png" />
+</figure>
+<p>and select the statistics toolbox:</p>
+<figure class="align-center">
+<img alt="_images/image16.png" src="_images/image16.png" />
+</figure>
+<p>Open the <em>Wilcoxon</em> tool:</p>
+<figure class="align-center">
+<img alt="_images/image17.png" src="_images/image17.png" />
+</figure>
+<p>Select the tutorial experiment in the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> field.</p>
+<p>The <em>Wilcoxon</em> tool have too inputs: <em>Population1</em> and <em>Population2</em>. These two inputs are in fact
+arrays of values corresponding to the two populations we want to process. In most of the existing
+applications, to construct such arrays, we need to write a script that read the values (number of
+spot) for each image, create the two arrays and run the statistical test.</p>
+<p>Because in BioImageIT, we annotated the data, we can simply use <em>Filter</em> to automatically generate
+the data arrays.</p>
+<p>For the <em>Population1</em> and <em>Population2</em>, select the line <em>threshold_particles:Number Of Particles</em>
+(see figure above).</p>
+<p>Now, we need to specify that for <em>Population1</em> we want to select the images with the corresponding
+key-value pair: Population=population1. Click on the <em>Filter</em> button at the right of the
+<em>Population1</em> input. It opens a popup window where you can tune a filter. Here we select the data
+where the key <em>Population</em> equals “population1”</p>
+<figure class="align-center">
+<img alt="_images/image18.png" src="_images/image18.png" />
+</figure>
+<p>When we validate, the filters status changes to ON.</p>
+<figure class="align-center">
+<img alt="_images/image19.png" src="_images/image19.png" />
+</figure>
+<p>Then, we do the same for the second population:</p>
+<figure class="align-center">
+<img alt="_images/image20.png" src="_images/image20.png" />
+</figure>
+<p>and validate:</p>
+<figure class="align-center">
+<img alt="_images/image21.png" src="_images/image21.png" />
+</figure>
+<p>Press the <em>Run</em> button:</p>
+<figure class="align-center">
+<img alt="_images/image22.png" src="_images/image22.png" />
+</figure>
+<p>We can now go to the <em>experiment editor</em> tab, press <em>Refresh</em> on the to toolbar and select the
+<code class="docutils literal notranslate"><span class="pre">Wilcoxon</span></code> dataset:</p>
+<figure class="align-center">
+<img alt="_images/image23.png" src="_images/image23.png" />
+</figure>
+<p>We can now see the <code class="docutils literal notranslate"><span class="pre">Wilcoxon</span></code> dataset contains 2 data:</p>
+<ul class="simple">
+<li><p>t: the Wilcoxon statistic</p></li>
+<li><p>p: the p-value</p></li>
+</ul>
+<p>Click the <code class="docutils literal notranslate"><span class="pre">view</span></code> button of the p-value data:</p>
+<figure class="align-center">
+<img alt="_images/image24.png" src="_images/image24.png" />
+</figure>
+<p>We can read that the p-value equals 0.0075. This means that we can reject the null hypothesis saying
+that the 2 populations have the same number of spots.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>During the step, we mention that BioImageIT created two arrays from the dataset
+<em>threshold_particles:Number Of Particles</em> using the <em>Filters</em> that we tuned with the experiment
+annotations. In fact, these arrays are stored in the output dataset. Thus, if we open the
+directory <code class="docutils literal notranslate"><span class="pre">path/to/tutorial/Wicoxon/</span></code> we can find the file <code class="docutils literal notranslate"><span class="pre">x.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">y.csv</span></code> that actually
+contain these two arrays.</p>
+</div>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<p>In this tutorial we saw how to use the <em>BioImageIT</em> app, to build step by step an image analysis
+pipeline without writing a single line of code.</p>
+<p>All the data we generated are stored in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> database with automatically generated
+metadata. This means that for every data in the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> database, we can track it origin and
+the parameters of each processing tool used to generate it.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_data_management.html" class="btn btn-neutral float-left" title="Tutorial: data management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Sylvain Prigent.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

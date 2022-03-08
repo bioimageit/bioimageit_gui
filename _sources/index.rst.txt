@@ -12,11 +12,8 @@ Welcome to BioImageIT GUI's documentation!
 
    intro
    install
-   tutorial_experiment
-   tutorial_finder
-   tutorial_runner
-   tutorial_pipeline
-   modules
+   tutorial_data_management
+   tutorial_data_analysis
 
 Indices and tables
 ==================

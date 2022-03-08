@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial: data management &mdash; BioImageIT User documentation 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial: data analysis" href="tutorial_data_analysis.html" />
+    <link rel="prev" title="Install" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> BioImageIT User documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: data management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-experiment">Create the experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-tutorial-dataset">The tutorial dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-data">Import data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#annotate-the-data">Annotate the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-metadata">Edit metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualize-data">Visualize data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_data_analysis.html">Tutorial: data analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BioImageIT User documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial: data management</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial_data_management.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-data-management">
+<span id="id1"></span><h1>Tutorial: data management<a class="headerlink" href="#tutorial-data-management" title="Permalink to this headline"></a></h1>
+<p>In BioImageIT, data are represented using 3 levels:</p>
+<ul class="simple">
+<li><p><strong>Data</strong>: a single data is made of one or several data files described with metadata. A data can be a <code class="docutils literal notranslate"><span class="pre">RawData</span></code> if it comes from an acquisition system or a <code class="docutils literal notranslate"><span class="pre">ProcessedData</span></code> if it is a data obtained by processing any other data.</p></li>
+<li><p><strong>DataSet</strong>: a collection of <em>Data</em> described with metadata. A dataset can contain a collection of <code class="docutils literal notranslate"><span class="pre">RawData</span></code> or a collection of <code class="docutils literal notranslate"><span class="pre">ProcessedData</span></code> but not a mixture of <code class="docutils literal notranslate"><span class="pre">RawData</span></code> and <code class="docutils literal notranslate"><span class="pre">ProcessedData</span></code>.</p></li>
+<li><p><strong>Experiment</strong>: contains one <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code>, the images to be analysed, and a list of <code class="docutils literal notranslate"><span class="pre">ProcessedDataSet</span></code>, one for each process applied to the Data. The Experiment is described using metadata.</p></li>
+</ul>
+<p>The <strong>BioImageIT application</strong> is a desktop graphical interface that allows to manipulate <code class="docutils literal notranslate"><span class="pre">Data</span></code>, <code class="docutils literal notranslate"><span class="pre">Datasets</span></code> and <code class="docutils literal notranslate"><span class="pre">Experiments</span></code> with a set of forms.
+The more common usage of this application is following this data manipulation steps:</p>
+<ul class="simple">
+<li><p>Create an Experiment</p></li>
+<li><p>Import data to the Experiment</p></li>
+<li><p>Annotate Data</p></li>
+<li><p>Process data.</p></li>
+</ul>
+<p>with goings and coming between steps 2 to 4</p>
+<p>This first tutorial cover the step 1, 2 and 3.</p>
+<p>Open the BioImageIT application:</p>
+<figure class="align-center">
+<img alt="_images/home1.png" src="_images/home1.png" />
+</figure>
+<p>The home screen contains the avialable tools (New experiment, Browse experiments…) and the list of the
+previously created experiments that is empty at the first use.</p>
+<section id="create-the-experiment">
+<h2>Create the experiment<a class="headerlink" href="#create-the-experiment" title="Permalink to this headline"></a></h2>
+<p>Click on the <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">expriment</span></code> button. The new experiment form opens:</p>
+<figure class="align-center">
+<img alt="_images/image110.png" src="_images/image110.png" />
+</figure>
+<p>They are 3 fields. The destination is the directory where the experiment will be saved. By default
+it is in the BioImageIT workspace dir. The name is the name of the experiment. We call it <em>tutorial</em>
+for the tutorial experiment. Finally, the author is the name of the person who do the experiment. By
+default it is the username of the computer session.</p>
+<p>Click the <code class="docutils literal notranslate"><span class="pre">Create</span></code> button.</p>
+<figure class="align-center">
+<img alt="_images/image25.png" src="_images/image25.png" />
+</figure>
+<p>The experiment is created and the experiment editor screen appears. The experiment screen contains
+two areas:</p>
+<p>1- The navigation bar allows to operate on the experiment metadata. Available tools are:</p>
+<ul class="simple">
+<li><p><em>Information</em>: the information tool button allows to edit the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> main metadata.</p></li>
+<li><p><em>Import data</em>: the import data tool button shows a forms to import single data or a corpus of data from a directory.</p></li>
+<li><p><em>Annotate data</em>: the annotate data tool button shows a forms to annotate to raw data with key-value pairs</p></li>
+<li><p><em>Refresh</em>: the refresh tool button allows to reload the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> metadata.</p></li>
+<li><p><em>datasets</em>: the dataset select box allows to select the dataset to display</p></li>
+</ul>
+<p>2- The central area contains the list of the data in the selected dataset</p>
+<p>Let’s now import some data.</p>
+</section>
+<section id="the-tutorial-dataset">
+<h2>The tutorial dataset<a class="headerlink" href="#the-tutorial-dataset" title="Permalink to this headline"></a></h2>
+<p>To illustrate the <em>Experiment</em> management we will use a synthetic dataset
+available at <a class="reference external" href="https://github.com/bioimageit/bioimageit-notebooks/tree/main/synthetic_data/data">https://github.com/bioimageit/bioimageit-notebooks/tree/main/synthetic_data/data</a>
+The dataset is made of 40 synthetic images from 2 populations.</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/image2a.png"><img alt="_images/image2a.png" src="_images/image2a.png" style="width: 250px;" /></a>
+</figure>
+<p>Data are spots with a lot of noise, and one population has more spots that the other. In this
+tutorial, we are going to import the dataset in the Experiment and annotate the raw data to identify
+the two populations.</p>
+<p>Example image of population1:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/image2b.png"><img alt="_images/image2b.png" src="_images/image2b.png" style="width: 250px;" /></a>
+</figure>
+<p>Example image of population2:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/image2c.png"><img alt="_images/image2c.png" src="_images/image2c.png" style="width: 250px;" /></a>
+</figure>
+</section>
+<section id="import-data">
+<h2>Import data<a class="headerlink" href="#import-data" title="Permalink to this headline"></a></h2>
+<p>To import data, we click on the <em>Import data</em> tool button on the Experiment toolbar and select the
+<code class="docutils literal notranslate"><span class="pre">Multiple</span> <span class="pre">Data</span></code> bar:</p>
+<figure class="align-center">
+<img alt="_images/image31.png" src="_images/image31.png" />
+</figure>
+<p>The popup window has two tabs. On to import a <em>Single Data</em> file, and one to import <em>Multiple Data</em>.
+In this tutorial, we have all the raw data in a folder. Thus we click the import <em>Multiple Data</em>
+tab. The form has the following inputs:</p>
+<ul class="simple">
+<li><p><em>Folder</em>: the directory where the data to import are stored</p></li>
+<li><p><em>Key-value pairs</em>: if checked, the name of the directory will be added as a data annotation</p></li>
+<li><p><em>Filter</em>: add a condition on the to import. In this example, we select all the file with a name ending by <em>.tif</em></p></li>
+<li><p><em>Format</em>: a metadata information about the data format. Here we select ‘imagetiff’ since out images are TIFF files</p></li>
+<li><p><em>Author</em>: a metadata information about who created the data</p></li>
+<li><p><em>Created date</em>: a metadata information about when the data have been created.</p></li>
+</ul>
+<p>Click <em>import</em>.</p>
+<figure class="align-center">
+<img alt="_images/image41.png" src="_images/image41.png" />
+</figure>
+<p>When the data are imported a popup window inform that the import is done.
+Click <em>ok</em>. The dataset <code class="docutils literal notranslate"><span class="pre">data</span></code> automatically updates and now we have the list of the imported
+data.</p>
+<figure class="align-center">
+<img alt="_images/image51.png" src="_images/image51.png" />
+</figure>
+</section>
+<section id="annotate-the-data">
+<h2>Annotate the data<a class="headerlink" href="#annotate-the-data" title="Permalink to this headline"></a></h2>
+<p>As we saw at the beginning of this tutorial, the imported data are from 2 populations. We now want
+to annotate the data individually to identify them.</p>
+<p>Click on the <em>Annotate data</em> tool button.</p>
+<figure class="align-center">
+<img alt="_images/image61.png" src="_images/image61.png" />
+</figure>
+<p>The tag data screen has 3 tabs:</p>
+<ul class="simple">
+<li><p><em>Keys</em>: is a form to manually declare new keys to the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>. This is useful only when we want to manually annotate all the data</p></li>
+<li><p><em>Annotate using separator</em>: contains a tool to automatically extract strings from the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> file names using separator strings.</p></li>
+<li><p><em>Annotate using names</em>: contains a tool to automatically extract keywords from the <code class="docutils literal notranslate"><span class="pre">RawData</span></code> by searching specific words in the file names.</p></li>
+</ul>
+<p>In the sample data we use for this tutorial, the file names contains the words <em>population1</em> and
+<em>population2</em>. Thus, we will use the <em>Annotate using names</em> tool. The <em>Annotate using names</em> tool
+form has 2 inputs:</p>
+<ul class="simple">
+<li><p><em>Key</em>: the name we want to give to the tag. In our example, we use <em>Population</em></p></li>
+<li><p><em>Searched values</em>: the words we want to extract from the file names. In out example, we want to extract <em>population1</em> and <em>population2</em></p></li>
+</ul>
+<figure class="align-center">
+<img alt="_images/image71.png" src="_images/image71.png" />
+</figure>
+<p>click <em>Validate</em>, and a new column with the extracted keywords is now visible in the <code class="docutils literal notranslate"><span class="pre">data</span></code>
+dataset list view:</p>
+<figure class="align-center">
+<img alt="_images/image81.png" src="_images/image81.png" />
+</figure>
+<p>In our sample data, the file names also contains a number located between two <em>_</em>. We propose now to
+extract this number as an annotation for each data.</p>
+<p>Click on the <em>Annotate data</em> tool button and select the tab <em>Annotate using separator</em>.</p>
+<figure class="align-center">
+<img alt="_images/image91.png" src="_images/image91.png" />
+</figure>
+<p>We fill the form as follow:</p>
+<ul class="simple">
+<li><p><em>Key</em>: the name we want to give the annotation key. Here we chose <em>ID</em></p></li>
+<li><p><em>Separator</em>: the chars that is used as separator in the filename. In our example it is <em>_</em></p></li>
+<li><p><em>Position</em>: The position of the word we want extract with respect to <em>Separator</em>. In our example we set 1 because we want the word that is just after the first <em>_</em> in the file name.</p></li>
+</ul>
+<p>Click <em>Validate</em>, and a new column with the extracted tag is now visible in the <code class="docutils literal notranslate"><span class="pre">RawDataSet</span></code> data list view:</p>
+<figure class="align-center">
+<img alt="_images/image101.png" src="_images/image101.png" />
+</figure>
+</section>
+<section id="edit-metadata">
+<h2>Edit metadata<a class="headerlink" href="#edit-metadata" title="Permalink to this headline"></a></h2>
+<p>When we click the <code class="docutils literal notranslate"><span class="pre">Metadata</span></code> button of any data in the table, a form opens with the list of all
+the metadata. Some metadata are editable like name, format date, author. The annotations are also
+editable.
+The section <cite>metadata</cite> that is empty for your images can contains all the metadata that are readed
+at the image import. For example, when importing a image with bioformat, metadata like the image
+resolution is extracted and stored in this <cite>metadata</cite> section. Of course this section is not
+editable:</p>
+<figure class="align-center">
+<img alt="_images/image111.png" src="_images/image111.png" />
+</figure>
+</section>
+<section id="visualize-data">
+<h2>Visualize data<a class="headerlink" href="#visualize-data" title="Permalink to this headline"></a></h2>
+<p>When we double click the <code class="docutils literal notranslate"><span class="pre">View</span></code> button of any data in the table, it opens a data viewer. The
+viewer is different depending on the data <strong>format</strong>. The data format is specified in each data
+metadata.</p>
+<p>In our example, the data format are <em>tif</em>. Thus, the browser app opens the <em>napari</em> viewer:</p>
+<figure class="align-center">
+<img alt="_images/image121.png" src="_images/image121.png" />
+</figure>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline"></a></h2>
+<p>In this tutorial we saw the main functionalities of the BioImageIT app for data management:</p>
+<ul class="simple">
+<li><p>Create an experiment</p></li>
+<li><p>import data to an experiment</p></li>
+<li><p>annotate an experiment data</p></li>
+<li><p>edit data metadata</p></li>
+<li><p>visualize data</p></li>
+</ul>
+<p>In the next tutorial data analysis, we are going to create a pipeline to analyse this dataset.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Install" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_data_analysis.html" class="btn btn-neutral float-right" title="Tutorial: data analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Sylvain Prigent.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
