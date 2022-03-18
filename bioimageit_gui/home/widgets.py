@@ -1,13 +1,16 @@
 import qtpy.QtCore
 from qtpy.QtCore import Signal
-from qtpy.QtGui import QPixmap, QImage
+from qtpy.QtGui import QPixmap, QImage, QIcon
 from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout)
 
 import qtpy.QtCore
 from qtpy.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QTableWidget,
-                               QTableWidgetItem, QLabel, QAbstractItemView)
+                            QTableWidgetItem, QLabel, QAbstractItemView,
+                            QPushButton, QToolBar)
 
-from bioimageit_framework.widgets import BiWidget                                
+from bioimageit_framework.widgets import BiWidget  
+
+from bioimageit_framework.theme import BiThemeAccess
 
 
 class BiHomeTile(QWidget):
@@ -93,8 +96,9 @@ class BiHomeTilesWidget(BiWidget):
 
 class BiWorkspaceWidget(BiWidget):
     CLICKED_EXP = 'clicked_exp'
+    BROWSE = 'browse'
 
-    def __init__(self):
+    def __init__(self, use_browse):
         super().__init__()
         self.experiments = {}
         self.clicked_experiment = None
@@ -118,9 +122,20 @@ class BiWorkspaceWidget(BiWidget):
         
         layout = QVBoxLayout()
         layout.addWidget(experimentsTitle, 0)
+
+        if use_browse:
+            toolbar = QToolBar()
+            browse_button = QPushButton('Browse')
+            browse_button.setIcon(QIcon(BiThemeAccess.instance().icon('folder-dark')))
+            browse_button.released.connect(self.ask_browse)
+            toolbar.addWidget(browse_button)
+            layout.addWidget(toolbar, 0)
         layout.addWidget(self.shortcutsWidget, 1)
         layout.addWidget(self.emptyshortcutsWidget, 1, qtpy.QtCore.Qt.AlignCenter)
         self.widget.setLayout(layout)
+
+    def ask_browse(self):
+        self.emit(BiWorkspaceWidget.BROWSE)
 
     def free(self):
         self.shortcutsWidget.setRowCount(0)

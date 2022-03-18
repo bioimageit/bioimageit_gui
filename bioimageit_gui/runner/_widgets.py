@@ -5,13 +5,14 @@ from qtpy.QtWidgets import (QWidget, QHBoxLayout, QLineEdit, QComboBox,
                                QPushButton, QVBoxLayout, QGridLayout, QLabel,
                                QCheckBox, QFileDialog, QTabWidget, QProgressBar,
                                QTextEdit, QSpinBox)
+from bioimageit_core import ConfigAccess
 
 from bioimageit_core.containers import Tool
 from bioimageit_core.api import APIAccess
 
 from bioimageit_framework.widgets import BiButtonPrimary
 from bioimageit_framework.widgets.qtwidgets import QtFileSelectWidget
-from bioimageit_gui.browser import BiExperimentSelectorWidget
+from bioimageit_gui.browser import get_experiment_selector_widget
 from ._containers import BiRunnerContainer
 
 
@@ -53,7 +54,7 @@ class BiRunnerInputSingleWidget(QWidget):
                 nameLabel = self.layout.itemAtPosition(row, 0).widget()
                 selectorWidget = self.layout.itemAtPosition(row, 2).widget()
                 inps.append({"name": nameLabel.text(),
-                            "uri": selectorWidget.text()})
+                             "uri": selectorWidget.text()})
         return inps 
 
     def showViewButton(self, id: int):
@@ -156,7 +157,7 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.info = container.process_info
 
         # experiment browser
-        self.browser_widget = BiExperimentSelectorWidget()
+        self.browser_widget = get_experiment_selector_widget()
         self.browser_widget.widget.setVisible(False)
         self.browser_widget.connect('selected_experiment', self.update_experiment_path)
 
@@ -209,34 +210,34 @@ class BiRunnerInputExperimentWidget(QWidget):
         self.browser_widget.widget.setVisible(True)   
 
     def update_experiment_path(self, emitter):
-        self.experiment_dir_edit.setText(emitter.selected_path)
+        self.experiment_dir_edit.setText(str(emitter.selected_name))
         self.browser_widget.widget.setVisible(False)  
-        self.openExperiment()
+        self.openExperiment(emitter.selected_path)
 
-    def openExperiment(self):
-        experiment_uri = os.path.join(self.experiment_dir_edit.text(),
-                                      'experiment.md.json')
+    def openExperiment(self, experiment_uri):
+        if ConfigAccess.instance().config['metadata']['service'] == 'LOCAL':
+            experiment_uri = os.path.join(experiment_uri, 'experiment.md.json')  
+
         datasets_text = ['data']
         datasets_name = ['data']
         datasets_origin = ['']
         tags = []
-        if os.path.isfile(experiment_uri):
-            experiment = APIAccess.instance().get_experiment(experiment_uri)
-            self.container.experiment = experiment
-            tags = experiment.keys
-            for i in range(len(experiment.processed_datasets)):
-                pdataset = APIAccess.instance().get_dataset_from_uri( experiment.processed_datasets[i].url)
-                # get run
-                run_uri = os.path.join(os.path.dirname(pdataset.md_uri),
-                                       'run.md.json')
-                if os.path.isfile(run_uri):
-                    run = APIAccess.instance().get_run(run_uri)
-                    process = APIAccess.instance().get_tool_from_uri(run.process_uri)
-                    for output in process.outputs:
-                        datasets_text.append(pdataset.name + ":" +
-                                             output.description)
-                        datasets_name.append(pdataset.name)
-                        datasets_origin.append(output.name)
+
+        experiment = APIAccess.instance().get_experiment(experiment_uri)
+        self.container.experiment = experiment
+        tags = experiment.keys
+        for i in range(len(experiment.processed_datasets)):
+            pdataset = APIAccess.instance().get_dataset_from_uri( experiment.processed_datasets[i].url)
+            # get run
+            runs = APIAccess.instance().get_dataset_runs(pdataset)
+            if len(runs) > 0:
+                run = runs[0]
+                process = APIAccess.instance().get_tool_from_uri(run.process_uri)
+                for output in process.outputs:
+                    datasets_text.append(pdataset.name + ":" +
+                                         output.description)
+                    datasets_name.append(pdataset.name)
+                    datasets_origin.append(output.name)
         idx = 1
         for inp in self.info.inputs:
             idx += 1
@@ -375,7 +376,7 @@ class BiRunnerExecWidget(QWidget):
 
         runButton = QPushButton(self.tr("Run"), self)
         runButton.released.connect(self.run)
-        runButton.setObjectName("btnPrimary")
+        runButton.setObjectName("btn-primary")
 
         layout.addWidget(runButton)
         self.setLayout(layout)

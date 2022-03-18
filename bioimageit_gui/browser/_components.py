@@ -12,9 +12,10 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                             QPushButton, QMessageBox)
 
 from bioimageit_core import ConfigAccess
+from bioimageit_core.api import APIAccess
 
 from bioimageit_framework.framework import BiComponent, BiConnectome
-from bioimageit_framework.widgets import BiWidget
+from bioimageit_framework.widgets import BiWidget, QtContentButton
 from bioimageit_framework.theme import BiThemeAccess
 
 from ._containers import BiBrowserContainer
@@ -22,7 +23,45 @@ from ._widgets import BiShortcutButton
 from ._models import BiBrowserModel
 
 
+def get_experiment_selector_widget():
+    if ConfigAccess.instance().config['metadata']['service'] == 'LOCAL':
+        return BiExperimentLocalSelectorWidget()
+    else:
+        return BiExperimentSelectorWidget()
+
+
 class BiExperimentSelectorWidget(BiWidget):
+    SELECTED_EXP = "selected_experiment"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.container = BiBrowserContainer()
+        self.selected_path = ''
+        self.selected_name = ''
+
+        self.widget = QWidget()
+        self.layout = QVBoxLayout()
+        self.widget.setLayout(self.layout)
+        self.refresh()
+
+    def refresh(self):
+        for i in reversed(range(self.layout.count())): 
+            self.layout.itemAt(i).widget().deleteLater()
+        experiments = APIAccess.instance().get_workspace_experiments()
+        for experiment in experiments:
+            experiment_btn = QtContentButton(experiment['info'].name)
+            experiment_btn.id = str(experiment['md_uri'])
+            experiment_btn.content = str(experiment['info'].name)
+            experiment_btn.clickedInfo.connect(self.selected)
+            self.layout.addWidget(experiment_btn)
+
+    def selected(self, id, content):
+        self.selected_path = id
+        self.selected_name = content
+        self.emit(BiExperimentSelectorWidget.SELECTED_EXP)        
+
+
+class BiExperimentLocalSelectorWidget(BiWidget):
     SELECTED_EXP = "selected_experiment"
 
     def __init__(self):
