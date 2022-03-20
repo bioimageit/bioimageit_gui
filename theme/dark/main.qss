@@ -11,6 +11,11 @@ QWidget#bi-transparent{
     background-color: transparent;
 }
 
+QLabel{
+    color: #f0f1f2;
+    background-color: transparent;
+}
+
 
 /* ****************************************** */
 /*         	        QMessageBox               */

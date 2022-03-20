@@ -1,7 +1,7 @@
 import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QHBoxLayout, QLabel)
 
-from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_framework.framework import BiComponent
 
 from ._components import (BiAboutComponent, BiUpdateComponent, 
                           BiConfigComponent)
@@ -72,9 +72,3 @@ class BiSettingsComponent(BiComponent):
             self.update_component.get_widget().setVisible(False) 
             self.config_component.get_widget().setVisible(False) 
             self.cleaner_compnent.setVisible(True)  
-
-    def update(self, action: BiAction):
-        pass 
-
-    def get_widget(self): 
-        return self.widget

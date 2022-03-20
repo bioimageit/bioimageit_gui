@@ -1,35 +1,33 @@
 import os
 import subprocess
+from bioimageit_framework.framework.framework import BiConnectome
 from qtpy.QtCore import QThread
 from bioimageit_core.core.toolboxes import Toolboxes
 from bioimageit_core import Config, ConfigAccess
 
-from bioimageit_gui.core.framework import BiModel, BiAction
+from bioimageit_framework.framework import BiActuator
 
 from ._containers import BiUpdateContainer, BiConfigContainer
-from ._states import BiUpdateStates, BiConfigStates
 
 
-class BiUpdateModel(BiModel):  
+class BiUpdateModel(BiActuator):  
     def __init__(self, container: BiUpdateContainer):
         super().__init__()
         self._object_name = 'BiUpdateModel'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect(container, self)
 
         self.thread = BiUpdateThread()
         self.thread.finished.connect(self.update_finished)
 
     def update_finished(self):
-        self.container.emit(BiUpdateStates.UpdateFinished)
+        self.container.action_update_finished()
 
-    def update(self, action: BiAction):
-        if action.state == BiUpdateStates.UpdateClicked:
-            print('Run here the update code')
-            self.thread.update_bioimageit = self.container.update_bioimageit
-            self.thread.update_toolboxes = self.container.update_toolboxes
-            self.thread.start()
-            return   
+    def callback_update_clicked(self, emitter):
+        print('Run here the update code')
+        self.thread.update_bioimageit = self.container.update_bioimageit
+        self.thread.update_toolboxes = self.container.update_toolboxes
+        self.thread.start()
 
 
 class BiUpdateThread(QThread):
@@ -88,21 +86,19 @@ class BiUpdateThread(QThread):
         builder = Toolboxes()
         builder.build()             
 
-class BiConfigModel(BiModel):  
+class BiConfigModel(BiActuator):  
     def __init__(self, container: BiConfigContainer):
         super().__init__()
         self._object_name = 'BiConfigModel'
         self.container = container
-        self.container.register(self)
+        BiConnectome.connect(container, self)
 
-    def update(self, action: BiAction):
-        if action.state == BiConfigStates.ConfigEdited:
-            # save the config    
-            config_obj = Config()
-            config_obj.config = self.container.config
-            config_obj.config_file = ConfigAccess.instance().config_file
-            config_obj.save()
-            # change the access pointer
-            ConfigAccess.instance().config = config_obj
-            self.container.emit(BiConfigStates.ConfigSaved)
-            return
+    def callback_config_edited(self, emitter):
+        # save the config    
+        config_obj = Config(ConfigAccess.instance().config_file)
+        config_obj.config = self.container.config
+        config_obj.save()
+        # change the access pointer
+        ConfigAccess.instance().config = config_obj
+        self.container.action_config_saved(None)
+        return

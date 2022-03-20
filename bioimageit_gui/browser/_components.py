@@ -9,7 +9,7 @@ from qtpy.QtWidgets import (QWidget, QLabel, QVBoxLayout,
                             QTableWidget, QTableWidgetItem,
                             QAbstractItemView, QHBoxLayout,
                             QToolButton, QSplitter, QLineEdit,
-                            QPushButton, QMessageBox)
+                            QPushButton, QMessageBox, QScrollArea)
 
 from bioimageit_core import ConfigAccess
 from bioimageit_core.api import APIAccess
@@ -39,9 +39,13 @@ class BiExperimentSelectorWidget(BiWidget):
         self.selected_path = ''
         self.selected_name = ''
 
-        self.widget = QWidget()
+        self.widget = QScrollArea()
+        self.widget.setWidgetResizable(True)
+
+        widget = QWidget()
+        self.widget.setWidget(widget)
         self.layout = QVBoxLayout()
-        self.widget.setLayout(self.layout)
+        widget.setLayout(self.layout)
         self.refresh()
 
     def refresh(self):

@@ -1,5 +1,6 @@
 import os
 import json
+from bioimageit_core.core.config import ConfigAccess
 
 from qtpy.QtCore import QDir
 
@@ -36,101 +37,102 @@ class BiBrowserModel(BiActuator):
                                                        fileInfo.fileName))  
             
     def callback_refresh(self, emitter):
-        dir = QDir(emitter.currentPath)
-        files = dir.entryInfoList()
-        self.files = []
+        if ConfigAccess.instance().config['metadata']['service'] == 'LOCAL':
+            dir = QDir(emitter.currentPath)
+            files = dir.entryInfoList()
+            self.files = []
 
-        for i in range(len(files)):
-            if files[i].fileName() != "." and files[i].fileName() != "..":
-                if files[i].isDir():
-                    experiment_file = os.path.join(files[i].absoluteFilePath(),
-                                                   'experiment.md.json')
-                    if os.path.isfile(experiment_file):
+            for i in range(len(files)):
+                if files[i].fileName() != "." and files[i].fileName() != "..":
+                    if files[i].isDir():
+                        experiment_file = os.path.join(files[i].absoluteFilePath(),
+                                                    'experiment.md.json')
+                        if os.path.isfile(experiment_file):
+                            fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            files[i].fileName(),
+                                            'experiment',
+                                            files[i].lastModified().toString(
+                                                "yyyy-MM-dd"))
+                        else:    
+                            fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                            files[i].path(),
+                                            files[i].fileName(),
+                                            'dir',
+                                            files[i].lastModified().toString(
+                                                "yyyy-MM-dd"))
+
+                        self.files.append(fileInfo)
+
+                    elif files[i].fileName().endswith("experiment.md.json"):
+                        experiment = APIAccess.instance().get_experiment(files[i].absoluteFilePath())
+
                         fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           files[i].fileName(),
-                                           'experiment',
-                                           files[i].lastModified().toString(
-                                               "yyyy-MM-dd"))
-                    else:    
+                                                files[i].path(),
+                                                experiment.name,
+                                                "experiment",
+                                                experiment.date)
+                        self.files.append(fileInfo)
+                        del experiment
+            
+                    elif files[i].fileName().endswith("run.md.json"):
+                        run = APIAccess.instance().get_run(files[i].absoluteFilePath())
+        
                         fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                           files[i].path(),
-                                           files[i].fileName(),
-                                           'dir',
-                                           files[i].lastModified().toString(
-                                               "yyyy-MM-dd"))
+                                                files[i].path(),
+                                                run.process_name,
+                                                "run",
+                                                files[i].lastModified().toString(
+                                                    "yyyy-MM-dd"))
+                        self.files.append(fileInfo)
+                        del run
+                    
+                    elif files[i].fileName().endswith("raw_dataset.md.json"):
+                        rawDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
 
-                    self.files.append(fileInfo)
+                        fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                                files[i].path(),
+                                                rawDataSet.name,
+                                                "rawdataset",
+                                                files[i].lastModified().toString(
+                                                    "yyyy-MM-dd"))
+                        self.files.append(fileInfo)
+                        del rawDataSet
+            
+                    elif files[i].fileName().endswith("processeddataset.md.json"):
+                        processedDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
 
-                elif files[i].fileName().endswith("experiment.md.json"):
-                    experiment = APIAccess.instance().get_experiment(files[i].absoluteFilePath())
+                        fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                                files[i].path(),
+                                                processedDataSet.metadata.name,
+                                                "processeddataset",
+                                                files[i].lastModified().toString(
+                                                    "yyyy-MM-dd"))
+                        self.files.append(fileInfo)
+                        del processedDataSet
+            
+                    elif files[i].fileName().endswith(".md.json"):
+                        # test type of file raw/processed
+                        metadata = None 
+                        if os.path.getsize(files[i].absoluteFilePath()) > 0:
+                            with open(files[i].absoluteFilePath()) as json_file:  
+                                metadata = json.load(json_file)
 
-                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                            files[i].path(),
-                                            experiment.name,
-                                            "experiment",
-                                            experiment.date)
-                    self.files.append(fileInfo)
-                    del experiment
-        
-                elif files[i].fileName().endswith("run.md.json"):
-                    run = APIAccess.instance().get_run(files[i].absoluteFilePath())
-    
-                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                            files[i].path(),
-                                            run.process_name,
-                                            "run",
-                                            files[i].lastModified().toString(
-                                                "yyyy-MM-dd"))
-                    self.files.append(fileInfo)
-                    del run
-                
-                elif files[i].fileName().endswith("raw_dataset.md.json"):
-                    rawDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
+                        name = ''
+                        if 'common' in metadata:
+                            if 'name' in metadata['common']:
+                                name = metadata['common']['name'] 
 
-                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                            files[i].path(),
-                                            rawDataSet.name,
-                                            "rawdataset",
-                                            files[i].lastModified().toString(
-                                                "yyyy-MM-dd"))
-                    self.files.append(fileInfo)
-                    del rawDataSet
-        
-                elif files[i].fileName().endswith("processeddataset.md.json"):
-                    processedDataSet = APIAccess.instance().get_dataset(files[i].absoluteFilePath())
+                        type = ''
+                        if 'origin' in metadata:
+                            if 'type' in metadata['origin']:
+                                type = metadata['origin']['type']               
 
-                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                            files[i].path(),
-                                            processedDataSet.metadata.name,
-                                            "processeddataset",
-                                            files[i].lastModified().toString(
-                                                "yyyy-MM-dd"))
-                    self.files.append(fileInfo)
-                    del processedDataSet
-        
-                elif files[i].fileName().endswith(".md.json"):
-                    # test type of file raw/processed
-                    metadata = None 
-                    if os.path.getsize(files[i].absoluteFilePath()) > 0:
-                        with open(files[i].absoluteFilePath()) as json_file:  
-                            metadata = json.load(json_file)
-
-                    name = ''
-                    if 'common' in metadata:
-                        if 'name' in metadata['common']:
-                            name = metadata['common']['name'] 
-
-                    type = ''
-                    if 'origin' in metadata:
-                        if 'type' in metadata['origin']:
-                            type = metadata['origin']['type']               
-
-                    fileInfo = BiBrowserFileInfo(files[i].fileName(),
-                                            files[i].path(),
-                                            name,
-                                            type + "data",
-                                            files[i].lastModified().toString(
-                                                "yyyy-MM-dd"))
-                    self.files.append(fileInfo)
-        self._emit(BiBrowserModel.RELOAD, tuple(self.files))
+                        fileInfo = BiBrowserFileInfo(files[i].fileName(),
+                                                files[i].path(),
+                                                name,
+                                                type + "data",
+                                                files[i].lastModified().toString(
+                                                    "yyyy-MM-dd"))
+                        self.files.append(fileInfo)
+            self._emit(BiBrowserModel.RELOAD, tuple(self.files))

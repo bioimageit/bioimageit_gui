@@ -13,6 +13,8 @@ from bioimageit_gui.experiment import (BiExperimentCreateContainer,
                                        BiExperimentCreateModel,
                                        BiExperimentViewerComponent)
 from bioimageit_gui.apps.runnerapp import BiRunnerViewApp
+from bioimageit_gui.settings import BiSettingsComponent
+
 
 class BioImageITApp(BiComponent):
     def __init__(self):
@@ -21,6 +23,8 @@ class BioImageITApp(BiComponent):
         self.toolboxes_tab_id = None
         self.browser_tab_id = None
         self.create_exp_tab_id = None
+        self.settings_tab_id = None
+
         # widgets
         self.main_widget = BiAppMainWidget()
         self.main_widget.connect('app_tab_changed', self.app_tab_changed)
@@ -38,6 +42,7 @@ class BioImageITApp(BiComponent):
         self.finderComponent = BiFinderComponent()
         self.browserComponent = BiBrowserComponent(self.browserContainer)
         self.experimentCreateComponent =  BiExperimentCreateComponent(self.experimentCreateContainer)
+        self.settingsComponent = BiSettingsComponent()
         # models
         self.finderModel = BiFinderModel() 
         self.browserModel = BiBrowserModel()
@@ -82,6 +87,8 @@ class BioImageITApp(BiComponent):
             self._open_browser()  
         elif emitter.clicked_tile_action == 'OpenNewExperiment':   
             self._open_new_experiment() 
+        elif emitter.clicked_tile_action == 'OpenSettings':   
+            self._open_settings()     
 
     def callback_experiment_created(self, emitter):
         self._open_experiment(emitter.experiment_uri)
@@ -134,6 +141,15 @@ class BioImageITApp(BiComponent):
                              BiThemeAccess.instance().icon('play'), 
                              "Runner", 
                              True)
+
+    def _open_settings(self):
+        if self.settings_tab_id is None:
+            self.settings_tab_id = self.main_widget.add(self.settingsComponent, 
+                                                         BiThemeAccess.instance().icon('settings-dark'), 
+                                                         "Settings", 
+                                                         False)     
+        else:
+            self.main_widget.open(self.settings_tab_id)     
 
     def app_tab_changed(self, origin):
         self.viewer.set_visible(False)
