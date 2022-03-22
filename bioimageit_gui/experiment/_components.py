@@ -20,15 +20,15 @@ from bioimageit_framework.framework import BiComponent, BiConnectome
 from bioimageit_framework.widgets import BiTagWidget, BiButtonDefault, BiButtonPrimary
 
 from bioimageit_gui.metadata import (BiRawDataContainer,
-                                     BiProcessedDataContainer,
+                                     BiProcessedDataViewerContainer,
                                      BiRunContainer,
                                      BiMetadataExperimentContainer,
                                      BiRawDataComponent,
-                                     BiProcessedDataComponent,
+                                     BiProcessedDataViewerComponent,
                                      BiMetadataRunComponent,
                                      BiMetadataExperimentComponent,
                                      BiRawDataModel,
-                                     BiProcessedDataModel,
+                                     BiProcessedDataViewerModel,
                                      BiRunModel,
                                      BiMetadataExperimentModel)
 from ._containers import (BiExperimentContainer,
@@ -81,24 +81,20 @@ class BiExperimentComponent(BiComponent):
         # containers
         self.container = container
         self.rawDataContainer = BiRawDataContainer()
-        self.processedDataContainer = BiProcessedDataContainer()
-        self.runContainer = BiRunContainer()
+        self.processedDataContainer = BiProcessedDataViewerContainer()
         self.metadataExperimentContainer = BiMetadataExperimentContainer()
 
         BiConnectome.connect(self.rawDataContainer, self)
         BiConnectome.connect(self.processedDataContainer, self)
-        BiConnectome.connect(self.runContainer, self)
         BiConnectome.connect(self.metadataExperimentContainer, self)
 
         # models
         self.rawDataModel = BiRawDataModel()
-        self.processedDataModel = BiProcessedDataModel()
-        self.runModel = BiRunModel()
+        self.processedDataModel = BiProcessedDataViewerModel()
         self.metadataExperimentModel = BiMetadataExperimentModel()
 
         BiConnectome.connect(self.rawDataContainer, self.rawDataModel)
         BiConnectome.connect(self.processedDataContainer, self.processedDataModel)
-        BiConnectome.connect(self.runContainer, self.runModel)
         BiConnectome.connect(self.metadataExperimentContainer, self.metadataExperimentModel)
 
         # components
@@ -106,7 +102,7 @@ class BiExperimentComponent(BiComponent):
         self.metaToolbarComponent = BiExperimentMetaToolbarComponent(self.container)
         self.datasetViewComponent = BiExperimentDataSetViewComponent(self.container)
         self.rawDataComponent = BiRawDataComponent()
-        self.processedDataComponent = BiProcessedDataComponent()
+        self.processedDataComponent = BiProcessedDataViewerComponent()
         self.runComponent = BiMetadataRunComponent()
         self.metadataExperimentComponent = BiMetadataExperimentComponent()
         self.importComponent = BiExperimentImportComponent(self.container)
@@ -114,7 +110,6 @@ class BiExperimentComponent(BiComponent):
 
         BiConnectome.connect(self.rawDataContainer, self.rawDataComponent)
         BiConnectome.connect(self.processedDataContainer, self.processedDataComponent)
-        BiConnectome.connect(self.runContainer, self.runComponent)
         BiConnectome.connect(self.metadataExperimentContainer, self.metadataExperimentComponent)
 
         # widget
@@ -125,18 +120,6 @@ class BiExperimentComponent(BiComponent):
         layout.setSpacing(5)
         self.widget.setLayout(layout)
 
-        self.processedDataWidget = QWidget()
-        processedDataLayout = QVBoxLayout()
-        title1 = QLabel('Processed data metadata')
-        title1.setObjectName('bi-label-form-header1')
-        processedDataLayout.addWidget(title1)
-        processedDataLayout.addWidget(self.processedDataComponent.get_widget())
-        title2 = QLabel('Run information')
-        title2.setObjectName('bi-label-form-header1')
-        processedDataLayout.addWidget(title2)
-        processedDataLayout.addWidget(self.runComponent.get_widget())
-        self.processedDataWidget.setLayout(processedDataLayout)
-
         layout.addWidget(self.toolbarComponent.get_widget())
         layout.addWidget(self.metaToolbarComponent.get_widget())
         layout.addWidget(self.datasetViewComponent.get_widget())
@@ -144,7 +127,7 @@ class BiExperimentComponent(BiComponent):
         layout.addWidget(self.importComponent.get_widget())
         layout.addWidget(self.tagComponent.get_widget())
         layout.addWidget(self.rawDataComponent.get_widget())
-        layout.addWidget(self.processedDataWidget)
+        layout.addWidget(self.processedDataComponent.get_widget())
 
         # widget init
         self.metaToolbarComponent.get_widget().setVisible(False)
@@ -152,12 +135,11 @@ class BiExperimentComponent(BiComponent):
         self.importComponent.get_widget().setVisible(False)
         self.tagComponent.get_widget().setVisible(False)
         self.rawDataComponent.get_widget().setVisible(False)
-        self.processedDataWidget.setVisible(False)
-
+        self.processedDataComponent.get_widget().setVisible(False)
 
     def hideDataComponents(self):
         self.rawDataComponent.get_widget().setVisible(False)  
-        self.processedDataWidget.setVisible(False)
+        self.processedDataComponent.get_widget().setVisible(False)
 
     def callback_experiment_loaded(self, emitter):
         self.metadataExperimentContainer.action_metadata_loaded(None, emitter.experiment)
@@ -170,17 +152,16 @@ class BiExperimentComponent(BiComponent):
         self.metaToolbarComponent.get_widget().setVisible(True) 
         self.datasetViewComponent.get_widget().setVisible(False)  
         self.rawDataComponent.get_widget().setVisible(True)
-        self.processedDataWidget.setVisible(False)
+        self.processedDataComponent.get_widget().setVisible(False)
 
     def callback_view_processed_metadata_clicked(self, emitter):
         self.processedDataContainer.action_update_uri(None, emitter.current_dataset.uris[self.container.clickedRow].md_uri)   
-        # TODO change processed data container to one component
 
         self.toolbarComponent.get_widget().setVisible(False)
         self.metaToolbarComponent.get_widget().setVisible(True) 
         self.datasetViewComponent.get_widget().setVisible(False) 
         self.rawDataComponent.get_widget().setVisible(False)
-        self.processedDataWidget.setVisible(True)
+        self.processedDataComponent.get_widget().setVisible(True)
 
     def callback_saved(self, emitter):
         self.toolbarComponent.get_widget().setVisible(True)
@@ -269,7 +250,7 @@ class BiExperimentComponent(BiComponent):
         self.importComponent.get_widget().setVisible(False)
         self.metadataExperimentComponent.get_widget().setVisible(False)
         self.rawDataComponent.get_widget().setVisible(False)
-        self.processedDataWidget.setVisible(False)
+        self.processedDataComponent.get_widget().setVisible(False)
         self.toolbarComponent.get_widget().setVisible(True)
         self.datasetViewComponent.get_widget().setVisible(True) 
     

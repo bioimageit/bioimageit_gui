@@ -120,6 +120,66 @@ class BiRawDataComponent(BiComponent):
         msgBox.exec()  
 
 
+class BiProcessedDataViewerComponent(BiComponent):
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiProcessedDataViewer'
+
+        self.dict_viewer = BiDictViewer()
+        self.widget = self.dict_viewer.widget
+
+    def callback_processed_data_loaded(self, emitter):
+        # convert metadata to dict
+        metadata = emitter.processeddata
+        data = {}
+        data['Common'] = {}
+        data['Common']['URI'] = metadata.uri
+        data['Common']['Name'] = metadata.name
+        data['Common']['Author'] = metadata.author
+        data['Common']['Date'] = metadata.date
+        data['Common']['Format'] = metadata.format
+
+        data["Inputs"] = {}
+        for input in metadata.inputs:
+            dict_data = {}
+            dict_data['name'] = input.name
+            dict_data['uri'] = input.uri
+            dict_data['uuid'] = input.uuid
+            dict_data['type'] = input.type
+            data['Inputs'][f'input {input.name}'] = dict_data
+
+        data['Output'] = metadata.output   
+
+        data['Run info'] = {}
+        data['Run info']['process'] = {}    
+        data['Run info']['process']['name'] = emitter.rundata.process_name
+        data['Run info']['process']['uri'] = emitter.rundata.process_uri
+
+        data['Run info']['dataset'] = {}
+        data['Run info']['dataset']['uri'] = emitter.rundata.processed_dataset.md_uri
+        data['Run info']['dataset']['uuid'] = emitter.rundata.processed_dataset.uuid
+
+        data['Run info']['inputs'] = {}
+        for input in emitter.rundata.inputs:
+            dict_data = {}
+            dict_data['name'] = input.name
+            dict_data['dataset'] = input.dataset
+            dict_data['query'] = input.query
+            dict_data['origin_output_name'] = input.origin_output_name
+            data['Run info']['inputs'][f'input {input.name}'] = dict_data
+
+        data['Run info']['parameters'] = {}
+        for parameter in emitter.rundata.parameters:
+            dict_data = {}
+            dict_data['name'] = parameter.name
+            dict_data['value'] = parameter.value
+            data['Run info']['parameters'][f'{parameter.name}'] = dict_data
+
+        # update viewer 
+        self.dict_viewer.import_data(data)
+            
+
+
 class BiProcessedDataComponent(BiComponent):
     RunOpenClicked = 'run_open_clicked'
 

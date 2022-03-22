@@ -67,6 +67,29 @@ class BiProcessedDataContainer(BiContainer):
         self._notify(BiProcessedDataContainer.Loaded)
 
 
+class BiProcessedDataViewerContainer(BiContainer):
+    Loaded = 'processed_data_loaded'
+    UriChanged = 'processed_data_uri_changed'
+
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiProcessedDataContainer'
+        # data
+        self.md_uri = '' 
+        self.processeddata = None  
+        self.rundata = None
+
+    def action_update_uri(self, action, uri):
+        self.md_uri = uri
+        print('BiProcessedDataContainer changed uri to:', uri)
+        self._notify(BiProcessedDataContainer.UriChanged)
+
+    def action_processed_data_loaded(self, action, processeddata, rundata):
+        self.processeddata = processeddata
+        self.rundata = rundata
+        self._notify(BiProcessedDataContainer.Loaded)
+
+
 class BiRunContainer(BiContainer):
     Loaded = 'loaded'
     UriChanged = 'uri_changed'

@@ -27,6 +27,20 @@ class BiRawDataModel(BiActuator):
         self._emit(BiRawDataModel.Saved)
 
 
+class BiProcessedDataViewerModel(BiActuator):  
+    Loaded = 'processed_data_loaded'
+
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiProcessedDataModel'
+
+    def callback_processed_data_uri_changed(self, emitter):
+        print('BiProcessedDataModel reload pdata from uri=', emitter.md_uri)
+        processeddata = APIAccess.instance().get_processed_data(emitter.md_uri)
+        rundata = APIAccess.instance().get_run(processeddata.run.md_uri)
+        self._emit(BiProcessedDataModel.Loaded, [processeddata, rundata]) 
+
+
 class BiProcessedDataModel(BiActuator):  
     Loaded = 'processed_data_loaded'
 
