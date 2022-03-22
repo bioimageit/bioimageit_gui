@@ -35,8 +35,9 @@ class BiProcessedDataModel(BiActuator):
         self._object_name = 'BiProcessedDataModel'
 
     def callback_processed_data_uri_changed(self, emitter):
+        print('BiProcessedDataModel reload pdata from uri=', emitter.md_uri)
         processeddata = APIAccess.instance().get_processed_data(emitter.md_uri)
-        self.e_mit(BiProcessedDataModel.Loaded, processeddata)    
+        self._emit(BiProcessedDataModel.Loaded, processeddata)    
 
 
 class BiRunModel(BiActuator): 

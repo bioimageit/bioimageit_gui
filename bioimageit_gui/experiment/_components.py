@@ -62,7 +62,8 @@ class BiExperimentViewerComponent(BiComponent):
         layout.addWidget(self.experimentComponent.widget)
 
     def callback_ask_view_data(self, emitter):
-        self.viewer.add_data(emitter.selected_data_info.uri,
+        local_uri = APIAccess.instance().download_data(emitter.selected_data_info.md_uri)
+        self.viewer.add_data(local_uri,
                              emitter.selected_data_info.name,
                              emitter.selected_data_info.format)
         self.viewer.set_visible(True)
@@ -156,7 +157,7 @@ class BiExperimentComponent(BiComponent):
 
     def hideDataComponents(self):
         self.rawDataComponent.get_widget().setVisible(False)  
-        self.processedDataComponent.get_widget().setVisible(False)
+        self.processedDataWidget.setVisible(False)
 
     def callback_experiment_loaded(self, emitter):
         self.metadataExperimentContainer.action_metadata_loaded(None, emitter.experiment)
@@ -169,10 +170,11 @@ class BiExperimentComponent(BiComponent):
         self.metaToolbarComponent.get_widget().setVisible(True) 
         self.datasetViewComponent.get_widget().setVisible(False)  
         self.rawDataComponent.get_widget().setVisible(True)
-        self.processedDataComponent.get_widget().setVisible(False)
+        self.processedDataWidget.setVisible(False)
 
     def callback_view_processed_metadata_clicked(self, emitter):
-        self.processedDataContainer.action_update_uri(emitter.current_dataset.get(self.container.clickedRow).md_uri)   
+        self.processedDataContainer.action_update_uri(None, emitter.current_dataset.uris[self.container.clickedRow].md_uri)   
+        # TODO change processed data container to one component
 
         self.toolbarComponent.get_widget().setVisible(False)
         self.metaToolbarComponent.get_widget().setVisible(True) 
@@ -592,7 +594,7 @@ class BiExperimentDataSetViewComponent(BiComponent):
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.author))
             # created date
             col_idx += 1
-            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.date))
+            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(str(raw_metadata.date)))
 
         #self.tableWidget.resizeColumnsToContents()    
 

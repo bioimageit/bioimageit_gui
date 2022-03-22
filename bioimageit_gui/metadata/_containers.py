@@ -47,8 +47,8 @@ class BiRawDataContainer(BiContainer):
 
 
 class BiProcessedDataContainer(BiContainer):
-    Loaded = 'loaded'
-    UriChanged = 'uri_changed'
+    Loaded = 'processed_data_loaded'
+    UriChanged = 'processed_data_uri_changed'
 
     def __init__(self):
         super().__init__()
@@ -59,9 +59,10 @@ class BiProcessedDataContainer(BiContainer):
 
     def action_update_uri(self, action, uri):
         self.md_uri = uri
+        print('BiProcessedDataContainer changed uri to:', uri)
         self._notify(BiProcessedDataContainer.UriChanged)
 
-    def action_loaded(self, action, processeddata):
+    def action_processed_data_loaded(self, action, processeddata):
         self.processeddata = processeddata
         self._notify(BiProcessedDataContainer.Loaded)
 

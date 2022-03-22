@@ -179,7 +179,6 @@ class BiConfigWidget(QWidget):
         elif text == 'OMERO':
             self.omero_widget.setVisible(True)  
 
-
     def emit_validate(self):
         self.validate.emit()
 

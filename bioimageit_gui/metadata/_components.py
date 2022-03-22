@@ -1,3 +1,4 @@
+from bioimageit_core.api.request import APIAccess
 import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QLabel, QScrollArea,
                             QTableWidget, QTableWidgetItem,
@@ -95,9 +96,9 @@ class BiRawDataComponent(BiComponent):
     def callback_raw_data_loaded(self, emitter):
         self.nameEdit.setText(emitter.rawdata.name)
         self.formatEdit.setText(emitter.rawdata.format)
-        self.dateEdit.setText(emitter.rawdata.date)
+        self.dateEdit.setText(str(emitter.rawdata.date))
         self.authorEdit.setText(emitter.rawdata.author)
-        self.uriEdit.setText(emitter.rawdata.uri)
+        self.uriEdit.setText(str(emitter.rawdata.uri))
         # metadata
         self.metadataWidget.import_data(emitter.rawdata.metadata)
         # tags
@@ -124,18 +125,18 @@ class BiProcessedDataComponent(BiComponent):
 
     def __init__(self):
         super().__init__()
-        self._object_name = 'BiMetadataProcessedDataComponent'
+        self._object_name = 'BiProcessedDataComponent'
 
         self.widget = QScrollArea()
-        self.widget.setObjectName('BiWidget')
         self.widget.setWidgetResizable(True)
+        self.widget.setMinimumHeight(150)
         self.widget.setMinimumWidth(150)
 
         widget = QWidget()
         widget.setAttribute(qtpy.QtCore.Qt.WA_StyledBackground, True)
         widget.setObjectName("bi-side-bar")
-        layout = QGridLayout()
-        widget.setLayout(layout)
+        self.layout = QGridLayout()
+        widget.setLayout(self.layout)
         self.widget.setWidget(widget)
 
         uriLabel = QLabel('URI')
@@ -173,7 +174,7 @@ class BiProcessedDataComponent(BiComponent):
 
         descLabel = QLabel('Description')
         descLabel.setObjectName('bi-metadata-title')
-        tagsLabel = QLabel('Tags')
+        tagsLabel = QLabel('Key-value pairs')
         tagsLabel.setObjectName('bi-metadata-title')
         originTitleLabel = QLabel('Origin')
         originTitleLabel.setObjectName('bi-metadata-title')
@@ -183,35 +184,37 @@ class BiProcessedDataComponent(BiComponent):
         self.tagsLayout.setContentsMargins(0,0,0,0)
         tagsWidget.setLayout(self.tagsLayout)
 
-        layout.addWidget(descLabel, 0, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(uriLabel, 1, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.uriEdit, 1, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(nameLabel, 2, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.nameEdit, 2, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(formatLabel, 3, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.formatEdit, 3, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(dateLabel, 4, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.dateEdit, 4, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(authorLabel, 5, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.authorEdit, 5, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(tagsLabel, 6, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(outlabelLabel, 7, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.outlabelEdit, 7, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(tagsWidget, 8, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(originTitleLabel, 9, 0, 1, 2,
-                         qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(originLabel, 10, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.originEdit, 10, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(runLabel, 11, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(runButton, 11, 1, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(QWidget(), 12, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
-        layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(descLabel, 0, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(uriLabel, 1, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.uriEdit, 1, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(nameLabel, 2, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.nameEdit, 2, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(formatLabel, 3, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.formatEdit, 3, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(dateLabel, 4, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.dateEdit, 4, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(authorLabel, 5, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.authorEdit, 5, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(tagsLabel, 6, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(outlabelLabel, 7, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.outlabelEdit, 7, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(tagsWidget, 8, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(originTitleLabel, 9, 0, 1, 2,
+                              qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(originLabel, 10, 0, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(self.originEdit, 10, 1, qtpy.QtCore.Qt.AlignTop)
+        #self.layout.addWidget(runLabel, 11, 0, qtpy.QtCore.Qt.AlignTop)
+        #self.layout.addWidget(runButton, 11, 1, qtpy.QtCore.Qt.AlignTop)
+        self.layout.addWidget(QWidget(), 11, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
+        self.layout.setAlignment(qtpy.QtCore.Qt.AlignTop)
 
     def emit_run(self):
         self._emit(BiProcessedDataComponent.RunOpenClicked)
 
-    def callback_loaded(self, emitter):
-        metadata = emitter.processeddata.metadata
+    def callback_processed_data_loaded(self, emitter):
+        metadata = emitter.processeddata
+
+        print('name = ', metadata.name)
 
         self.uriEdit.setText(metadata.uri)
         self.nameEdit.setText(metadata.name)
@@ -221,25 +224,25 @@ class BiProcessedDataComponent(BiComponent):
         self.outlabelEdit.setText(metadata.output['label'])
 
         # tags
-        orig = emitter.processeddata.get_origin()
+        orig = APIAccess.instance().get_origin(metadata)
         if orig:
-            origin = orig.metadata
+            origin = orig
             for i in reversed(range(self.tagsLayout.count())): 
                 self.tagsLayout.itemAt(i).widget().deleteLater()
             self.tagWidgets = {}
             row_idx = -1    
-            for key in origin.tags:
+            for key in origin.key_value_pairs:
                 label = QLabel(key)
-                edit = QLineEdit(origin.tags[key])
+                edit = QLineEdit(origin.key_value_pairs[key])
                 edit.setReadOnly(True)
                 row_idx += 1
                 self.tagsLayout.addWidget(label, row_idx, 0) 
                 self.tagsLayout.addWidget(edit, row_idx, 1)
                 self.tagWidgets[key] = edit
 
-        parent = emitter.processeddata.get_parent()
+        parent = APIAccess.instance().get_parent(metadata)
         if parent:
-            self.originEdit.setText(parent.metadata.name)
+            self.originEdit.setText(parent.name)
         else:
             self.originEdit.setText("")  
 
@@ -297,7 +300,7 @@ class BiMetadataExperimentComponent(BiComponent):
     def callback_metadata_loaded(self, emitter):
         self.nameEdit.setText(emitter.experiment.name)
         self.authorEdit.setText(emitter.experiment.author)
-        self.createddateEdit.setText(emitter.experiment.date)
+        self.createddateEdit.setText(str(emitter.experiment.date))
 
     def callback_metadata_saved(self, emitter):
         msgBox = QMessageBox()
