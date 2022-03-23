@@ -72,6 +72,7 @@ class BiExperimentLocalSelectorWidget(BiWidget):
         super().__init__()
         self.container = BiBrowserContainer()
         self.selected_path = ''
+        self.selected_name = ''
         # components
         browser_component = BiBrowserComponent(self.container)
 
@@ -111,6 +112,7 @@ class BiExperimentLocalSelectorWidget(BiWidget):
         experiment_uri = os.path.join(path, 'experiment.md.json')
         if os.path.isfile(experiment_uri):
             self.selected_path = path
+            self.selected_name = path
             self.emit(BiExperimentSelectorWidget.SELECTED_EXP)
             #self.selected_experiment.emit(path)
         else:
