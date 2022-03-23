@@ -201,3 +201,19 @@ QSplitter::handle:vertical {
 QSplitter::handle:pressed {
     background-color:#0071C3;
 }
+
+/* ****************************************** */
+/*         	        QProgressBar                 */
+/* ****************************************** */
+ QProgressBar {
+  border-radius: 7px;
+  text-align: center;
+  color: #d1d1d1;
+  height: 6px;
+  background-color: #5A626C;
+}
+
+QProgressBar::chunk {
+  background-color: #0071C3;
+  border-radius: 7px;
+}
