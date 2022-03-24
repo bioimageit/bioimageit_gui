@@ -50,6 +50,7 @@ class BiSettingsComponent(BiComponent):
         layout.addWidget(self.cleaner_compnent, 1)
         self.update_view(0)
         toolbar.set_checked(0)
+        self.update_container.init()
 
     def update_view(self, id: int):
         if id == 0:

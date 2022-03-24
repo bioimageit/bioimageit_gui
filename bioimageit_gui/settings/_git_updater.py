@@ -14,20 +14,21 @@ class GitUpdater(Observable):
         self.conda_dir = conda_dir
 
     def get_newer_tags(self):
-        current_branch = self.git_branch()
-        print('current_branch is:', current_branch)
-        self.git_checkout_main()
-        self.git_pull()
+        #current_branch = self.git_branch()
+        #print('current_branch is:', current_branch)
+        #self.git_checkout_main()
+        #self.git_pull()
         tags = self.ls_remote_tags()
-        print('tags are:', tags)
+        tags.sort(reverse=True)
+        return tags
         
-        # find the tags after the current branch
-        position = -1
-        for i,tag in enumerate(tags):
-            if tag in current_branch:
-                position = i 
-        print('position:', position)        
-        return tags[position+1:]        
+        ## find the tags after the current branch
+        #position = -1
+        #for i,tag in enumerate(tags):
+        #    if tag in current_branch:
+        #        position = i 
+        #print('position:', position)        
+        #return tags[position+1:]        
 
     def lsremote(self):
         remote_refs = {}

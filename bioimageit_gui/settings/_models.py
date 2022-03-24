@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 from bioimageit_framework.framework.framework import BiConnectome
 from qtpy.QtCore import QThread
@@ -8,6 +9,7 @@ from bioimageit_core import Config, ConfigAccess
 from bioimageit_framework.framework import BiActuator
 
 from ._containers import BiUpdateContainer, BiConfigContainer
+from ._git_updater import GitUpdater
 
 
 class BiUpdateModel(BiActuator):  
@@ -21,7 +23,16 @@ class BiUpdateModel(BiActuator):
         self.thread.finished.connect(self.update_finished)
 
     def update_finished(self):
-        self.container.action_update_finished()
+        self.container.action_update_finished(None)
+
+    def callback_get_new_tags(self, emiiter):
+        conda_dir = ConfigAccess.instance().config['runner']['conda_dir']
+        install_dir = ConfigAccess.instance().config['install_dir']
+        local_repo_path = os.path.join(install_dir, 'bioimageit_gui')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_gui.git'
+        gui_updater = GitUpdater(conda_dir, 'bioimageit', local_repo_path, remote_repo_url)
+        tags = gui_updater.get_newer_tags()
+        self.container.action_new_tags(None, tags)
 
     def callback_update_clicked(self, emitter):
         print('Run here the update code')
@@ -35,6 +46,7 @@ class BiUpdateThread(QThread):
         super().__init__() 
         self.update_bioimageit = False
         self.update_toolboxes = False   
+        self.target_version_tag = ''
 
     def run(self):  
         if self.update_bioimageit:
@@ -42,7 +54,38 @@ class BiUpdateThread(QThread):
         if self.update_toolboxes:
             self.update_tools()    
 
-    def update_app(self):    
+    def update_app(self):
+        conda_dir = ConfigAccess.instance().config['runner']['conda_dir']
+        install_dir = ConfigAccess.instance().config['install_dir']
+        env_name = 'bioimageit'
+
+        # Formats
+        local_repo_path = os.path.join(install_dir, 'bioimageit_formats')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_formats.git'
+        gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
+        gui_updater.update_to_tag(self.target_version_tag)
+        # CORE
+        local_repo_path = os.path.join(install_dir, 'bioimageit_core')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_core.git'
+        gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
+        gui_updater.update_to_tag(self.target_version_tag)
+        # Framework
+        local_repo_path = os.path.join(install_dir, 'bioimageit_framework')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_framework.git'
+        gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
+        gui_updater.update_to_tag(self.target_version_tag)
+        # Viewer
+        local_repo_path = os.path.join(install_dir, 'bioimageit_virwer')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_viewer.git'
+        gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
+        gui_updater.update_to_tag(self.target_version_tag)
+        # GUI
+        local_repo_path = os.path.join(install_dir, 'bioimageit_gui')
+        remote_repo_url = 'https://github.com/bioimageit/bioimageit_gui.git'
+        gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
+        gui_updater.update_to_tag(self.target_version_tag)
+
+    def update_app_old(self):    
         install_dir = ConfigAccess.instance().get('install_dir')
         conda_dir = ConfigAccess.instance().get('runner')['conda_dir']
 

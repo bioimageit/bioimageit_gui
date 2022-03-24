@@ -1,7 +1,8 @@
 from bioimageit_framework.framework.framework import BiConnectome
 import qtpy.QtCore
-from qtpy.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
-                            QMessageBox, QLabel, QCheckBox, QProgressBar)
+from qtpy.QtWidgets import (QWidget, QGridLayout, QVBoxLayout, QPushButton, 
+                            QComboBox, QMessageBox, QLabel, QCheckBox, 
+                            QProgressBar)
 
 from bioimageit_core import ConfigAccess
 
@@ -34,14 +35,15 @@ class BiUpdateComponent(BiComponent):
         BiConnectome.connect(container, self)
 
         self.widget = QWidget()
-        layout = QVBoxLayout()
+        layout = QGridLayout()
         self.widget.setLayout(layout)
 
         self.checkbox_bioimageit = QCheckBox("Update BioImageIT")
-        self.checkbox_bioimageit.setObjectName("BiCheckBoxNegative")
         self.checkbox_bioimageit.setChecked(True)
+        self.checkbox_bioimageit.stateChanged.connect(self.show_hide_version)
+        self.tags_list_label = QLabel('Version')
+        self.tags_list = QComboBox()
         self.checkbox_toolboxes = QCheckBox("Update Toolboxes")
-        self.checkbox_toolboxes.setObjectName("BiCheckBoxNegative")
         self.checkbox_toolboxes.setChecked(True)
 
         update_btn = QPushButton('Update')
@@ -50,18 +52,32 @@ class BiUpdateComponent(BiComponent):
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
 
-        layout.addWidget(self.checkbox_bioimageit, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.checkbox_toolboxes, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(update_btn, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(self.progress_bar, 0, qtpy.QtCore.Qt.AlignTop)
-        layout.addWidget(QWidget(), 1, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(self.checkbox_bioimageit, 0, 0, 1, 2)
+        layout.addWidget(self.tags_list_label, 1, 0, 1, 1)
+        layout.addWidget(self.tags_list, 1, 1, 1, 1)
+        layout.addWidget(self.checkbox_toolboxes, 2, 0, 1, 2)
+        layout.addWidget(update_btn, 3, 0, 1, 2)
+        layout.addWidget(self.progress_bar, 4, 0, 1, 2)
+        layout.addWidget(QWidget(), 5, 0, 1, 2, qtpy.QtCore.Qt.AlignTop)
         
+    def show_hide_version(self, state):
+        if state > 0:
+            self.tags_list_label.setVisible(True)
+            self.tags_list.setVisible(True)
+        else:
+            self.tags_list_label.setVisible(False)
+            self.tags_list.setVisible(False)            
+
     def update_clicked(self):
         self.container.update_bioimageit = self.checkbox_bioimageit.isChecked()
         self.container.update_toolboxes = self.checkbox_toolboxes.isChecked()
         self.container.action_update_clicked()
         self.progress_bar.setRange(0, 0)
         self.progress_bar.setVisible(True)
+
+    def callback_new_tags(self, emitter):
+        self.tags_list.clear()
+        self.tags_list.addItems(emitter.new_tags)
 
     def callback_update_finished(self, emitter):
         self.progress_bar.setVisible(False)

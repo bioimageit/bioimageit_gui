@@ -9,18 +9,29 @@ class BiSettingsContainer(BiContainer):
 class BiUpdateContainer(BiContainer):
     UpdateClicked = "update_clicked"
     UpdateFinished = "update_finished"
+    GetNewTags = "get_new_tags"
+    NewTags = 'new_tags'
 
     def __init__(self):
         super().__init__()
         self._object_name = 'BiUpdateContainer'
         self.update_bioimageit = False
         self.update_toolboxes = False
+        self.new_tags = []
 
-    def action_update_clicked(self):
+    def init(self):
+        self._notify(BiUpdateContainer.GetNewTags) 
+
+    def action_new_tags(self, action, tags):
+        self.new_tags = tags
+        self._notify(BiUpdateContainer.NewTags)
+
+    def action_update_clicked(self, action):
         self._notify(BiUpdateContainer.UpdateClicked)
 
-    def action_update_finished(self):
+    def action_update_finished(self, action):
         self._notify(BiUpdateContainer.UpdateFinished)
+
 
 class BiConfigContainer(BiContainer):
     ConfigEdited = "config_edited"
