@@ -1,8 +1,18 @@
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QLabel)
 
-from bioimageit_gui.core.framework import BiComponent, BiAction
+from bioimageit_framework.framework import BiComponent
 
 from ._containers import BiDesignerContainer
+from ._scene import BiDesignerView
+
+
+class BiDesigner(BiComponent):
+    def __init__(self):
+        super().__init__()
+        self._object_name = 'BiDesignerComponent'
+
+        self.designer_component = BiDesignerComponent()
+        self.widget = self.designer_component.widget
 
 
 class BiDesignerComponent(BiComponent):
@@ -19,12 +29,9 @@ class BiDesignerComponent(BiComponent):
         layout.setSpacing(0)
         self.widget.setLayout(layout)
 
-        label = QLabel('The pipeline designer is not yet implemented')
-        label.setObjectName("BiWidget")
-        layout.addWidget(label)
+        self.view = BiDesignerView()
+        layout.addWidget(self.view)
 
-    def update(self, action: BiAction):
-        pass 
-
-    def get_widget(self): 
-        return self.widget  
+        #label = QLabel('The pipeline designer is not yet implemented')
+        #label.setObjectName("BiWidget")
+        #layout.addWidget(label)

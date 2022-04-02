@@ -95,7 +95,7 @@ class BiRunnerInputDatasetFilterWidget(QWidget):
         filterLayout = QGridLayout()
         self.filterWidget.setLayout(filterLayout)
         
-        tagLabel = QLabel(self.tr('Tag'))
+        tagLabel = QLabel(self.tr('Key'))
         operatorLabel = QLabel(self.tr('Operator'))
         valueLabel = QLabel(self.tr('Value'))
 

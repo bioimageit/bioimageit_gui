@@ -35,7 +35,7 @@ class BiExperimentContainer(BiContainer):
         self.experiment = None
         self.import_info = BiExperimentImportContainer()
         self.tag_info = BiExperimentTagContainer()
-        self.current_dataset_name = ''
+        self.current_dataset_name = 'data'
         self.current_dataset = None
         self.clickedRow = -1
         self.selected_data_info = None

@@ -37,7 +37,11 @@ class BiExperimentModel(BiActuator):
         self.callback_load(emitter)
 
     def callback_dataset_clicked(self, emitter):
-        current_dataset = APIAccess.instance().get_dataset(emitter.experiment, emitter.current_dataset_name)
+        if emitter.current_dataset_name == '':
+            dataset_name = 'data'
+        else:
+            dataset_name = emitter.current_dataset_name
+        current_dataset = APIAccess.instance().get_dataset(emitter.experiment, dataset_name)
         self._emit(BiExperimentModel.DataSetLoaded, current_dataset)
 
     def callback_import_file(self, emitter):

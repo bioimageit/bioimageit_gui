@@ -1,4 +1,4 @@
-from bioimageit_gui.core.framework import BiContainer
+from bioimageit_framework.framework import BiContainer
 
 
 class BiDesignerContainer(BiContainer):
