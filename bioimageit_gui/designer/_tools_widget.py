@@ -41,7 +41,7 @@ class BiDesignerTools(QWidget):
         self.tools_list.load_tools(tools_list)
 
 
-class BiDesignerToolsBar(QToolBar):
+class BiDesignerToolsBar(QWidget):
     changed_toolbox = Signal(str)
 
     def __init__(self, categories):
@@ -51,9 +51,17 @@ class BiDesignerToolsBar(QToolBar):
         self.categories_box.addItems(categories)
         self.categories_box.currentTextChanged.connect(self.show_toolbox)
 
-        #layout = QHBoxLayout()
-        self.addWidget(self.categories_box)
-        #self.setLayout(layout)
+        layout = QHBoxLayout()
+        layout.addWidget(self.categories_box)
+        
+        widget = QWidget()
+        tlayout = QVBoxLayout()
+        tlayout.setContentsMargins(0, 0, 0, 0)
+        tlayout.addWidget(widget)
+
+        widget.setLayout(layout)
+        widget.setObjectName('bi-toolbar')
+        self.setLayout(tlayout)
 
     def show_toolbox(self, toolbox_name):
         self.changed_toolbox.emit(toolbox_name)
@@ -67,7 +75,7 @@ class BiDesignerTool(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         label = QLabel(tool.name)
-        label.setStyleSheet('background-color:#0071C3; border-radius: 5px; min-height:50px; qproperty-alignment: AlignCenter;')
+        label.setStyleSheet('background-color:#0071C3; border-radius: 5px; min-height:40px; qproperty-alignment: AlignCenter;')
         layout.addWidget(label)
         self.setLayout(layout)
 
@@ -82,7 +90,7 @@ class BiDesignerToolIO(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         label = QLabel(name)
-        label.setStyleSheet('background-color:#007100; border-radius: 5px; min-height:50px; qproperty-alignment: AlignCenter;')
+        label.setStyleSheet('background-color:#007100; border-radius: 5px; min-height:40px; qproperty-alignment: AlignCenter;')
         layout.addWidget(label)
         self.setLayout(layout)
 
