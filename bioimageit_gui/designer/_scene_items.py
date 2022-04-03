@@ -23,6 +23,9 @@ class BiDesignerViewItem(QGraphicsPathItem):
         self.settingWidget = None
         self.widget = None
 
+    def type(self):
+        return QGraphicsItem.UserType
+
     def setName(self, name):
         self.name = name
 
@@ -65,6 +68,9 @@ class BiDesignerViewPort(BiDesignerViewItem):
     def __del__(self):  
         for conn in self.connections:
             del conn
+
+    def type(self):
+        return QGraphicsItem.UserType +1
 
     def setNode(self, b):
         """
@@ -113,7 +119,7 @@ class BiDesignerViewPort(BiDesignerViewItem):
     def isConnected(self, other):
         #other: khComposerViewPort
         for conn in self.connections:
-            if conn.port1() == other or conn.port2() == other:
+            if conn.port1 == other or conn.port2 == other:
                 return True
         return False
 
@@ -146,10 +152,12 @@ class BiDesignerViewNode(BiDesignerViewItem):
         self.height_right = self.vertMargin
         self.height_left = self.vertMargin
 
-        self.processId = '' # process id
-        self.processType = '' # process type
+        self.process = None
         self.alreadyRan = False # boolean used by
         self.scene.addItem(self)
+
+    def type(self):
+        return QGraphicsItem.UserType +3
 
     def addPort(self, name, typeName, isOutput, isInput, flags=0, ptr=0):
         fm = QFontMetrics(self.scene.font())
@@ -324,18 +332,24 @@ class BiDesignerViewNodeData:
     def set_pos(self, x, y):
         self.item.setPos(x, y) 
 
+
 class BiDesignerViewNodeTool:
-    def __init__(self, uuid, parent, scene):
+    def __init__(self, tool, uuid, parent, scene):
         super().__init__()
         self.item = BiDesignerViewNode(parent, scene)
         self.item.name = 'Process'
         self.item.processType = 'process' 
-        self.item.addPort( f"#{uuid}: process", "", False, False, BiDesignerViewPort.NamePort, None)
-        self.item.addInputPort('Any', 'Any')
-        self.item.addOutputPort('Any', 'Any')
+        self.item.addPort( f"#{uuid}: {tool.name}", "", False, False, BiDesignerViewPort.NamePort, None)
+        for input in tool.inputs:
+            if input.is_data:
+                self.item.addInputPort(input.description, input.type)
+        for output in tool.outputs:
+            self.item.addOutputPort(output.description, output.type)
+        self.item.process = tool    
         
     def set_pos(self, x, y):
         self.item.setPos(x, y)    
+
 
 class BiDesignerViewConnection(BiDesignerViewItem):
     Type = QGraphicsItem.UserType + 2
@@ -343,19 +357,23 @@ class BiDesignerViewConnection(BiDesignerViewItem):
     def __init__(self, parent, scene):
         super().__init__(parent, scene)
         
-        self.setPen(QPen(qtpy.QtCore.Qt.black, 2))
+        self.setPen(QPen(qtpy.QtCore.Qt.lightGray, 2))
         self.setBrush(qtpy.QtCore.Qt.NoBrush)
         self.setZValue(-1)
-        self.port1 = 0
-        self.port2 = 0
+        self.port1 = None
+        self.port2 = None
         self.pos1 = 0
         self.pos2 = 0
+        self.scene.addItem(self)
 
     def __del__(self):    
         if self.port1:
-            self.port1.connections().remove(self.port1.connections().indexOf(self))
+            self.port1.connections.remove(self)
         if self.port2:
-            self.port2.connections().remove(self.port2.connections().indexOf(self))
+            self.port2.connections.remove(self)
+
+    def type(self):
+        return QGraphicsItem.UserType + 2
 
     def setPos1(self, p):
         self.pos1 = p
@@ -365,11 +383,11 @@ class BiDesignerViewConnection(BiDesignerViewItem):
 
     def setPort1(self, p):
         self.port1 = p
-        self.port1.connections().append(self)
+        self.port1.connections.append(self)
 
     def setPort2(self, p):
         self.port2 = p
-        self.port2.connections().append(self)
+        self.port2.connections.append(self)
 
     def updatePosFromPorts(self):
         self.pos1 = self.port1.scenePos()
@@ -383,8 +401,8 @@ class BiDesignerViewConnection(BiDesignerViewItem):
         dx = self.pos2.x() - self.pos1.x()
         dy = self.pos2.y() - self.pos1.y()
 
-        ctr1 = QPointF(self.pos1.x() + dx * 0.5, self.pos1.y() + dy * 0.1)
-        ctr2 = QPointF(self.pos1.x() + dx * 0.5, self.pos1.y() + dy * 0.9)
+        ctr1 = QPointF(self.pos1.x() + dx * 0.7, self.pos1.y() + dy * 0.1)
+        ctr2 = QPointF(self.pos1.x() + dx * 0.3, self.pos1.y() + dy * 0.9)
 
         p.cubicTo(ctr1, ctr2, self.pos2)
 

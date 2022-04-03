@@ -4,6 +4,7 @@ from qtpy.QtGui import QIcon, QPainter
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QToolBar, QToolButton, QGraphicsView
 
 from bioimageit_framework.theme import BiThemeAccess
+from bioimageit_core.api import APIAccess
 
 from ._scene import BiDesignerGraphicScene, BiDesignerGraphicView, BiDesignerViewNodesEditor
 from ._scene_items import BiDesignerViewNodeSave, BiDesignerViewNodeData, BiDesignerViewNodeTool
@@ -72,6 +73,7 @@ class BiDesignerEditorView(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.req = APIAccess.instance()
         self.count=0
         self.scene = BiDesignerGraphicScene()
         self.scene.ask_new_node.connect(self.add_node)
@@ -101,5 +103,6 @@ class BiDesignerEditorView(QWidget):
             b = BiDesignerViewNodeData(self.count, None, self.scene)
             b.set_pos(pos_x, pos_y)  
         else:
-            b = BiDesignerViewNodeTool(self.count, None, self.scene)
+            tool = self.req.get_tool_from_uri(id)
+            b = BiDesignerViewNodeTool(tool, self.count, None, self.scene)
             b.set_pos(pos_x, pos_y)              

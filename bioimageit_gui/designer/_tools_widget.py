@@ -16,9 +16,7 @@ class BiDesignerTools(QWidget):
         categories = self.req.get_categories('root')
         for category in categories:
             categories_names.append(category.id)
-
-        print('categories=', categories_names)
-
+        #print('categories=', categories_names)
         self.tools_bar = BiDesignerToolsBar(categories_names)
         self.tools_list = BiDesignerToolsList()
         self.tools_footer = BiDesignerToolsFooter()
@@ -33,12 +31,8 @@ class BiDesignerTools(QWidget):
         self.tools_bar.changed_toolbox.connect(self.browse)
 
     def browse(self, category):   
-        print('get tools for ', category)
         tools = self.req.get_category_tools(category)
-        tools_list = []
-        for tool in tools:
-            tools_list.append(self.req.get_tool_from_uri(tool.uri))
-        self.tools_list.load_tools(tools_list)
+        self.tools_list.load_tools(tools)
 
 
 class BiDesignerToolsBar(QWidget):
@@ -80,7 +74,8 @@ class BiDesignerTool(QWidget):
         self.setLayout(layout)
 
     def id(self):
-        return self.tool.id
+        return self.tool.uri
+
 
 class BiDesignerToolIO(QWidget):
     def __init__(self, name):
