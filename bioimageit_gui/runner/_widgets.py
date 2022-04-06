@@ -490,7 +490,7 @@ class BiProcessInputInt(BiProcessInputWidget):
         self.valueEdit = QSpinBox(self)
         self.valueEdit.setAttribute(qtpy.QtCore.Qt.WA_MacShowFocusRect, False)
         self.layout.addWidget(self.valueEdit, 0, 1)
-        self.valueEdit.textChanged.connect(self.updateValue)
+        self.valueEdit.valueChanged.connect(self.updateValue)
 
     def updateValue(self, value: int):
         self._value = value
