@@ -1,8 +1,7 @@
-from PySide2.QtWidgets import QGroupBox
 import qtpy.QtCore
 from qtpy.QtWidgets import (QWidget, QHBoxLayout, 
                             QLabel, QPushButton, 
-                            QVBoxLayout, QScrollArea)
+                            QVBoxLayout, QScrollArea, QGroupBox)
 
 from bioimageit_core import ConfigAccess
 from bioimageit_framework.framework import BiComponent, BiConnectome
