@@ -51,7 +51,7 @@ class BiHomeComponent(BiComponent):
                
         
     def open_tile(self, origin: str):
-        print('clicked til=', origin.clicked_tile)
+        #print('clicked til=', origin.clicked_tile)
         self._emit(BiHomeComponent.CLICKED_TILE, [origin.clicked_tile])
 
     def browse(self, origin):

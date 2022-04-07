@@ -146,9 +146,15 @@ class BiWorkspaceWidget(BiWidget):
         self.shortcutsWidget.setRowCount(n)
 
     def set_item(self, row, experiment):
+        author = ''
+        if isinstance(experiment['info'].author, str):
+            author = experiment['info'].author
+        elif 'name' in experiment['info'].author:
+            author = experiment['info'].author['name']     
+
         self.shortcutsWidget.setItem(row, 0, QTableWidgetItem(experiment['info'].name))  
         self.shortcutsWidget.setItem(row, 1, QTableWidgetItem(experiment['info'].date))  
-        self.shortcutsWidget.setItem(row, 2, QTableWidgetItem(experiment['info'].author))
+        self.shortcutsWidget.setItem(row, 2, QTableWidgetItem(author))
         self.shortcutsWidget.setVisible(True)
         self.emptyshortcutsWidget.setVisible(False)   
         self.experiments[row] = experiment        

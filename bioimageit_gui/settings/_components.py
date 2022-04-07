@@ -71,7 +71,7 @@ class BiUpdateComponent(BiComponent):
     def update_clicked(self):
         self.container.update_bioimageit = self.checkbox_bioimageit.isChecked()
         self.container.update_toolboxes = self.checkbox_toolboxes.isChecked()
-        self.container.action_update_clicked()
+        self.container.action_update_clicked(None)
         self.progress_bar.setRange(0, 0)
         self.progress_bar.setVisible(True)
 
