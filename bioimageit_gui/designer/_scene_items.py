@@ -1,4 +1,3 @@
-import qtpy.QtCore
 """Implements scene items for the designer
 
 
@@ -9,9 +8,10 @@ BiDesignerViewPort
 
 """
 
+import qtpy.QtCore
 from qtpy.QtCore import QPointF
 from qtpy.QtGui import QPainterPath, QPen, QFontMetrics, QFont, QColor, QGradient, QLinearGradient
-from qtpy.QtWidgets import QGraphicsScene, QGraphicsPathItem, QGraphicsItem, QGraphicsTextItem
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QLabel, QGraphicsScene, QGraphicsPathItem, QGraphicsItem, QGraphicsTextItem
 
 
 class BiDesignerViewItem(QGraphicsPathItem):
@@ -133,7 +133,7 @@ class BiDesignerViewPort(BiDesignerViewItem):
    
 
 class BiDesignerViewNode(BiDesignerViewItem):
-    print('create the view NOde')
+    print('create the view Node')
     Type = QGraphicsItem.UserType + 3
 
     def __init__(self, parent, scene):
@@ -152,9 +152,13 @@ class BiDesignerViewNode(BiDesignerViewItem):
         self.height_right = self.vertMargin
         self.height_left = self.vertMargin
 
-        self.process = None
-        self.alreadyRan = False # boolean used by
+        # information for the pipeline
+        self.uuid = -1
+        self.node_type = ''
+        self.widget = None
+
         self.scene.addItem(self)
+        self.ports = []
 
     def type(self):
         return QGraphicsItem.UserType +3
@@ -226,6 +230,7 @@ class BiDesignerViewNode(BiDesignerViewItem):
                     port.setPos(-self.width/2 + 2*port.radius, y_left)
                     y_left += h
                     y_right+=h
+        self.ports.append(port)            
         return port
 
     def addInputPort(self, name, typeName):
@@ -243,10 +248,18 @@ class BiDesignerViewNode(BiDesignerViewItem):
             self.addOutputPort(names[i], typeName[i])
 
     def paint(self, painter, option, widget):
-        #QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget
-        #Q_UNUSED(option)
-        #Q_UNUSED(widget)
+        """Paint the item 
 
+        Parameters
+        ----------
+        painter: QPainter
+            Painter object
+        option: QStyleOptionGraphicsItem
+            Options for the painting style     
+        widget: Widget  
+            Parent widget
+
+        """
         if self.isSelected():
             pen = QPen()
             pen.setColor(QColor(183, 130, 237, 255))
@@ -254,13 +267,10 @@ class BiDesignerViewNode(BiDesignerViewItem):
             painter.setPen(pen)
         else:
             pen = QPen()
-            if self.processType == "I/O":
+            if self.node_type == "Data" or self.node_type == "Save":
                 pen.setColor(QColor(0, 115, 0, 127))
-            elif self.processType == "process":
-                pen.setColor(QColor(0, 113, 195, 127))
-            elif self.processType == "save":
-                pen.setColor(QColor(0, 115, 0, 127))    
-
+            elif self.node_type == "Process":
+                pen.setColor(QColor(0, 113, 195, 127)) 
             pen.setWidth(3)
             painter.setPen(pen)     
 
@@ -268,26 +278,16 @@ class BiDesignerViewNode(BiDesignerViewItem):
         endPoint = QPointF(0.0,150.0)
         gradient = QLinearGradient(startPoint, endPoint)
 
-        if self.processType == "I/O":
+        if self.node_type == 'Data' or self.node_type == 'Save':
             gradient.setColorAt(0.1,QColor(0, 115, 0, 127))
             gradient.setColorAt(0.3,QColor(0, 115, 0, 155))
             gradient.setColorAt(0.8,QColor(0, 115, 0, 200))
             gradient.setColorAt(0.9,QColor(0, 115, 0, 255))
-        if self.processType == "process":
+        if self.node_type == "Process":
             gradient.setColorAt(0.1,QColor(0, 113, 195, 127))
             gradient.setColorAt(0.3,QColor(0, 113, 195, 155))
             gradient.setColorAt(0.9,QColor(0, 113, 195, 200))
             gradient.setColorAt(0.9,QColor(0, 113, 195, 255))
-        if self.processType == "save":
-            gradient.setColorAt(0.1,QColor(0, 115, 0, 127))
-            gradient.setColorAt(0.3,QColor(0, 115, 0, 155))
-            gradient.setColorAt(0.8,QColor(0, 115, 0, 200))
-            gradient.setColorAt(0.9,QColor(0, 115, 0, 255))
-        if self.processType == "interactive":
-            gradient.setColorAt(0.1,QColor(175, 20, 175, 127))
-            gradient.setColorAt(0.3,QColor(175, 20, 175, 155))
-            gradient.setColorAt(0.8,QColor(175, 20, 175, 200))
-            gradient.setColorAt(0.9,QColor(175, 20, 175, 255))
         
         gradient.setSpread(QGradient.PadSpread)
         painter.setBrush(gradient)
@@ -307,48 +307,65 @@ class BiDesignerViewNode(BiDesignerViewItem):
         return self.name
 
 
-class BiDesignerViewNodeSave:
-    def __init__(self, uuid, parent, scene):
+class TmpParameterWidget(QWidget):
+    def __init__(self, title):
         super().__init__()
-        self.item = BiDesignerViewNode(parent, scene)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.setObjectName('bi-widget')
+        layout.addWidget(QLabel(title))
+
+
+class BiDesignerViewNodeSave(BiDesignerViewNode):
+    def __init__(self, uuid, parent, scene):
+        super().__init__(parent, scene)
+        self.uuid = uuid
         print('create node save')
-        self.item.name = 'Save'
-        self.item.addPort( f"#{uuid}: Save", "", False, False, BiDesignerViewPort.NamePort, None)
-        self.item.addInputPort('Any', 'Any')
-        self.item.processType = 'save' 
+        self.name = 'Save'
+        self.id = f"#{uuid}: Save"
+        self.node_type = 'Save'
+        self.addPort( f"#{uuid}: Save", "", False, False, BiDesignerViewPort.NamePort, None)
+        self.addInputPort('Any', 'Any')
+        self.widget = TmpParameterWidget('This is the Save Node parameter widget') # TODO implement the real widget
 
     def set_pos(self, x, y):
-        self.item.setPos(x, y) 
+        self.setPos(x, y) 
 
-class BiDesignerViewNodeData:
+
+class BiDesignerViewNodeData(BiDesignerViewNode):
     def __init__(self, uuid, parent, scene):
-        super().__init__()
-        self.item = BiDesignerViewNode(parent, scene)
-        self.item.name = 'Data'
-        self.item.addPort( f"#{uuid}: Data", "", False, False, BiDesignerViewPort.NamePort, None)
-        self.item.addOutputPort('Any', 'Any')
-        self.item.processType = 'I/O'
+        super().__init__(parent, scene)
+        self.name = 'Data'
+        self.id = f"#{uuid}: Data"
+        self.node_type = 'Data'
+        self.addPort( f"#{uuid}: Data", "", False, False, BiDesignerViewPort.NamePort, None)
+        self.addOutputPort('Any', 'Any')
+        self.processType = 'Save'
+        self.widget = TmpParameterWidget('This is the Data Node parameter widget') # TODO implement the real widget
 
     def set_pos(self, x, y):
-        self.item.setPos(x, y) 
+        self.setPos(x, y) 
 
 
-class BiDesignerViewNodeTool:
+class BiDesignerViewNodeTool(BiDesignerViewNode):
     def __init__(self, tool, uuid, parent, scene):
-        super().__init__()
-        self.item = BiDesignerViewNode(parent, scene)
-        self.item.name = 'Process'
-        self.item.processType = 'process' 
-        self.item.addPort( f"#{uuid}: {tool.name}", "", False, False, BiDesignerViewPort.NamePort, None)
+        super().__init__(parent, scene)
+        self.name = 'Process'
+        self.node_type = 'Process' 
+        self.addPort( f"#{uuid}: {tool.name}", "", False, False, BiDesignerViewPort.NamePort, None)
+        self.id = f"#{uuid}: {tool.name}"
         for input in tool.inputs:
             if input.is_data:
-                self.item.addInputPort(input.description, input.type)
+                self.addInputPort(input.description, input.type)
         for output in tool.outputs:
-            self.item.addOutputPort(output.description, output.type)
-        self.item.process = tool    
+            self.addOutputPort(output.description, output.type)
+        self.tool = tool   
+        self.already_ran = False 
+        self.widget = TmpParameterWidget('This is the Tool Node parameter widget') # TODO implement the real widget
+        self.widget.setObjectName('bi-widget')
         
     def set_pos(self, x, y):
-        self.item.setPos(x, y)    
+        self.setPos(x, y)    
 
 
 class BiDesignerViewConnection(BiDesignerViewItem):
@@ -390,8 +407,10 @@ class BiDesignerViewConnection(BiDesignerViewItem):
         self.port2.connections.append(self)
 
     def updatePosFromPorts(self):
-        self.pos1 = self.port1.scenePos()
-        self.pos2 = self.port2.scenePos()
+        if self.pos1 is not None:
+            self.pos1 = self.port1.scenePos()
+        if self.pos2 is not None:    
+            self.pos2 = self.port2.scenePos()
 
     def updatePath(self):
         p = QPainterPath()

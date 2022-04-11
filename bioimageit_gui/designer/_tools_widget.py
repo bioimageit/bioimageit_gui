@@ -1,10 +1,91 @@
 import qtpy.QtCore
 from qtpy.QtCore import Signal, QMimeData, QUrl, QByteArray
-from qtpy.QtGui import QPixmap, QDrag
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QToolBar, QLabel, QScrollArea, QComboBox
+from qtpy.QtGui import QPixmap, QDrag, QIcon
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QToolButton, QLabel, QScrollArea, QComboBox
 
 from bioimageit_framework.theme import BiThemeAccess
 from bioimageit_core.api import APIAccess
+
+
+class BiDesignerToolsArea(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self._widgets = {}
+
+        self.layout = QHBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        widget_area = QWidget()
+        widget_area.setLayout(self.layout)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self._toolbar = BiDesignerToolsAreaBar()
+        self._toolbar.back.connect(self._show_tools)
+        layout.addWidget(self._toolbar, 0, qtpy.QtCore.Qt.AlignTop)
+        layout.addWidget(widget_area, 1)
+        self.setLayout(layout)
+
+    def add_widget(self, id, widget):
+        self._widgets[id] = widget
+        self.layout.addWidget(widget)
+        self.show_widget(id)
+
+    def remove_widget(self, id):
+        self.layout.removeWidget(self._widgets[id])
+
+    def show_widget(self, id):
+        print('show widget:', id)
+        self._toolbar.change_text(id)
+        if id == 'Tools':
+            self._toolbar.set_back_button_visible(False)
+        else:
+            self._toolbar.set_back_button_visible(True)    
+        for key, widget in self._widgets.items():
+            if key == id:
+                widget.setVisible(True)
+            else:
+                widget.setVisible(False)      
+
+    def _show_tools(self):
+        self.show_widget('Tools')                  
+
+
+class BiDesignerToolsAreaBar(QWidget):
+    back = Signal()
+
+    def __init__(self):
+        super().__init__()  
+
+        self.back_button = QToolButton()
+        self.back_button.setIcon(QIcon(BiThemeAccess.instance().icon('arrow-left')))
+        self.back_button.clicked.connect(self._emit_back)
+        self.label = QLabel()
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(7, 0, 0, 0)
+        layout.addWidget(self.back_button)
+        layout.addWidget(self.label)
+        
+        widget = QWidget()
+        tlayout = QVBoxLayout()
+        tlayout.setContentsMargins(0, 0, 0, 0)
+        tlayout.addWidget(widget)
+
+        widget.setLayout(layout)
+        widget.setObjectName('bi-toolbar')
+        self.setLayout(tlayout)
+
+    def _emit_back(self):
+        self.back.emit()    
+
+    def change_text(self, text):
+        self.label.setText(text)
+
+    def set_back_button_visible(self, visible):
+        self.back_button.setVisible(visible) 
+
+
 
 
 class BiDesignerTools(QWidget):
@@ -46,6 +127,7 @@ class BiDesignerToolsBar(QWidget):
         self.categories_box.currentTextChanged.connect(self.show_toolbox)
 
         layout = QHBoxLayout()
+        layout.setContentsMargins(4, 0, 4, 0)
         layout.addWidget(self.categories_box)
         
         widget = QWidget()
@@ -54,7 +136,6 @@ class BiDesignerToolsBar(QWidget):
         tlayout.addWidget(widget)
 
         widget.setLayout(layout)
-        widget.setObjectName('bi-toolbar')
         self.setLayout(tlayout)
 
     def show_toolbox(self, toolbox_name):

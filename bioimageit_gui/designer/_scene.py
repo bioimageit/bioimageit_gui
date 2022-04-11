@@ -29,9 +29,7 @@ class BiDesignerGraphicScene(QGraphicsScene):
 
 
 class BiDesignerViewNodesEditor(QObject):
-    clone = Signal(str, int, int)
-    deleteBlock = Signal(str)
-    docBlock = Signal(str)
+    show_parameters = Signal(str)
 
     def __init__(self, editMode, parent):
         super().__init__(parent)
@@ -40,28 +38,28 @@ class BiDesignerViewNodesEditor(QObject):
         self.scene = None
         self.view = None
 
-        self.clickedProcessId = '' # id of the clicked process
-        self.clickedPluginPath = '' # Url of the clicked process
-        self.clickedPluginPosx = -1 # X position of the clicked process
-        self.clickedPluginPosy = -1 # Y position of the clicked process
+        self.clicked_node_uuid = -1
+        self.clickedNodePosx = -1 # X position of the clicked process
+        self.clickedNodePosy = -1 # Y position of the clicked process
+        self.clickedTool = None
         self.docPath = '' # last doc URL
 
         # create context menu
         if self.editMode:
-            self.actionClone = QAction("Clone", self)
-            self.actionClone.triggered.connect(self.AskClone)
+            self.actionParameters = QAction("Parameters", self)
+            self.actionParameters.triggered.connect(self.parameters_node)
             self.actionDelete = QAction("Delete", self)
-            self.actionDelete.triggered.connect(self.AskDelete)
-            self.actionDoc = QAction("Doc", self)
+            self.actionDelete.triggered.connect(self.delete_node)
+            self.actionDoc = QAction("Help", self)
             self.actionDoc.triggered.connect(self.AskDoc)
 
             self.menu = QMenu()
-            self.menu.addAction(self.actionClone)
+            self.menu.addAction(self.actionParameters)
             self.menu.addAction(self.actionDelete)
             self.menu.addSeparator()
             self.menu.addAction(self.actionDoc)
         else:
-            self.actionDoc = QAction("Doc", self)
+            self.actionDoc = QAction("Help", self)
             self.actionDoc.triggered.connect(self.AskDoc)
             m_menu = QMenu()
             m_menu.addAction(self.actionDoc)
@@ -75,26 +73,25 @@ class BiDesignerViewNodesEditor(QObject):
 
     def itemAt(self, pos):
         items = self.scene.items(QRectF(pos - QPointF(1,1), QSize(3,3)))
-        print('itemAt -> items:', items)
         for item in items:  
-            print('item user type = ', QGraphicsItem.UserType)
-            print('item type = ', item.type())
             if item.type() > QGraphicsItem.UserType:
                 return item
         return None
-
-    def AskClone(self):
-        self.clone.emit(self.clickedPluginPath, self.clickedPluginPosx + 15, self.clickedPluginPosy + 15)
     
-
-    def AskDelete(self):
+    def delete_node(self):
         # delete the block
-        point = QPointF(self.clickedPluginPosx, self.clickedPluginPosy)
+        point = QPointF(self.clickedNodePosx, self.clickedNodePosy)
         item = self.itemAt(point)
-        del item
+        for port in item.ports:
+            for conn in port.connections:
+                self.scene.removeItem(conn)
+        self.scene.removeItem(item)
 
-        # delete the settings widgets
-        self.deleteBlock.emit(self.clickedProcessId)
+    def parameters_node(self):
+        point = QPointF(self.clickedNodePosx, self.clickedNodePosy)
+        item = self.itemAt(point)
+        print('BiDesignerViewNodesEditor: emit show parameter: ', item.id)
+        self.show_parameters.emit(item.id)
 
     def AskDoc(self):
         self.docBlock.emit(self.docPath)
@@ -109,88 +106,111 @@ class BiDesignerViewNodesEditor(QObject):
             L.removeFirst()
         print("khComposerViewNodesEditor::free() finish")   
         
-    def eventFilter(self, obj, e): #  QObject *o, QEvent *e
-
-        event_type = e.type()    
+    def eventFilter(self, obj, event): 
+        """Filter the user mouse and keybord events
         
+        Parameters
+        ----------
+        obj: QObject
+            Origin object
+        event: QEvent
+            User input event    
+        """
+        #  QObject *o, QEvent *e
+        event_type = event.type()    
         if event_type == QEvent.GraphicsSceneMousePress:
-            button = e.button()
+            button = event.button()
             if button == qtpy.QtCore.Qt.LeftButton:
-                item = self.itemAt(e.scenePos())
-                print('left click item=', item)
+                item = self.itemAt(event.scenePos())
                 if item is not None and item.type() == BiDesignerViewPort.Type:
-                    print('item is recognized as viewport=')
-                    if self.editMode:
-                        print('create connection')
-                        self.conn = BiDesignerViewConnection(None, self.scene)
-                        self.conn.setPort1(item)
-                        self.conn.setPos1(item.scenePos())
-                        self.conn.setPos2(e.scenePos())
-                        self.conn.updatePath()
-                        return True
+                    return self._create_connection(item, event)
             elif button == qtpy.QtCore.Qt.RightButton:
-                #print('event type = ', event_type)
-                #print('is edit mode:', self.editMode)
-                item = self.itemAt(e.scenePos())
-                #print('item=', item)
+                item = self.itemAt(event.scenePos())
                 if self.editMode:
                     if item is not None and item.type() == BiDesignerViewConnection.Type:
-                        del item
+                        self._remove_connecttion(item)
                     elif item is not None and item.type() == BiDesignerViewNode.Type:
-                        self.clickedProcessId = item.process.id + " " + item.process.name
-                        self.clickedPluginPath = item.process.name
-                        self.clickedPluginPosx = item.scenePos().x()
-                        self.clickedPluginPosy = item.scenePos().y()
-                        self.docPath = item.nodeName()
-                        self.menu.exec_(QCursor.pos())
+                        self._show_context_menu(item)
                 else:
                     if item is not None and item.type() == BiDesignerViewNode.Type:
-                        self.clickedProcessId = item.process().processId() + " " + item.process().processName()
-                        self.clickedPluginPath = item.process().processName()
-                        self.clickedPluginPosx = item.scenePos().x()
-                        self.clickedPluginPosy = item.scenePos().y()
-                        self.docPath = item.nodeName()
-                        self.menu.exec_(QCursor.pos())
+                        self._show_context_menu(item)
+
         elif event_type == QEvent.GraphicsSceneMouseMove:
-            if self.conn is not None:
-                self.conn.setPos2(e.scenePos())
-                self.conn.updatePath()
-                return True
+            return self._draw_connection(event)
+
         elif event_type == QEvent.GraphicsSceneMouseRelease:
-            print('release event')
-            if self.conn is not None and e.button() == qtpy.QtCore.Qt.LeftButton:
-                item = self.itemAt(e.scenePos())
-                print('release event item=', item)
-                if item is not None and item.type() == BiDesignerViewPort.Type:
-                    print('release event item=', item)
-                    port1 = self.conn.port1
-                    port2 = item
-                    if port1.node() != port2.node() and port1.isOutput != port2.isOutput and not port1.isConnected(port2) and (port1.typeId == port2.typeId or port1.typeId=='Any' or port2.typeId=='Any'):
-                        self.conn.setPos2(port2.scenePos())
-                        self.conn.setPort2(port2)
-                        self.conn.updatePath()
-                        self.conn = None
-                        return True
-                    else:
-                        self.scene.removeItem(self.conn)
-                else:
-                    self.scene.removeItem(self.conn)
-
-                del self.conn
-                self.conn = None
-                return True
-
+            return self._ends_connection(event)
+            
         elif event_type == QEvent.GraphicsSceneMouseDoubleClick:
-            item = self.itemAt(e.scenePos())
+            item = self.itemAt(event.scenePos())
             if item is not None and item.type() == BiDesignerViewNode.Type:
-                if item.useWidget():
-                    w = item.widget()
-                    w.move(QCursor.pos().x(), QCursor.pos().y())
-                    w.show()
+                return self._show_node_widget(item)
 
         #return False
-        return QObject.eventFilter(self, obj, e)  
+        return QObject.eventFilter(self, obj, event)  
     
+    def _create_connection(self, item, event):
+        if self.editMode:
+            print('create connection')
+            self.conn = BiDesignerViewConnection(None, self.scene)
+            self.conn.setPort1(item)
+            self.conn.setPos1(item.scenePos())
+            self.conn.setPos2(event.scenePos())
+            self.conn.updatePath()
+        return True    
+
+    def _remove_connecttion(self, item):
+        self.scene.removeItem(item) 
+        #return True 
+
+    def _show_context_menu(self, item):
+        self.clicked_node_uuid = item.uuid
+        if item.node_type == 'Process':
+            # Process menu
+            self.clickedTool = item.tool
+            self.clickedNodePosx = item.scenePos().x()
+            self.clickedNodePosy = item.scenePos().y()
+            self.docPath = item.nodeName()
+            self.menu.exec_(QCursor.pos())    
+        else:
+            # I/O menu
+            self.clickedNodePosx = item.scenePos().x()
+            self.clickedNodePosy = item.scenePos().y()
+            self.docPath = item.nodeName()
+            self.menu.exec_(QCursor.pos())   
+        return True      
+
+    def  _draw_connection(self, event):
+        if self.conn is not None:
+            self.conn.setPos2(event.scenePos())
+            self.conn.updatePath()
+        #return True        
+
+    def _show_node_widget(self, item):
+        self.show_parameters.emit(item.id)
+        #return True
+
+    def _ends_connection(self, event):
+        if self.conn is not None and event.button() == qtpy.QtCore.Qt.LeftButton:
+            item = self.itemAt(event.scenePos())
+            if item is not None and item.type() == BiDesignerViewPort.Type:
+                port1 = self.conn.port1
+                port2 = item
+                if port1.node() != port2.node() and port1.isOutput != port2.isOutput and not port1.isConnected(port2) and (port1.typeId == port2.typeId or port1.typeId=='Any' or port2.typeId=='Any'):
+                    self.conn.setPos2(port2.scenePos())
+                    self.conn.setPort2(port2)
+                    self.conn.updatePath()
+                    self.conn = None
+                    return True
+                else:
+                    self.scene.removeItem(self.conn)
+            else:
+                self.scene.removeItem(self.conn)
+
+            del self.conn
+            self.conn = None
+            return True        
+
 
 class BiDesignerGraphicView(QGraphicsView):
     def __init__(self, scene: QGraphicsScene, parent=0):

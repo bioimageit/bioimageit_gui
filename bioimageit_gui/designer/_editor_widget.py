@@ -11,6 +11,7 @@ from ._scene_items import BiDesignerViewNodeSave, BiDesignerViewNodeData, BiDesi
 
 
 class BiDesignerEditorWidget(QWidget):
+
     def __init__(self):
         super().__init__()
 
@@ -45,9 +46,15 @@ class BiDesignerEditorBar(QWidget):
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(run_btn, 0, qtpy.QtCore.Qt.AlignLeft)
-        layout.addWidget(stop_btn, 0, qtpy.QtCore.Qt.AlignLeft)
-        layout.addWidget(save_btn, 1, qtpy.QtCore.Qt.AlignLeft)
+        spacer1 = QWidget()
+        spacer1.setObjectName('bi-toolbar')
+        layout.addWidget(spacer1, 1)
+        layout.addWidget(run_btn, 0, qtpy.QtCore.Qt.AlignCenter)
+        layout.addWidget(stop_btn, 0, qtpy.QtCore.Qt.AlignCenter)
+        spacer2 = QWidget()
+        spacer2.setObjectName('bi-toolbar')
+        layout.addWidget(spacer2, 1)
+        layout.addWidget(save_btn, 0, qtpy.QtCore.Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -70,11 +77,14 @@ class BiDesignerEditorBar(QWidget):
 
 
 class BiDesignerEditorView(QWidget):
+    added_node = Signal(str, QWidget)
+    show_node_widget = Signal(str)
+
     def __init__(self):
         super().__init__()
 
         self.req = APIAccess.instance()
-        self.count=0
+        self.count = 0
         self.scene = BiDesignerGraphicScene()
         self.scene.ask_new_node.connect(self.add_node)
 
@@ -82,16 +92,18 @@ class BiDesignerEditorView(QWidget):
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
 
-        self.nodesEditor = BiDesignerViewNodesEditor(True, self)
-        self.nodesEditor.install(self.scene)
-        self.nodesEditor.setView(self.view)
-        #connect(m_nodesEditor, SIGNAL(clone(QString,int,int)), this, SLOT(addBlockByName(QString,int,int)));
-        #connect(m_nodesEditor, SIGNAL(deleteBlock(QString)), this, SLOT(deleteNode(QString)));
-        #connect(m_nodesEditor, SIGNAL(docBlock(QString)), this, SLOT(emitAskDocBlock(QString)));
+        self.nodes_editor = BiDesignerViewNodesEditor(True, self)
+        self.nodes_editor.install(self.scene)
+        self.nodes_editor.setView(self.view)
+        self.nodes_editor.show_parameters.connect(self._emit_show_node_widget)
     
         layout = QVBoxLayout()
         layout.addWidget(self.view)
         self.setLayout(layout)        
+
+    def _emit_show_node_widget(self, id):
+        print('BiDesignerEditorView: _emit_show_node_widget id=', id)
+        self.show_node_widget.emit(id)    
 
     def add_node(self, id, pos_x, pos_y):
         print('add note:', type(id), ', ', id, ' at (', pos_x, ', ', pos_y, ')')
@@ -99,10 +111,13 @@ class BiDesignerEditorView(QWidget):
         if id == 'Save':
             b = BiDesignerViewNodeSave(self.count, None, self.scene)
             b.set_pos(pos_x, pos_y)  
+            self.added_node.emit(b.id, b.widget)
         elif id == 'Data':
             b = BiDesignerViewNodeData(self.count, None, self.scene)
             b.set_pos(pos_x, pos_y)  
+            self.added_node.emit(b.id, b.widget)
         else:
             tool = self.req.get_tool_from_uri(id)
             b = BiDesignerViewNodeTool(tool, self.count, None, self.scene)
-            b.set_pos(pos_x, pos_y)              
+            b.set_pos(pos_x, pos_y)  
+            self.added_node.emit(b.id, b.widget)         
