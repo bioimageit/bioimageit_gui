@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -76,10 +77,10 @@
            <div itemprop="articleBody">
              
   <section id="tutorial-data-analysis">
-<h1>Tutorial: data analysis<a class="headerlink" href="#tutorial-data-analysis" title="Permalink to this headline"></a></h1>
+<h1>Tutorial: data analysis<a class="headerlink" href="#tutorial-data-analysis" title="Permalink to this heading"></a></h1>
 <p>In this tutorial, we are going to create a pipeline for processing data stored in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
 <section id="the-tutorial-project">
-<h2>The tutorial project<a class="headerlink" href="#the-tutorial-project" title="Permalink to this headline"></a></h2>
+<h2>The tutorial project<a class="headerlink" href="#the-tutorial-project" title="Permalink to this heading"></a></h2>
 <p>In this tutorial we use the same dataset as in the first tutorial
 (see <a class="reference internal" href="tutorial_data_management.html#tutorial-data-management"><span class="std std-ref">Tutorial: data management</span></a>). We then suppose that we already have a created experiment
 with the imported and annotated data.</p>
@@ -98,7 +99,7 @@ this dataset, but it is not the purpose of this tutorial.</p>
 </figure>
 </section>
 <section id="image-deconvolution">
-<h2>Image deconvolution<a class="headerlink" href="#image-deconvolution" title="Permalink to this headline"></a></h2>
+<h2>Image deconvolution<a class="headerlink" href="#image-deconvolution" title="Permalink to this heading"></a></h2>
 <p>To ease the spot segmentation, we chose to preprocess the data with a deconvolution algorithm. The
 selected algorithm is the Spitfire2D. It is a c++ implementation of a sparse variation deconvolution
 method.</p>
@@ -143,7 +144,7 @@ each image show the metadata of the image and the details of it origin (raw data
 run information).</p>
 </section>
 <section id="spot-detection">
-<h2>Spot detection<a class="headerlink" href="#spot-detection" title="Permalink to this headline"></a></h2>
+<h2>Spot detection<a class="headerlink" href="#spot-detection" title="Permalink to this heading"></a></h2>
 <p>After deconvolution, the spots are easy to detect on the images. We can simply threshold the image
 and count the number of independent component in the binary map. BioImageIT wrap a Fiji macro that
 runs an auto-threshold and the analyse particles tool. This is exactly what we need here.</p>
@@ -185,7 +186,7 @@ spots:</p>
 </figure>
 </section>
 <section id="statistical-testing">
-<h2>Statistical testing<a class="headerlink" href="#statistical-testing" title="Permalink to this headline"></a></h2>
+<h2>Statistical testing<a class="headerlink" href="#statistical-testing" title="Permalink to this heading"></a></h2>
 <p>In the previous processing step, we extracted the number of spots for each image. This number is
 contained in the <code class="docutils literal notranslate"><span class="pre">count</span></code> data file for each image. In this step we are going to run a statistical
 testing on these number in order to measure if the <em>Population1</em> and <em>Population2</em> data have
@@ -263,7 +264,7 @@ contain these two arrays.</p>
 </div>
 </section>
 <section id="conclusion">
-<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this heading"></a></h2>
 <p>In this tutorial we saw how to use the <em>BioImageIT</em> app, to build step by step an image analysis
 pipeline without writing a single line of code.</p>
 <p>All the data we generated are stored in an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> database with automatically generated
