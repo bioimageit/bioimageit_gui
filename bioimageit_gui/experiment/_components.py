@@ -62,10 +62,11 @@ class BiExperimentViewerComponent(BiComponent):
         layout.addWidget(self.experimentComponent.widget)
 
     def callback_ask_view_data(self, emitter):
-        local_uri = APIAccess.instance().download_data(emitter.selected_data_info.md_uri)
-        self.viewer.add_data(local_uri,
-                             emitter.selected_data_info.name,
-                             emitter.selected_data_info.format)
+        #local_uri = APIAccess.instance().download_data(emitter.selected_data_info.md_uri)
+        data_container = APIAccess.instance().view_data(emitter.selected_data_info.md_uri)
+        self.viewer.add_loaded_data(data_container,
+                                    emitter.selected_data_info.name,
+                                    emitter.selected_data_info.format)
         self.viewer.set_visible(True)
 
 
