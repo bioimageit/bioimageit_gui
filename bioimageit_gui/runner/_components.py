@@ -65,7 +65,7 @@ class BiRunnerToolbarCommponent(BiComponent):
         btn_layout.setContentsMargins(0, 0, 0, 0)
         btn_layout.setSpacing(0)
         btn_widget.setLayout(btn_layout)
-        self.btn_file = QPushButton('File')
+        self.btn_file = QPushButton('Test')
         self.btn_file.setCheckable(True)
         self.btn_file.setObjectName('btn-default-left')
         self.btn_file.released.connect(self.switch_to_file_mode)
