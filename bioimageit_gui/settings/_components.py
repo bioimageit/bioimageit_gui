@@ -24,7 +24,7 @@ class BiAboutComponent(BiComponent):
         label.setObjectName('bi-about')
         label.setWordWrap(True)
         layout.addWidget(label, 0, qtpy.QtCore.Qt.AlignHCenter)
-        label.setText('<span><p>BioImageIT v0.1.0</p></span><p>BioImageIT is an open source software funded by France-BioImaging : <a href="https://bioimageit.github.io">https://bioimageit.github.io</a></p>')
+        label.setText('<span><p>BioImageIT v0.1.2</p></span><p>BioImageIT is an open source software funded by France-BioImaging : <a href="https://bioimageit.github.io">https://bioimageit.github.io</a></p>')
 
 
 class BiUpdateComponent(BiComponent):
