@@ -79,7 +79,6 @@ class BiUpdateComponent(BiComponent):
     def callback_new_tags(self, emitter):
         self.tags_list.clear()
         self.tags_list.addItems(emitter.new_tags)
-        self.tags_list.
 
     def callback_update_finished(self, emitter):
         self.progress_bar.setVisible(False)
