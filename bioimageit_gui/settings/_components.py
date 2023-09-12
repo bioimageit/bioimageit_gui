@@ -71,6 +71,7 @@ class BiUpdateComponent(BiComponent):
     def update_clicked(self):
         self.container.update_bioimageit = self.checkbox_bioimageit.isChecked()
         self.container.update_toolboxes = self.checkbox_toolboxes.isChecked()
+        self.container.target_version_tag = self.tags_list.currentText()
         self.container.action_update_clicked(None)
         self.progress_bar.setRange(0, 0)
         self.progress_bar.setVisible(True)
@@ -78,6 +79,7 @@ class BiUpdateComponent(BiComponent):
     def callback_new_tags(self, emitter):
         self.tags_list.clear()
         self.tags_list.addItems(emitter.new_tags)
+        self.tags_list.
 
     def callback_update_finished(self, emitter):
         self.progress_bar.setVisible(False)

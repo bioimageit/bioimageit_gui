@@ -18,6 +18,7 @@ class BiUpdateContainer(BiContainer):
         self.update_bioimageit = False
         self.update_toolboxes = False
         self.new_tags = []
+        self.target_version_tag = ""
 
     def init(self):
         self._notify(BiUpdateContainer.GetNewTags) 

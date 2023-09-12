@@ -38,6 +38,7 @@ class BiUpdateModel(BiActuator):
         print('Run here the update code')
         self.thread.update_bioimageit = self.container.update_bioimageit
         self.thread.update_toolboxes = self.container.update_toolboxes
+        self.thread.target_version_tag = self.container.target_version_tag
         self.thread.start()
 
 
