@@ -12,6 +12,7 @@ class GitUpdater(Observable):
         self.remote_repo_url = remote_repo_url
         self.env_name = env_name
         self.conda_dir = conda_dir
+        super().__init__()
 
     def get_newer_tags(self):
         #current_branch = self.git_branch()

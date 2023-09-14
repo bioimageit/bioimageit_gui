@@ -38,6 +38,7 @@ class BiUpdateModel(BiActuator):
         print('Run here the update code')
         self.thread.update_bioimageit = self.container.update_bioimageit
         self.thread.update_toolboxes = self.container.update_toolboxes
+        self.thread.target_version_tag = self.container.target_version_tag
         self.thread.start()
 
 
@@ -75,7 +76,7 @@ class BiUpdateThread(QThread):
         gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
         gui_updater.update_to_tag(self.target_version_tag)
         # Viewer
-        local_repo_path = os.path.join(install_dir, 'bioimageit_virwer')
+        local_repo_path = os.path.join(install_dir, 'bioimageit_viewer')
         remote_repo_url = 'https://github.com/bioimageit/bioimageit_viewer.git'
         gui_updater = GitUpdater(conda_dir, env_name, local_repo_path, remote_repo_url)
         gui_updater.update_to_tag(self.target_version_tag)
