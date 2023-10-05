@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name='bioimageit_gui',
-    version="0.1.3",
+    version="0.2.0",
     author="Sylvain Prigent and BioImageIT team",
     author_email="bioimageit@gmail.com",
     description='Gui application for BioImageIT',
