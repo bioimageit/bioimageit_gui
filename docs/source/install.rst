@@ -20,16 +20,15 @@ The install process can then be tedious. This is the reason why we provide insta
 Windows
 ^^^^^^^
 
-Run the `executable <https://raw.githubusercontent.com/bioimageit/bioimageit-install/main/windows/BioImageIT_install.exe>`_
-or run the `install bat script <https://raw.githubusercontent.com/bioimageit/bioimageit-install/main/windows/install_main.bat>`_.
+Run the `executable <https://github.com/bioimageit/bioimageit-install/raw/v0.2.0/windows/Install_BioImageIT.exe>`.
 
 MacOS
 ^^^^^
 
-Run the `MacOS install script <https://raw.githubusercontent.com/bioimageit/bioimageit-install/main/mac/BioImageIT_install.app/Contents/MacOS/install.sh>`_
-The install can also be done using the install application available as a `dmg <https://raw.githubusercontent.com/bioimageit/bioimageit-install/main/mac/BioImageIT_install.dmg>`_ 
+Run the `MacOS install script <https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.2.0/mac/BioImageIT_install.app/Contents/MacOS/install.sh>`_
+The install can also be done using the install application available as a `dmg <https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.2.0/mac/BioImageIT_install.dmg>`_ 
 
 Linux
 ^^^^^
 
-Run the `linux install scipt <https://raw.githubusercontent.com/bioimageit/bioimageit-install/main/linux/install.sh>`_.
+Run the `linux install scipt <https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.2.0/linux/install.sh>`_.
