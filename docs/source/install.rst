@@ -20,7 +20,7 @@ The install process can then be tedious. This is the reason why we provide insta
 Windows
 ^^^^^^^
 
-Run the `executable <https://github.com/bioimageit/bioimageit-install/raw/v0.2.0/windows/Install_BioImageIT.exe>`.
+Run the `executable <https://github.com/bioimageit/bioimageit-install/raw/v0.2.0/windows/Install_BioImageIT.exe>`_.
 
 MacOS
 ^^^^^
