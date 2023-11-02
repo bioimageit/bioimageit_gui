@@ -660,7 +660,9 @@ class BiExperimentDataSetViewComponent(BiComponent):
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.name))
             # origin
             col_idx  += 1
-            self.tableWidget.setItem(i, col_idx, QTableWidgetItem(parent_metadata.name))
+
+            if parent_metadata is not None:
+                self.tableWidget.setItem(i, col_idx, QTableWidgetItem(parent_metadata.name))
             # label
             col_idx  += 1
             self.tableWidget.setItem(i, col_idx, QTableWidgetItem(raw_metadata.output['label']))

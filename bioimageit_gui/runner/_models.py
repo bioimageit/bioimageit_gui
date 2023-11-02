@@ -60,7 +60,7 @@ class BiRunnerModel(BiActuator):
         self.thread.config_file = self.config_file
         if APIAccess.instance().log_observer is not None:
             self.thread.log_dir = APIAccess.instance().log_observer.log_dir
-        self.thread.log_file_id = APIAccess.instance().log_observer.log_file_id
+            self.thread.log_file_id = APIAccess.instance().log_observer.log_file_id
         self.thread.experiment = self.container.experiment
         self.thread.mode = BiRunnerContainer.MODE_EXP
         self.thread.process_info = self.container.process_info
