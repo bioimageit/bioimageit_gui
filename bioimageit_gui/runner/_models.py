@@ -46,8 +46,9 @@ class BiRunnerModel(BiActuator):
     def run_file(self):
         self.thread.observer = self.observer
         self.thread.config_file = self.config_file
-        self.thread.log_dir = APIAccess.instance().log_observer.log_dir
-        self.thread.log_file_id = APIAccess.instance().log_observer.log_file_id
+        log_observer = APIAccess.instance().log_observer
+        self.thread.log_dir = log_observer.log_dir if log_observer is not None else None
+        self.thread.log_file_id = log_observer.log_file_id if log_observer is not None else None
         self.thread.mode = BiRunnerContainer.MODE_FILE
         self.thread.process_info = self.container.process_info
         self.thread.inputs = self.container.inputs
@@ -58,9 +59,9 @@ class BiRunnerModel(BiActuator):
     def run_exp(self):
         self.thread.observer = self.observer
         self.thread.config_file = self.config_file
-        if APIAccess.instance().log_observer is not None:
-            self.thread.log_dir = APIAccess.instance().log_observer.log_dir
-            self.thread.log_file_id = APIAccess.instance().log_observer.log_file_id
+        log_observer = APIAccess.instance().log_observer
+        self.thread.log_dir = log_observer.log_dir if log_observer is not None else None
+        self.thread.log_file_id = log_observer.log_file_id if log_observer is not None else None
         self.thread.experiment = self.container.experiment
         self.thread.mode = BiRunnerContainer.MODE_EXP
         self.thread.process_info = self.container.process_info
@@ -112,7 +113,8 @@ class BiRunnerThread(QThread):
 
             request = Request(self.config_file, False, False)
             request.job_count = self.job_count
-            request.add_log_observer(self.log_dir, self.log_file_id)
+            if self.log_dir is not None:
+                request.add_log_observer(self.log_dir, self.log_file_id)
             request.connect()
             request.exec(self.process_info, **params)    
 
@@ -129,7 +131,8 @@ class BiRunnerThread(QThread):
 
             request = Request(self.config_file, False, False)
             request.job_count = self.job_count
-            request.add_log_observer(self.log_dir, self.log_file_id)
+            if self.log_dir is not None:
+                request.add_log_observer(self.log_dir, self.log_file_id)
             request.connect()
             request.add_observer(self.observer)
             request.run(job)
